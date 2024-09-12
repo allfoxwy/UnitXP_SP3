@@ -36,3 +36,13 @@ When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3_distanceBetween
 
 You could check their existance to tell if certain function is available.
+
+
+
+### Some notes for compiling the code
+- I used MS VS 2022. There are elder post says GCC won't work.
+- I staticly link [MinHook](https://github.com/TsudaKageyu/minhook). So UnitXP_SP3 also have "C/C++ > Code Generation > Runtime Library > Multi-threaded(/MT)"
+- It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > No Enhanced Instructions (/arch:IA32)"
+- x32 has a limited memory space. I think it would be better our program use less memory: "C/C++ > Optimization > Optimization /O1 and Favor small code /Os"
+- I used C++ 17 features so "C/C++ > Language > C++ Language Standard > ISO C++ 17 Standard(/std:c++17)"
+
