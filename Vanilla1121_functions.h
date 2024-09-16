@@ -43,6 +43,7 @@ uint64_t UnitGUID(const char* unitID);
 bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, unsigned int queryFlags);
 
 
+
 // WoW Visiable Object
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
