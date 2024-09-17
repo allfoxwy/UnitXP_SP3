@@ -79,7 +79,8 @@ I wish I could make a perfect "refresh to disappear" program with NO flash, howe
 
 
 ### Tell if UnitXP_SP3 functions available
-This only works with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip this.
+These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip this.
+
 When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3
 - Vanilla1121mod.UnitXP_SP3_inSight
