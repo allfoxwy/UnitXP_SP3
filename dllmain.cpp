@@ -166,6 +166,7 @@ extern "C" {
             {u8"UnitXP_SP3_inSight", p_UnitXP},
             {u8"UnitXP_SP3_distanceBetween", p_UnitXP},
             {u8"UnitXP_SP3_modernNameplateDistance", p_UnitXP},
+            {u8"UnitXP_SP3_target", p_UnitXP},
             {NULL, NULL}
         };
 
