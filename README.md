@@ -115,6 +115,8 @@ This makes the mod require Windows Vista or newer to operate. I know there is Ge
 
 ### Tell if UnitXP_SP3 functions available
 
+These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip this.
+
 When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3
 - Vanilla1121mod.UnitXP_SP3_inSight
