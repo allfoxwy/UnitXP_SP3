@@ -19,7 +19,9 @@ LUA_PUSHNUMBER p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
 // WoW C function
 UNITGUID p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
 CWORLD__INTERSECT p_CWorld_Intersect = reinterpret_cast<CWORLD__INTERSECT>(0x672170);
-
+TARGET p_Target = reinterpret_cast<TARGET>(0x489a40);
+UNITREACTION p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
+CANATTACK p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
 
 // To get lua_State pointer
 void* GetContext(void) {
@@ -67,6 +69,7 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vec
 
 // WoW Visiable Object
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
+// There is an official function at 0x464890 which could doing the same thing.
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -89,6 +92,27 @@ C3Vector vanilla1121_getPosition(uint32_t object) {
         *reinterpret_cast<float*>(object + 0x09B8 + 0x4),
         *reinterpret_cast<float*>(object + 0x09B8 + 0x8),
     };
+}
+// Return true for in-combat; false for not-in-combat or unchecked
+bool vanilla1121_inCombat(uint32_t object) {
+    if (object == 0) {
+        return false;
+    }
+
+    // some kind of attribute, including in-combat information
+    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return false;
+    }
+
+    uint32_t flags = *reinterpret_cast<uint32_t*>(attr + 0xa0);
+    if ((flags & 0x80000) != 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 // return true for "in sight"; false for "not in sight";
 bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
@@ -119,4 +143,76 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
         return true;
     }
 }
+// Target the unit with GUID
+void vanilla1121_target(uint64_t targetGUID) {
+    p_Target(&targetGUID);
+    return;
+}
+// Get in-game object type
+int vanilla1121_getType(uint64_t targetGUID) {
+    uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
+    uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
 
+    while (i != 0 && (i & 1) == 0) {
+        uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
+
+        if (currentObjectGUID == targetGUID) {
+            uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+            return type;
+        }
+
+        i = *reinterpret_cast<uint32_t*>(i + 0x3c);
+    }
+
+    return OBJECT_TYPE_Null;
+}
+
+// Get in-game unit reaction, return -1 for error
+int vanilla1121_getReaction(uint64_t targetGUID) {
+    uint32_t target = vanilla1121_getVisiableObject(targetGUID);
+    uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
+    if (target == 0 || self == 0) {
+        return -1;
+    }
+
+    return p_UnitReaction(self, target);
+}
+
+// This function is different from getReaction because enemy player could turn off PvP
+int vanilla1121_canAttack(uint64_t targetGUID) {
+    uint32_t target = vanilla1121_getVisiableObject(targetGUID);
+    uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
+    if (target == 0 || self == 0) {
+        return -1;
+    }
+
+    if (p_CanAttack(self, target)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+// Return 1 for dead, 0 for alive, -1 for error
+int vanilla1121_isDead(uint32_t object) {
+    if (object == 0) {
+        return -1;
+    }
+
+    // some kind of attribute, including death information
+    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    uint32_t flag0 = *reinterpret_cast<uint32_t*>(attr + 0x40);
+    uint32_t flag1 = *reinterpret_cast<uint32_t*>(attr + 0x224);
+    if (flag0 < 1 || (flag1 & 0x20) != 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}

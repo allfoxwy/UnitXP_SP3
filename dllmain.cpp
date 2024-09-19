@@ -11,6 +11,7 @@
 #include "inSight.h"
 #include "distanceBetween.h"
 #include "modernNameplateDistance.h"
+#include "targeting.h"
 
 using namespace std;
 
@@ -51,6 +52,19 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushnumber(L, (double)GetTickCount64());
             return 1;
         }
+        else if (cmd == "target" && lua_gettop(L) >= 2) {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "nearestEnemy") {
+                lua_pushboolean(L, targetNearestEnemy());
+                return 1;
+            }
+            if (subcmd == "randomEnemy") {
+                lua_pushboolean(L, targetRandomEnemy());
+                return 1;
+            }
+            lua_pushnil(L);
+            return 1;
+        }
         else if (cmd == "modernNameplateDistance" && lua_gettop(L) >= 2) {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "enable") {
@@ -88,7 +102,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+
         DisableThreadLibraryCalls(hModule);
+
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -97,29 +113,45 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for UnitXP function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_EnableHook(p_UnitXP) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling UnitXP function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
         if (MH_CreateHook(p_addNameplate, &detoured_addNameplate, reinterpret_cast<LPVOID*>(&p_original_addNameplate)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for addNameplate function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
-        if (MH_EnableHook(p_addNameplate) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling addNameplate function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
         if (MH_CreateHook(p_renderWorld, &detoured_renderWorld, reinterpret_cast<LPVOID*>(&p_original_renderWorld)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for renderWorld function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_EnableHook(p_renderWorld) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling renderWorld function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+        if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
         break;
+
     case DLL_PROCESS_DETACH:
-        MH_Uninitialize();
+        if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+
+        if (MH_RemoveHook(p_renderWorld) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for renderWorld function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+
+        if (MH_RemoveHook(p_addNameplate) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for addNameplate function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+
+        if (MH_RemoveHook(p_UnitXP) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for UnitXP function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+
+        if (MH_Uninitialize() != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to uninitialize MinHook. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         break;
     }
     return TRUE;
@@ -127,6 +159,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 
 extern "C" {
+    // This function would be called by vanilla-dll-sideloader when EnterWorld event happens
     __declspec(dllexport) void FirstEnterWorld(void) {
         lua_func_reg l[] = {
             {u8"UnitXP_SP3", p_UnitXP},
