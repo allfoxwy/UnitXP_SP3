@@ -13,8 +13,8 @@ TAB key by default could select anything except your wish.
 
 
 This mod adds 2 targeting function, which you could use in macro or LUA:
-- `/script UnitXP("target", "nearestEnemy);`
-- `/script UnitXP("target", "randomEnemy);`
+- `/script UnitXP("target", "nearestEnemy");`
+- `/script UnitXP("target", "randomEnemy");`
 
 Return TRUE when found a target.
 
