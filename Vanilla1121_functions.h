@@ -14,6 +14,8 @@ typedef void* (__fastcall* GETCONTEXT)(void);
 typedef void(__fastcall* LUA_PUSHNIL)(void* L);
 typedef void(__fastcall* LUA_PUSHBOOLEAN)(void* L, int boolean_value);
 typedef void(__fastcall* LUA_PUSHNUMBER)(void* L, double n);
+typedef double(__fastcall* LUA_TONUMBER)(void* L, int index);
+typedef int(__fastcall* LUA_ISNUMBER)(void* L, int index);
 typedef const char* (__fastcall* LUA_TOSTRING)(void* L, int index);
 typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
 typedef struct {
@@ -44,6 +46,13 @@ enum InGameReactions {
     UNIT_REACTION_FRIENDLY,
     UNIT_REACTION_REVERED
 };
+enum InGameClassification {
+    CLASSIFICATION_NORMAL,
+    CLASSIFICATION_ELITE,
+    CLASSIFICATION_RARE_ELITE,
+    CLASSIFICATION_WORLDBOSS,
+    CLASSIFICATION_RARE,
+};
 
 
 // To get lua_State pointer
@@ -54,10 +63,12 @@ void* GetContext(void);
 void lua_pushstring(void* L, const char* str);
 void luaL_openlib(void* L, const char* name_space, lua_func_reg function_list[], int upvalues);
 const char* lua_tostring(void* L, int index);
+double lua_tonumber(void* L, int index);
 int lua_gettop(void* L);
 void lua_pushnil(void* L);
 void lua_pushboolean(void* L, int boolean_value);
 void lua_pushnumber(void* L, double n);
+int lua_isnumber(void* L, int index);
 
 
 // WoW C function
@@ -70,17 +81,19 @@ int vanilla1121_getReaction(uint64_t targetGUID);
 // -1 for error. This function is different from getReaction because enemy player could turn off PvP
 int vanilla1121_canAttack(uint64_t targetGUID);
 // Return 1 for dead, 0 for alive, -1 for error
-int vanilla1121_isDead(uint32_t object);
-
-
-// WoW Visiable Object
+int vanilla1121_objIsDead(uint32_t object);
+// Return 1 for player controlling, 0 for not, -1 for error
+int vanilla1121_objIsControlledByPlayer(uint32_t object);
+// Get object's classification: normal, elite, rare elite, world boss, rare. Return -1 for error.
+int vanilla1121_getObject_s_classification(uint32_t object);
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
-C3Vector vanilla1121_getPosition(uint32_t object);
+C3Vector vanilla1121_getObjectPosition(uint32_t object);
 // Return true for "in sight"; false for "not in sight";
 bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1);
 // Return true for in-combat; false for not-in-combat or unchecked
 bool vanilla1121_inCombat(uint32_t object);
 // Get in-game object type
 int vanilla1121_getType(uint64_t targetGUID);
-
+// Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
+uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);

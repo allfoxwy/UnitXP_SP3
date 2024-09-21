@@ -22,8 +22,8 @@ float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1) {
 		return -1;
 	}
 
-	C3Vector pos0 = vanilla1121_getPosition(obj0);
-	C3Vector pos1 = vanilla1121_getPosition(obj1);
+	C3Vector pos0 = vanilla1121_getObjectPosition(obj0);
+	C3Vector pos1 = vanilla1121_getObjectPosition(obj1);
 
 	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
 }

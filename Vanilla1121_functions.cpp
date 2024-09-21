@@ -15,6 +15,8 @@ LUA_CFUNCTION p_lua_gettop = reinterpret_cast<LUA_CFUNCTION>(0x006F3070);
 LUA_PUSHNIL p_lua_pushnil = reinterpret_cast<LUA_PUSHNIL>(0x006F37F0);
 LUA_PUSHBOOLEAN p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0);
 LUA_PUSHNUMBER p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
+LUA_TONUMBER p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
+LUA_ISNUMBER p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
 
 // WoW C function
 UNITGUID p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
@@ -56,6 +58,12 @@ void lua_pushnumber(void* L, double n) {
     p_lua_pushnumber(L, n);
     return;
 }
+double lua_tonumber(void* L, int index) {
+    return p_lua_tonumber(L, index);
+}
+int lua_isnumber(void* L, int index) {
+    return p_lua_isnumber(L, index);
+}
 
 
 // WoW C function
@@ -86,13 +94,15 @@ uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
 
     return 0;
 }
-C3Vector vanilla1121_getPosition(uint32_t object) {
+
+C3Vector vanilla1121_getObjectPosition(uint32_t object) {
     return {
         *reinterpret_cast<float*>(object + 0x09B8),
         *reinterpret_cast<float*>(object + 0x09B8 + 0x4),
         *reinterpret_cast<float*>(object + 0x09B8 + 0x8),
     };
 }
+
 // Return true for in-combat; false for not-in-combat or unchecked
 bool vanilla1121_inCombat(uint32_t object) {
     if (object == 0) {
@@ -116,15 +126,15 @@ bool vanilla1121_inCombat(uint32_t object) {
 }
 // return true for "in sight"; false for "not in sight";
 bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
-    C3Vector pos0 = vanilla1121_getPosition(object0);
-    C3Vector pos1 = vanilla1121_getPosition(object1);
+    C3Vector pos0 = vanilla1121_getObjectPosition(object0);
+    C3Vector pos1 = vanilla1121_getObjectPosition(object1);
 
     C3Vector intersectPoint = { 0,0,0 };
     float distance = 1.0f;
 
-    //TODO: I can't find height of object, 2.0f is human height
-    pos0.z += 2.0f;
-    pos1.z += 2.0f;
+    //TODO: I can't find height of object
+    pos0.z += 2.5f;
+    pos1.z += 2.5f;
 
     bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100111);
 
@@ -195,7 +205,7 @@ int vanilla1121_canAttack(uint64_t targetGUID) {
 }
 
 // Return 1 for dead, 0 for alive, -1 for error
-int vanilla1121_isDead(uint32_t object) {
+int vanilla1121_objIsDead(uint32_t object) {
     if (object == 0) {
         return -1;
     }
@@ -214,5 +224,75 @@ int vanilla1121_isDead(uint32_t object) {
     }
     else {
         return 0;
+    }
+}
+
+// Return 1 for player controlling, 0 for not, -1 for error
+// Somehow companions are not counted as player controlling
+int vanilla1121_objIsControlledByPlayer(uint32_t object) {
+    if (object == 0) {
+        return -1;
+    }
+
+    // some kind of attribute, including in-combat information
+    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    uint32_t data = *reinterpret_cast<uint32_t*>(attr + 0xa0);
+    if ((data & 8) != 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+// Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
+uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object) {
+    if (object == 0) {
+        return 0;
+    }
+
+    // some kind of attribute, including in-combat information
+    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return 0;
+    }
+
+    uint64_t data = *reinterpret_cast<uint64_t*>(attr + 0x28);
+    
+    return data;
+}
+// Get object's classification: normal, elite, rare elite, world boss, rare. Return -1 for error.
+int vanilla1121_getObject_s_classification(uint32_t object) {
+    if (object == 0) {
+        return -1;
+   }
+
+    // some kind of attribute
+    uint32_t attr0 = *reinterpret_cast<uint32_t*>(object + 0xb30);
+    if (attr0 == 0 || (attr0 & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    uint32_t attr1 = *reinterpret_cast<uint32_t*>(object + 0x110);
+    if (attr1 == 0 || (attr1 & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    uint32_t data1 = *reinterpret_cast<uint32_t*>(attr1 + 0x214);
+
+    if (attr0 != 0 && data1 == 0) {
+        int data0 = *reinterpret_cast<int*>(attr0 + 0x20);
+        return data0;
+    }
+    else {
+        return -1;
     }
 }

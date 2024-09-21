@@ -5,6 +5,7 @@
 
 #include <string>
 #include <sstream>
+#include <limits>
 
 #include "MinHook.h"
 #include "Vanilla1121_functions.h"
@@ -12,6 +13,7 @@
 #include "distanceBetween.h"
 #include "modernNameplateDistance.h"
 #include "targeting.h"
+#include "notifyOS.h"
 
 using namespace std;
 
@@ -55,37 +57,70 @@ int __fastcall detoured_UnitXP(void* L) {
         else if (cmd == "target" && lua_gettop(L) >= 2) {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "nearestEnemy") {
-                lua_pushboolean(L, targetNearestEnemy());
+                lua_pushboolean(L, targetNearestEnemy(FLT_MAX));
                 return 1;
             }
-            if (subcmd == "randomEnemy") {
-                lua_pushboolean(L, targetRandomEnemy());
+            if (subcmd == "nextEnemyConsideringDistance") {
+                lua_pushboolean(L, targetEnemyConsideringDistance(&selectNext));
+                return 1;
+            }
+            if (subcmd == "previousEnemyConsideringDistance") {
+                lua_pushboolean(L, targetEnemyConsideringDistance(&selectPrevious));
+                return 1;
+            }
+            if (subcmd == "nextEnemyInCycle") {
+                lua_pushboolean(L, targetEnemyInCycle(&selectNext));
+                return 1;
+            }
+            if (subcmd == "previousEnemyInCycle") {
+                lua_pushboolean(L, targetEnemyInCycle(&selectPrevious));
+                return 1;
+            }
+            if (subcmd == "worldBoss") {
+                lua_pushboolean(L, targetWorldBoss(FLT_MAX));
                 return 1;
             }
             lua_pushnil(L);
             return 1;
         }
-        else if (cmd == "modernNameplateDistance" && lua_gettop(L) >= 2) {
-            string subcmd{ lua_tostring(L, 2) };
-            if (subcmd == "enable") {
-                modernNameplateDistance = true;
-            }
-            else if (subcmd == "disable") {
-                modernNameplateDistance = false;
-            }
-            else if (subcmd == "enableFriendRefresh") {
-                modernNameplateDistanceRefreshFriend = true;
-            }
-            else if (subcmd == "disableFriendRefresh") {
-                modernNameplateDistanceRefreshFriend = false;
-            }
-            else if (subcmd == "enableEnemyRefresh") {
-                modernNameplateDistanceRefreshEnemy = true;
-            }
-            else if (subcmd == "disableEnemyRefresh") {
-                modernNameplateDistanceRefreshEnemy = false;
+        else if (cmd == "modernNameplateDistance") {
+            if (lua_gettop(L) >= 2) {
+                string subcmd{ lua_tostring(L, 2) };
+                if (subcmd == "enable") {
+                    modernNameplateDistance = true;
+                }
+                else if (subcmd == "disable") {
+                    modernNameplateDistance = false;
+                }
+                else if (subcmd == "enableFriendRefresh") {
+                    modernNameplateDistanceRefreshFriend = true;
+                }
+                else if (subcmd == "disableFriendRefresh") {
+                    modernNameplateDistanceRefreshFriend = false;
+                }
+                else if (subcmd == "enableEnemyRefresh") {
+                    modernNameplateDistanceRefreshEnemy = true;
+                }
+                else if (subcmd == "disableEnemyRefresh") {
+                    modernNameplateDistanceRefreshEnemy = false;
+                }
             }
             lua_pushboolean(L, modernNameplateDistance);
+            return 1;
+        }
+        else if (cmd == "flashNotifyOS") {
+            uint32_t count = 5;
+            if (lua_gettop(L) >= 2 && lua_isnumber(L, 2)) {
+                double wish = lua_tonumber(L, 2);
+                if (wish > UINT32_MAX) {
+                    count = UINT32_MAX;
+                }
+                else {
+                    count = static_cast<uint32_t>(wish);
+                }
+            }
+            flashNotifyOS(count);
+            lua_pushboolean(L, true);
             return 1;
         }
     }
@@ -166,7 +201,9 @@ extern "C" {
             {u8"UnitXP_SP3_inSight", p_UnitXP},
             {u8"UnitXP_SP3_distanceBetween", p_UnitXP},
             {u8"UnitXP_SP3_modernNameplateDistance", p_UnitXP},
+            {u8"UnitXP_SP3_getTickCount", p_UnitXP},
             {u8"UnitXP_SP3_target", p_UnitXP},
+            {u8"UnitXP_SP3_flashNotifyOS", p_UnitXP},
             {NULL, NULL}
         };
 
