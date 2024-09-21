@@ -7,37 +7,90 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 
 
+### How to use them in game
+
+- You could create a new macro in game.
+
+- Write function in macro, example: `/script local time = UnitXP("getTickCount", "anything would do");print(time);`
+
+- Pull the macro icon onto Action bar
+
+- Click that Action bar button
+
+
+
 ### Targeting function
 
-TAB key by default could select anything except your wish.
+This mod adds a targeting functiones to help you have a better TAB.
+
+Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
 
 
-This mod adds 2 targeting function, which you could use in macro or LUA:
+
 - `/script UnitXP("target", "nearestEnemy");`
-- `/script UnitXP("target", "randomEnemy");`
 
 Return TRUE when found a target.
 
-
-Target nearest enemy is by its name, the one and the only one nearest enemy. No bullshit. And it follows rules:
+Target nearest enemy. It is the one and the only one nearest enemy. No bullshit. And it follows rules:
 - Only target attackable enemy.
 - Only target livings.
 - Only target enemy in line of sight.
+- In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
 - No range limit, as long as we could see the enemy in eyes.
 
 
-Target random enemy despite its name, is a well-defined targeting function I proposed for replacing TAB key:
+
+- `/script UnitXP("target", "nextEnemyConsideringDistance");`
+- `/script UnitXP("target", "previousEnemyConsideringDistance");`
+
+Return TRUE when found a target.
+
+These functions are designed for ***melee***:
 - Only target attackable enemy.
 - Only target livings.
 - Only target enemy in line of sight.
+- In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
 - Attack range is divided into 3 parts (0-5, 5-25, 25-41). If there is enemy in near range part, further range parts would be ignored.
-- In 0 to 5 yards. All ememy would be targeted randomly.
-- In 5 to 25 yards. Only the nearest 3 enemies would be targeted, randomly.
-- In 25 to 41 yards. Only the nearest 5 enemies would be targeted, randomly.
-- When there is an alternative choice, it won't target the same enemy as last time.
+- In 0 to 5 yards. It cycles all enemies.
+- In 5 to 25 yards. Only the nearest 3 enemies would be cycled.
+- In 25 to 41 yards. Only the nearest 5 enemies would be cycled.
+- When no target, it selects the nearest.
+
+
+
+- `/script UnitXP("target", "nextEnemyInCycle");`
+- `/script UnitXP("target", "previousEnemyInCycle");`
+
+Return TRUE when found a target.
+
+These functions are designed for ***ranged***:
+- Only target attackable enemy.
+- Only target livings.
+- Only target enemy in line of sight.
+- In PvP, it ignores Pets and Totems.
+- When player is in-combat, it only target in-combat enemy.
+- Max range is 41 yards. Enemy further than that is ignored.
+- When continuously triggered, it guarantees that every mob in range would be targeted for once.
+- When no target, it selects the nearest.
+
+
+
+- `/script UnitXP("target", "worldBoss");`
+
+Return TRUE when found a world boss.
+
+World boss needs special attention:
+- Only target attackable enemy.
+- Only target livings.
+- ***It ignores line of sight.*** For example NAXX 4HM fight has a stone platform in the center of battlefield, it would block line of sight.
+- When player is in-combat, it only target in-combat enemy.
+- No range limit, as long as we could see the enemy in eyes.
+- When continuously triggered, it guarantees that every world boss in range would be targeted for once.
+- When no target, it selects the nearest.
+
 
 
 
@@ -109,20 +162,33 @@ Return a number, or NIL for error.
 
 - `/script local time = UnitXP("getTickCount", "anything would do");print(time);`
 
-This makes the mod require Windows Vista or newer to operate. I know there is GetTickCount() but I think I won't compromise for now.
+This makes the mod require Windows Vista or newer to operate. I know there is GetTickCount() but I won't compromise for now.
+
+
+
+
+### Flash WoW window and its taskbar icon to notify player
+
+- `/script UnitXP("flashNotifyOS", 10);`
+
+Above command would attmpt flashing 10 times, and stop as soon as WoW window is back to foreground.
+
+
 
 
 
 ### Tell if UnitXP_SP3 functions available
 
-These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip this.
+These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip them.
 
 When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3
 - Vanilla1121mod.UnitXP_SP3_inSight
 - Vanilla1121mod.UnitXP_SP3_distanceBetween
 - Vanilla1121mod.UnitXP_SP3_modernNameplateDistance
+- Vanilla1121mod.UnitXP_SP3_getTickCount
 - Vanilla1121mod.UnitXP_SP3_target
+- Vanilla1121mod.UnitXP_SP3_flashNotifyOS
 
 You could check their existance to tell if certain function is available.
 
