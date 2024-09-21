@@ -21,7 +21,7 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 ### Targeting function
 
-This mod adds a targeting functiones to help you have a better TAB.
+This mod adds a few targeting functions to help you have a better TAB.
 
 Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
 
