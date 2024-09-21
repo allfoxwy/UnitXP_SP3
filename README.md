@@ -26,6 +26,7 @@ This mod adds a few targeting functions to help you have a better TAB.
 Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
 
 
+##### Nearest targeting
 
 - `/script UnitXP("target", "nearestEnemy");`
 
@@ -40,6 +41,7 @@ Target nearest enemy. It is the one and the only one nearest enemy. No bullshit.
 - No range limit, as long as we could see the enemy in eyes.
 
 
+##### Melee targeting
 
 - `/script UnitXP("target", "nextEnemyConsideringDistance");`
 - `/script UnitXP("target", "previousEnemyConsideringDistance");`
@@ -60,6 +62,7 @@ These functions are designed for ***melee***:
 - When no target, it selects the nearest.
 
 
+##### Ranged targeting
 
 - `/script UnitXP("target", "nextEnemyInCycle");`
 - `/script UnitXP("target", "previousEnemyInCycle");`
@@ -77,6 +80,7 @@ These functions are designed for ***ranged***:
 - When no target, it selects the nearest.
 
 
+##### World boss targeting
 
 - `/script UnitXP("target", "worldBoss");`
 
