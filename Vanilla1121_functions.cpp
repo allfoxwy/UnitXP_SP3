@@ -24,6 +24,7 @@ CWORLD__INTERSECT p_CWorld_Intersect = reinterpret_cast<CWORLD__INTERSECT>(0x672
 TARGET p_Target = reinterpret_cast<TARGET>(0x489a40);
 UNITREACTION p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
 CANATTACK p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
+GETCREATURETYPE p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
 
 // To get lua_State pointer
 void* GetContext(void) {
@@ -295,4 +296,11 @@ int vanilla1121_getObject_s_classification(uint32_t object) {
     else {
         return -1;
     }
+}
+// Get object's creature type
+int vanilla1121_getObject_s_creatureType(uint32_t object) {
+    if (object == 0) {
+        return 0;
+    }
+    return p_getCreatureType(object);
 }

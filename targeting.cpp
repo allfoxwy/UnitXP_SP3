@@ -25,7 +25,8 @@ bool targetNearestEnemy(float distanceLimit) {
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
             && vanilla1121_canAttack(currentObjectGUID) == 1
-            && vanilla1121_objIsDead(i) == 0) {
+            && vanilla1121_objIsDead(i) == 0
+            && vanilla1121_getObject_s_creatureType(i) != 8) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -79,7 +80,8 @@ bool targetWorldBoss(float distanceLimit) {
             // && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
             && vanilla1121_canAttack(currentObjectGUID) == 1
             && vanilla1121_objIsDead(i) == 0
-            && vanilla1121_getObject_s_classification(i) == CLASSIFICATION_WORLDBOSS) {
+            && vanilla1121_getObject_s_classification(i) == CLASSIFICATION_WORLDBOSS
+            && vanilla1121_getObject_s_creatureType(i) != 8) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -211,7 +213,8 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
             && vanilla1121_canAttack(currentObjectGUID) == 1
-            && vanilla1121_objIsDead(i) == 0) {
+            && vanilla1121_objIsDead(i) == 0
+            && vanilla1121_getObject_s_creatureType(i) != 8) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -276,7 +279,8 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
             && vanilla1121_canAttack(currentObjectGUID) == 1
-            && vanilla1121_objIsDead(i) == 0) {
+            && vanilla1121_objIsDead(i) == 0
+            && vanilla1121_getObject_s_creatureType(i) != 8) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));

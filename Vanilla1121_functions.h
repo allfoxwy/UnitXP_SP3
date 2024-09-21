@@ -27,6 +27,7 @@ typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* 
 typedef void(__fastcall* TARGET)(uint64_t* GUID);
 typedef int(__thiscall* UNITREACTION)(uint32_t self, uint32_t targetObj);
 typedef bool(__thiscall* CANATTACK)(uint32_t self, uint32_t targetObj);
+typedef int(__fastcall* GETCREATURETYPE)(uint32_t obj);
 enum InGameObjectType {
     OBJECT_TYPE_Null,
     OBJECT_TYPE_Item,
@@ -97,3 +98,5 @@ bool vanilla1121_inCombat(uint32_t object);
 int vanilla1121_getType(uint64_t targetGUID);
 // Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
 uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);
+// Get object's creature type
+int vanilla1121_getObject_s_creatureType(uint32_t object);
