@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "Vanilla1121_functions.h"
+#include "distanceBetween.h"
 
 using namespace std;
 
@@ -20,6 +21,16 @@ int UnitXP_inSight(uint64_t guid0, uint64_t guid1) {
 	if (obj1 == 0) {
 		return -1;
 	}
+
+	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
+	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+	// TODO: I don't have a way to find out what the current system is
+	// To workaround, we test the distance. If they are too far away, we judge that situation as error
+	float distance = UnitXP_distanceBetween(guid0, guid1);
+	if (distance > 150.0f) {
+		return -1;
+	}
+
 
 	if (vanilla1121_inLineOfSight(obj0, obj1)) {
 		return 1;

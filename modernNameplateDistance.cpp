@@ -76,7 +76,7 @@ void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1,
         uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(self) + 0x30);
         uint64_t player = UnitGUID(u8"player");
         if (guidUnderNameplate != 0 && player != 0) {
-            bool inSight = UnitXP_inSight(player, guidUnderNameplate);
+            bool inSight = (UnitXP_inSight(player, guidUnderNameplate) > 0);
             float distance = UnitXP_distanceBetween(player, guidUnderNameplate);
             const float seeThroughWallDistance = 8.0f;
 

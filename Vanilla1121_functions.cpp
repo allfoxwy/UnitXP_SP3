@@ -137,7 +137,10 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
     pos0.z += 2.5f;
     pos1.z += 2.5f;
 
-    bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100111);
+    // This line was the flags I used in first place
+    //bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100111);
+
+    bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100171);
 
     if (result) {
         if (distance <= 1 && distance >= 0) {
