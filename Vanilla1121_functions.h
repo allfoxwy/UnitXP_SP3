@@ -98,5 +98,5 @@ bool vanilla1121_inCombat(uint32_t object);
 int vanilla1121_getType(uint64_t targetGUID);
 // Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
 uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);
-// Get object's creature type
+// Get object's creature type. I'm not sure when error what would be returned from original function, so current it returns -1 when object is 0 or return original function's result.
 int vanilla1121_getObject_s_creatureType(uint32_t object);

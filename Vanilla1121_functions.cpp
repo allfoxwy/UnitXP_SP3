@@ -300,7 +300,7 @@ int vanilla1121_getObject_s_classification(uint32_t object) {
 // Get object's creature type
 int vanilla1121_getObject_s_creatureType(uint32_t object) {
     if (object == 0) {
-        return 0;
+        return -1;
     }
     return p_getCreatureType(object);
 }
