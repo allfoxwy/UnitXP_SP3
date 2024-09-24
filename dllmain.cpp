@@ -1,8 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
-#include "sysinfoapi.h" // We need Windows Vista or newer for GetTickCount64()
-
 #include <string>
 #include <sstream>
 #include <limits>
@@ -50,10 +48,6 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-        else if (cmd == "getTickCount") {
-            lua_pushnumber(L, (double)GetTickCount64());
-            return 1;
-        }
         else if (cmd == "target" && lua_gettop(L) >= 2) {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "nearestEnemy") {
@@ -91,18 +85,6 @@ int __fastcall detoured_UnitXP(void* L) {
                 }
                 else if (subcmd == "disable") {
                     modernNameplateDistance = false;
-                }
-                else if (subcmd == "enableFriendRefresh") {
-                    modernNameplateDistanceRefreshFriend = true;
-                }
-                else if (subcmd == "disableFriendRefresh") {
-                    modernNameplateDistanceRefreshFriend = false;
-                }
-                else if (subcmd == "enableEnemyRefresh") {
-                    modernNameplateDistanceRefreshEnemy = true;
-                }
-                else if (subcmd == "disableEnemyRefresh") {
-                    modernNameplateDistanceRefreshEnemy = false;
                 }
             }
             lua_pushboolean(L, modernNameplateDistance);

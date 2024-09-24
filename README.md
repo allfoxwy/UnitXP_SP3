@@ -6,7 +6,6 @@ It is intended to be loaded via [vanilla-dll-sideloader](https://github.com/allf
 I don't take ANY responsibility if this mod is originate in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
 
 
-
 ### How to use them in game
 
 - You could create a new macro in game.
@@ -19,7 +18,7 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 
 
-### Targeting function
+### Targeting function (for TAB key)
 
 This mod adds a few targeting functions to help you have a better TAB.
 
@@ -98,43 +97,22 @@ World boss needs special attention:
 
 
 
-### Hide nameplate behind wall
+### Hide nameplate behind wall (for V key)
 
-Vanilla client only check distance for nameplates. This would make mobs behind wall/door also show up their nameplates.
+Vanilla client only check distance for nameplates. This makes mobs behind wall/door also show up their nameplates.
 
-This mod changes Vanilla behaviour:
-- In 8 to MAX range, only those mobs in player's sight would receive a nameplate
-- In 0 to 8 range, every mob receive a nameplate
-- When a mob with nameplate move into shadow behind wall, its nameplate would disappear within 2 seconds. However this refresh feature could be disabled because it causes flash.
+This mod changes Vanilla behaviour to Classic style:
+- Only those mobs in player's sight would receive a nameplate
+- If you move your camera really close, you could see through a wall for a short distance
 
-By default:
-- Modern Nameplate Distance feature is Enabled
+LUA nameplate addon would work out-of-box, no need to change anything.
 
-- Refresh enemy nameplate every 2 seconds.
-
-- Friendly nameplate would NOT refresh.
-
- ...you could control it by
+By default this feature is enabled. You could toggle its switch:
 
 - `/script UnitXP("modernNameplateDistance", "enable");`
 
 - `/script UnitXP("modernNameplateDistance", "disable");`
 
-- `/script UnitXP("modernNameplateDistance", "enableEnemyRefresh");`
-
-- `/script UnitXP("modernNameplateDistance", "disableEnemyRefresh");`
-
-- `/script UnitXP("modernNameplateDistance", "enableFriendRefresh");`
-
-- `/script UnitXP("modernNameplateDistance", "disableFriendRefresh");`
-
-- `/script local query = UnitXP("modernNameplateDistance", "anything else");print(query);`
-
-LUA nameplate addon would work out-of-box, no need to change anything.
-
-I wish I could make a perfect "refresh to disappear" program with NO flash, however I lack 2 pieces of critical information:
-- I can't find address of CGUnit_C::RemoveUnitNamePlate()
-- There is a linked list of nameplates at 0xc4d92c, it could be iterated by NODE_ADDR + 0x4e0 . However I can't find unit GUID out of it.
 
 
 
@@ -152,6 +130,7 @@ This function has limitation:
 
 
 
+
 ### Measure distance between two units
 
 - `/script local result = UnitXP("distanceBetween", UNIT_ID, UNIT_ID);print(result);`
@@ -159,14 +138,6 @@ This function has limitation:
 UNIT_ID could be "player", "target"... also GUID string `"0x12345"`
 
 Return a number, or NIL for error.
-
-
-
-### GetTickCount64() WinAPI
-
-- `/script local time = UnitXP("getTickCount", "anything would do");print(time);`
-
-This makes the mod require Windows Vista or newer to operate. I know there is GetTickCount() but I won't compromise for now.
 
 
 
@@ -190,7 +161,6 @@ When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3_inSight
 - Vanilla1121mod.UnitXP_SP3_distanceBetween
 - Vanilla1121mod.UnitXP_SP3_modernNameplateDistance
-- Vanilla1121mod.UnitXP_SP3_getTickCount
 - Vanilla1121mod.UnitXP_SP3_target
 - Vanilla1121mod.UnitXP_SP3_flashNotifyOS
 

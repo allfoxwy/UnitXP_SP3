@@ -11,10 +11,12 @@ typedef int(__thiscall* RENDERWORLD)(void* self);
 extern RENDERWORLD p_renderWorld;
 extern RENDERWORLD p_original_renderWorld;
 
+typedef void(__thiscall* REMOVENAMEPLATE)(uint32_t);
+extern REMOVENAMEPLATE p_removeNameplate;
+
 
 extern bool modernNameplateDistance;
-extern bool modernNameplateDistanceRefreshEnemy;
-extern bool modernNameplateDistanceRefreshFriend;
+
 
 int __fastcall detoured_renderWorld(void* self, void* ignored);
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2);

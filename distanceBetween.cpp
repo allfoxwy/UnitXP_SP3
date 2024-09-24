@@ -9,23 +9,24 @@
 using namespace std;
 
 // return -1 for error
-float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1) {
-	uint32_t obj0, obj1;
-
-	obj0 = vanilla1121_getVisiableObject(guid0);
-	if (obj0 == 0) {
+// This function is using void* to prevent implicit conversion from uint32_t to uint64_t
+float UnitXP_distanceBetween(void* obj0, void* obj1) {
+	if (!obj0 || !obj1) {
 		return -1;
 	}
 
-	obj1 = vanilla1121_getVisiableObject(guid1);
-	if (obj1 == 0) {
-		return -1;
-	}
-
-	C3Vector pos0 = vanilla1121_getObjectPosition(obj0);
-	C3Vector pos1 = vanilla1121_getObjectPosition(obj1);
+	C3Vector pos0 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj0));
+	C3Vector pos1 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj1));
 
 	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
+}
+
+// return -1 for error
+float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1) {
+	return UnitXP_distanceBetween(
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1))
+	);
 }
 
 // return -1 for error

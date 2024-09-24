@@ -78,9 +78,9 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vec
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
 // Get in-game unit reaction, return -1 for error
-int vanilla1121_getReaction(uint64_t targetGUID);
+int vanilla1121_getReaction(uint32_t targetObject);
 // -1 for error. This function is different from getReaction because enemy player could turn off PvP
-int vanilla1121_canAttack(uint64_t targetGUID);
+int vanilla1121_canAttack(uint32_t targetObject);
 // Return 1 for dead, 0 for alive, -1 for error
 int vanilla1121_objIsDead(uint32_t object);
 // Return 1 for player controlling, 0 for not, -1 for error
@@ -95,8 +95,11 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1);
 // Return true for in-combat; false for not-in-combat or unchecked
 bool vanilla1121_inCombat(uint32_t object);
 // Get in-game object type
-int vanilla1121_getType(uint64_t targetGUID);
+int vanilla1121_getType(uint32_t targetObject);
 // Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
 uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);
 // Get object's creature type. I'm not sure when error what would be returned from original function, so current it returns -1 when object is 0 or return original function's result.
 int vanilla1121_getObject_s_creatureType(uint32_t object);
+// Get active camera position
+C3Vector vanilla1121_getCameraPosition();
+

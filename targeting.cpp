@@ -18,13 +18,15 @@ bool targetNearestEnemy(float distanceLimit) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
 
+    void* player = reinterpret_cast<void*>(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
-            && vanilla1121_canAttack(currentObjectGUID) == 1
+            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1
+            && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8) {
 
@@ -35,14 +37,14 @@ bool targetNearestEnemy(float distanceLimit) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
-                    new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                    new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
                     mobs.push_back(new_mob);
                 }
             }
             else {
                 struct mob_entity new_mob;
                 new_mob.GUID = currentObjectGUID;
-                new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
                 mobs.push_back(new_mob);
             }
 
@@ -72,13 +74,14 @@ bool targetWorldBoss(float distanceLimit) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
 
+    void* player = reinterpret_cast<void*>(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            // && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
-            && vanilla1121_canAttack(currentObjectGUID) == 1
+            && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_classification(i) == CLASSIFICATION_WORLDBOSS
             && vanilla1121_getObject_s_creatureType(i) != 8) {
@@ -90,7 +93,7 @@ bool targetWorldBoss(float distanceLimit) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
-                    new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                    new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
                     if (new_mob.distance < distanceLimit) {
                         mobs.push_back(new_mob);
                     }
@@ -99,7 +102,7 @@ bool targetWorldBoss(float distanceLimit) {
             else {
                 struct mob_entity new_mob;
                 new_mob.GUID = currentObjectGUID;
-                new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
                 if (new_mob.distance < distanceLimit) {
                     mobs.push_back(new_mob);
                 }
@@ -198,6 +201,8 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
 
+    void* player = reinterpret_cast<void*>(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
     // TODO: Maybe we could find last target without lagging
     //static uint64_t lastTarget = 0;
     uint64_t lastTarget = vanilla1121_getObject_s_targetGUID(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -211,8 +216,8 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
-            && vanilla1121_canAttack(currentObjectGUID) == 1
+            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1
+            && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8) {
 
@@ -223,7 +228,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
-                    new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                    new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
                     if (new_mob.distance < 41.0f) {
                         list.push_back(new_mob);
@@ -233,7 +238,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
             else {
                 struct mob_entity new_mob;
                 new_mob.GUID = currentObjectGUID;
-                new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
                 
                 if (new_mob.distance < 41.0f) {
                     list.push_back(new_mob);
@@ -264,6 +269,8 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
 
+    void* player = reinterpret_cast<void*>(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
     // TODO: Maybe we could find last target without lagging
     //static uint64_t lastTarget = 0;
     uint64_t lastTarget = vanilla1121_getObject_s_targetGUID(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -277,8 +284,8 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            && UnitXP_inSight(UnitGUID("player"), currentObjectGUID) == 1
-            && vanilla1121_canAttack(currentObjectGUID) == 1
+            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1
+            && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8) {
 
@@ -289,9 +296,9 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
-                    new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
+                    new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
-                    if (new_mob.distance <= 5.0f) {
+                    if (new_mob.distance <= 8.0f) {
                         meleeRange.push_back(new_mob);
                     }
                     else if (new_mob.distance <= 25.0f) {
@@ -305,8 +312,8 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             else {
                 struct mob_entity new_mob;
                 new_mob.GUID = currentObjectGUID;
-                new_mob.distance = UnitXP_distanceBetween(UnitGUID("player"), currentObjectGUID);
-                if (new_mob.distance < 5.0f) {
+                new_mob.distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+                if (new_mob.distance < 8.0f) {
                     meleeRange.push_back(new_mob);
                 }
                 else if (new_mob.distance < 25.0f) {

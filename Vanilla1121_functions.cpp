@@ -26,6 +26,9 @@ UNITREACTION p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
 CANATTACK p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
 GETCREATURETYPE p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
 
+typedef uint32_t(__fastcall* GETACTIVECAMERA)(void);
+GETACTIVECAMERA p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
+
 // To get lua_State pointer
 void* GetContext(void) {
     return p_GetContext();
@@ -134,8 +137,8 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
     float distance = 1.0f;
 
     //TODO: I can't find height of object
-    pos0.z += 2.5f;
-    pos1.z += 2.5f;
+    pos0.z += 2.4f;
+    pos1.z += 2.4f;
 
     // This line was the flags I used in first place
     //bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100111);
@@ -163,27 +166,17 @@ void vanilla1121_target(uint64_t targetGUID) {
     return;
 }
 // Get in-game object type
-int vanilla1121_getType(uint64_t targetGUID) {
-    uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
-    uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
-
-    while (i != 0 && (i & 1) == 0) {
-        uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-
-        if (currentObjectGUID == targetGUID) {
-            uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
-            return type;
-        }
-
-        i = *reinterpret_cast<uint32_t*>(i + 0x3c);
+int vanilla1121_getType(uint32_t targetObject) {
+    if (targetObject == 0) {
+        return OBJECT_TYPE_Null;
     }
 
-    return OBJECT_TYPE_Null;
+    return *reinterpret_cast<uint32_t*>(targetObject + 0x14);
 }
 
 // Get in-game unit reaction, return -1 for error
-int vanilla1121_getReaction(uint64_t targetGUID) {
-    uint32_t target = vanilla1121_getVisiableObject(targetGUID);
+int vanilla1121_getReaction(uint32_t targetObject) {
+    uint32_t target = targetObject;
     uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
     if (target == 0 || self == 0) {
         return -1;
@@ -193,8 +186,8 @@ int vanilla1121_getReaction(uint64_t targetGUID) {
 }
 
 // This function is different from getReaction because enemy player could turn off PvP
-int vanilla1121_canAttack(uint64_t targetGUID) {
-    uint32_t target = vanilla1121_getVisiableObject(targetGUID);
+int vanilla1121_canAttack(uint32_t targetObject) {
+    uint32_t target = targetObject;
     uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
     if (target == 0 || self == 0) {
         return -1;
@@ -306,4 +299,16 @@ int vanilla1121_getObject_s_creatureType(uint32_t object) {
         return -1;
     }
     return p_getCreatureType(object);
+}
+C3Vector vanilla1121_getCameraPosition() {
+    uint32_t cptr = p_getCamera();
+    if (cptr == 0) {
+        return { 0,0,0 };
+    }
+
+    return {
+        *reinterpret_cast<float*>(cptr + 0x8),
+        *reinterpret_cast<float*>(cptr + 0x8 + 0x4),
+        *reinterpret_cast<float*>(cptr + 0x8 + 0x8)
+    };
 }
