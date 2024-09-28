@@ -95,9 +95,9 @@ These functions are designed for ***melee***:
 - In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
-- Attack range is divided into 3 parts (0-5, 5-25, 25-41). If there is enemy in near range part, further range parts would be ignored.
-- In 0 to 5 yards. It cycles all enemies.
-- In 5 to 25 yards. Only the nearest 3 enemies would be cycled.
+- Attack range is divided into 3 parts (0-8, 8-25, 25-41). If there is enemy in near range part, further range parts would be ignored.
+- In 0 to 8 yards. It cycles all enemies.
+- In 8 to 25 yards. Only the nearest 3 enemies would be cycled.
 - In 25 to 41 yards. Only the nearest 5 enemies would be cycled.
 - When no target, it selects the nearest.
 
