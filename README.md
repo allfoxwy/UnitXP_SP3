@@ -1,5 +1,5 @@
 # UnitXP Service Pack 3
-WoW Vanilla 1.12.1 mod adding additional functions to UnitXP().
+WoW Vanilla 1.12.1 mod giving Classic style nameplate hiding behaviour and a better TAB key function.
 
 It is intended to be loaded via [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader) and also serve as an example about how to write a memory mod.
 
