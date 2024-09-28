@@ -144,7 +144,7 @@ World boss needs special attention:
 
 "In front of player camera" is defined by a factor which could be adjusted with: 
 
-- /script UnitXP("target","rangeCone", 2.2);
+- `/script UnitXP("target","rangeCone", 2.2);`
 
 When this range cone factor in its minimum value 2, the cone is same as game's Field of View.
 
@@ -157,7 +157,7 @@ By default it's 2.2 . Increasing the factor would narrow the cone, so that only 
 
 For example: "We target raid mark first. However when no mark, we cycle in magic range":
 
-- /script local _=(UnitXP("target","nextMarkedEnemyInCycle") or UnitXP("target","nextEnemyInCycle"));
+- `/script local _=(UnitXP("target","nextMarkedEnemyInCycle") or UnitXP("target","nextEnemyInCycle"));`
 
 This code works because targeting functions return TRUE or FALSE indicating if they got a target. LUA logic operators support short-cut evaluation, that is, they evaluate their second operand only when necessary. 
 
