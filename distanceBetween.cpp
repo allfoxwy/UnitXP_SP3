@@ -8,6 +8,11 @@
 
 using namespace std;
 
+
+float UnitXP_distanceBetween(C3Vector& pos0, C3Vector& pos1) {
+	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
+}
+
 // return -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
 float UnitXP_distanceBetween(void* obj0, void* obj1) {
@@ -18,7 +23,7 @@ float UnitXP_distanceBetween(void* obj0, void* obj1) {
 	C3Vector pos0 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj0));
 	C3Vector pos1 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj1));
 
-	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
+	return UnitXP_distanceBetween(pos0, pos1);
 }
 
 // return -1 for error

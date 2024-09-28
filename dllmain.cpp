@@ -70,8 +70,36 @@ int __fastcall detoured_UnitXP(void* L) {
                 lua_pushboolean(L, targetEnemyInCycle(&selectPrevious));
                 return 1;
             }
+            if (subcmd == "nextMarkedEnemyInCycle") {
+                if (lua_gettop(L) >= 3 && lua_isstring(L, 3)) {
+                    lua_pushboolean(L, targetMarkedEnemyInCycle(&selectNextMark, lua_tostring(L, 3)));
+                }
+                else {
+                    lua_pushboolean(L, targetMarkedEnemyInCycle(&selectNextMark, ""));
+                }
+                return 1;
+            }
+            if (subcmd == "previousMarkedEnemyInCycle") {
+                if (lua_gettop(L) >= 3 && lua_isstring(L, 3)) {
+                    lua_pushboolean(L, targetMarkedEnemyInCycle(&selectPreviousMark, lua_tostring(L, 3)));
+                }
+                else {
+                    lua_pushboolean(L, targetMarkedEnemyInCycle(&selectPreviousMark, ""));
+                }
+                return 1;
+            }
             if (subcmd == "worldBoss") {
                 lua_pushboolean(L, targetWorldBoss(FLT_MAX));
+                return 1;
+            }
+            if (subcmd == "rangeCone") {
+                if (lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                    double n = lua_tonumber(L, 3);
+                    if (n > 1.99 && n < FLT_MAX) {
+                        targetingRangeCone = static_cast<float>(n);
+                    }
+                }
+                lua_pushnumber(L, targetingRangeCone);
                 return 1;
             }
             lua_pushnil(L);
@@ -183,7 +211,6 @@ extern "C" {
             {u8"UnitXP_SP3_inSight", p_UnitXP},
             {u8"UnitXP_SP3_distanceBetween", p_UnitXP},
             {u8"UnitXP_SP3_modernNameplateDistance", p_UnitXP},
-            {u8"UnitXP_SP3_getTickCount", p_UnitXP},
             {u8"UnitXP_SP3_target", p_UnitXP},
             {u8"UnitXP_SP3_flashNotifyOS", p_UnitXP},
             {NULL, NULL}

@@ -23,8 +23,8 @@ int camera_inSight(void* obj) {
 	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
-	float testDistance = hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
-	if (testDistance > 150.0f) {
+	float testDistance = UnitXP_distanceBetween(pos0, pos1);
+	if (testDistance > guardAgainstTransportsCoordinates) {
 		return -1;
 	}
 
@@ -64,7 +64,7 @@ int UnitXP_inSight(void* obj0, void* obj1) {
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
 	float distance = UnitXP_distanceBetween(obj0, obj1);
-	if (distance > 150.0f) {
+	if (distance > guardAgainstTransportsCoordinates) {
 		return -1;
 	}
 

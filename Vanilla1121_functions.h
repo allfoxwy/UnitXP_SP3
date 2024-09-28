@@ -55,6 +55,11 @@ enum InGameClassification {
     CLASSIFICATION_RARE,
 };
 
+// When player jump onto transports (boat/zeppelin) their coordinates system would change.
+// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+// TODO: I don't have a way to find out what the current system is
+// To workaround, we test the distance. If they are too far away, we judge that situation as error
+extern float guardAgainstTransportsCoordinates;
 
 // To get lua_State pointer
 void* GetContext(void);
@@ -70,6 +75,7 @@ void lua_pushnil(void* L);
 void lua_pushboolean(void* L, int boolean_value);
 void lua_pushnumber(void* L, double n);
 int lua_isnumber(void* L, int index);
+int lua_isstring(void* L, int index);
 
 
 // WoW C function
@@ -102,4 +108,10 @@ uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);
 int vanilla1121_getObject_s_creatureType(uint32_t object);
 // Get active camera position
 C3Vector vanilla1121_getCameraPosition();
-
+// Get Field of View value
+float vanilla1121_getCameraFoV();
+// Get Raid/Party target mark.
+// Return icon index as https://wowwiki-archive.fandom.com/wiki/API_GetRaidTargetIndex
+// Return -1 for error
+// In fact there is an official function with same capability at 0x4bb190, but I'm not sure about its calling convention
+int vanilla1121_getTargetMark(uint64_t targetGUID);

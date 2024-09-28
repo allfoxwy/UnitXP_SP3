@@ -17,6 +17,8 @@ LUA_PUSHBOOLEAN p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0
 LUA_PUSHNUMBER p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
 LUA_TONUMBER p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
 LUA_ISNUMBER p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
+LUA_ISNUMBER p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
+
 
 // WoW C function
 UNITGUID p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
@@ -28,6 +30,8 @@ GETCREATURETYPE p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
 
 typedef uint32_t(__fastcall* GETACTIVECAMERA)(void);
 GETACTIVECAMERA p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
+
+extern float guardAgainstTransportsCoordinates = 200.0f;
 
 // To get lua_State pointer
 void* GetContext(void) {
@@ -67,6 +71,9 @@ double lua_tonumber(void* L, int index) {
 }
 int lua_isnumber(void* L, int index) {
     return p_lua_isnumber(L, index);
+}
+int lua_isstring(void* L, int index) {
+    return p_lua_isstring(L, index);
 }
 
 
@@ -311,4 +318,22 @@ C3Vector vanilla1121_getCameraPosition() {
         *reinterpret_cast<float*>(cptr + 0x8 + 0x4),
         *reinterpret_cast<float*>(cptr + 0x8 + 0x8)
     };
+}
+
+float vanilla1121_getCameraFoV() {
+    return *reinterpret_cast<float*>(0x8089B4);
+}
+
+int vanilla1121_getTargetMark(uint64_t targetGUID) {
+    if (targetGUID == 0) {
+        return -1;
+    }
+
+    for (int result = 0; result < 8; ++result) {
+        if (*reinterpret_cast<uint64_t*>(0xb71368 + result * 8) == targetGUID) {
+            return result + 1;
+        }
+    }
+
+    return -1;
 }

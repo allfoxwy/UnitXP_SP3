@@ -6,6 +6,13 @@ It is intended to be loaded via [vanilla-dll-sideloader](https://github.com/allf
 I don't take ANY responsibility if this mod is originate in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
 
 
+
+### How to install
+
+Installation howto is inclued with released packages.
+
+
+
 ### How to use them in game
 
 - You could create a new macro in game.
@@ -25,6 +32,7 @@ This mod adds a few targeting functions to help you have a better TAB.
 Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
 
 
+
 #### Nearest targeting
 
 - `/script UnitXP("target", "nearestEnemy");`
@@ -35,9 +43,41 @@ Target nearest enemy. It is the one and the only one nearest enemy. No bullshit.
 - Only target attackable enemy.
 - Only target livings.
 - Only target enemy in line of sight.
+- Only target enemy in front of player camera.
+- Maximum range is 200 yards.
 - In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
-- No range limit, as long as we could see the enemy in eyes.
+
+
+
+#### Raid mark targeting
+
+- `/script UnitXP("target", "nextMarkedEnemyInCycle");`
+- `/script UnitXP("target", "previousMarkedEnemyInCycle");`
+
+Return TRUE when found a target.
+
+These functions only target mobs with a mark icon in order:
+1. Skull
+1. Red X cross
+1. Blue square
+1. Moon
+1. Green triangle
+1. Purple diamond
+1. Orange circle
+1. Yellow star
+
+With following rules:
+- Only target attackable enemy.
+- Only target livings.
+- Only target enemy in line of sight.
+- Only target enemy in front of player camera.
+- In PvP, it ignores Pets and Totems.
+- Maximum range is 200 yards.
+- When player is in-combat, it only target in-combat enemy.
+- When continuously triggered, it guarantees that every marked mob in range would be targeted for once.
+
+
 
 
 #### Melee targeting
@@ -51,6 +91,7 @@ These functions are designed for ***melee***:
 - Only target attackable enemy.
 - Only target livings.
 - Only target enemy in line of sight.
+- Only target enemy in front of player camera.
 - In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
@@ -59,6 +100,7 @@ These functions are designed for ***melee***:
 - In 5 to 25 yards. Only the nearest 3 enemies would be cycled.
 - In 25 to 41 yards. Only the nearest 5 enemies would be cycled.
 - When no target, it selects the nearest.
+
 
 
 #### Ranged targeting
@@ -72,11 +114,13 @@ These functions are designed for ***ranged***:
 - Only target attackable enemy.
 - Only target livings.
 - Only target enemy in line of sight.
+- Only target enemy in front of player camera.
 - In PvP, it ignores Pets and Totems.
 - When player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
 - When continuously triggered, it guarantees that every mob in range would be targeted for once.
 - When no target, it selects the nearest.
+
 
 
 #### World boss targeting
@@ -88,11 +132,34 @@ Return TRUE when found a world boss.
 World boss needs special attention:
 - Only target attackable enemy.
 - Only target livings.
-- ***It ignores line of sight.*** For example NAXX 4HM fight has a stone platform in the center of battlefield, it would block line of sight.
+- Only target enemy in line of sight.
+- Only target enemy in front of player camera.
+- Maximum range is 200 yards.
 - When player is in-combat, it only target in-combat enemy.
-- No range limit, as long as we could see the enemy in eyes.
 - When continuously triggered, it guarantees that every world boss in range would be targeted for once.
-- When no target, it selects the nearest.
+
+
+
+#### Range cone
+
+"In front of player camera" is defined by a factor which could be adjusted with: 
+
+- /script UnitXP("target","rangeCone", 2.2);
+
+When this range cone factor in its minimum value 2, the cone is same as game's Field of View.
+
+By default it's 2.2 . Increasing the factor would narrow the cone, so that only mobs in the center of vision would be targeted.
+
+
+
+
+#### Using multiple targeting function together
+
+For example: "We target raid mark first. However when no mark, we cycle in magic range":
+
+- /script local _=(UnitXP("target","nextMarkedEnemyInCycle") or UnitXP("target","nextEnemyInCycle"));
+
+This code works because targeting functions return TRUE or FALSE indicating if they got a target. LUA logic operators support short-cut evaluation, that is, they evaluate their second operand only when necessary. 
 
 
 
