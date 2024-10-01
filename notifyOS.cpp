@@ -38,16 +38,16 @@ HWND find_main_window(DWORD process_id)
     return data.window_handle;
 }
 
-void flashNotifyOS(UINT count) {
+void flashTaskbarIcon() {
     DWORD pid = GetCurrentProcessId();
     HWND window = find_main_window(pid);
 
     FLASHWINFO param;
     param.cbSize = sizeof(FLASHWINFO);
     param.hwnd = window;
-    param.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-    param.uCount = count;
-    param.dwTimeout = 0;
+    param.dwFlags = FLASHW_TRAY | FLASHW_TIMERNOFG;
+    param.uCount = 0u;
+    param.dwTimeout = 0u;
 
     FlashWindowEx(&param);
 }

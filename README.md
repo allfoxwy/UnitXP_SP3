@@ -209,11 +209,13 @@ Return a number, or NIL for error.
 
 
 
-### Flash WoW window and its taskbar icon to notify player
+### Flash operating system's taskbar icon when game is in background
 
-- `/script UnitXP("flashNotifyOS", 10);`
+- `/script UnitXP("notify", "taskbarIcon");`
 
-Above command would attmpt flashing 10 times, and stop as soon as WoW window is back to foreground.
+Flash would stop when game back to foreground.
+
+To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
 
 
 

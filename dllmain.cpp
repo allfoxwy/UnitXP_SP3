@@ -118,19 +118,16 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, modernNameplateDistance);
             return 1;
         }
-        else if (cmd == "flashNotifyOS") {
-            uint32_t count = 5;
-            if (lua_gettop(L) >= 2 && lua_isnumber(L, 2)) {
-                double wish = lua_tonumber(L, 2);
-                if (wish > UINT32_MAX) {
-                    count = UINT32_MAX;
-                }
-                else {
-                    count = static_cast<uint32_t>(wish);
+        else if (cmd == "notify") {
+            if (lua_gettop(L) >= 2) {
+                string subcmd{ lua_tostring(L, 2) };
+                if (subcmd == "taskbarIcon") {
+                    flashTaskbarIcon();
+                    lua_pushboolean(L, true);
+                    return 1;
                 }
             }
-            flashNotifyOS(count);
-            lua_pushboolean(L, true);
+            lua_pushboolean(L, false);
             return 1;
         }
     }
