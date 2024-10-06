@@ -220,6 +220,14 @@ To make this function link with certain game events like whisper/trade/invitatio
 
 
 
+### Play operating system's event sound when game is in background
+
+- `/script UnitXP("notify", "systemSound", "SystemDefault");`
+
+Only work when game is in background.
+
+To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
+
 
 ### Tell if UnitXP_SP3 functions available
 
@@ -231,7 +239,7 @@ When mod loads, it adds some globals to LUA:
 - Vanilla1121mod.UnitXP_SP3_distanceBetween
 - Vanilla1121mod.UnitXP_SP3_modernNameplateDistance
 - Vanilla1121mod.UnitXP_SP3_target
-- Vanilla1121mod.UnitXP_SP3_flashNotifyOS
+- Vanilla1121mod.UnitXP_SP3_notify
 
 You could check their existance to tell if certain function is available.
 

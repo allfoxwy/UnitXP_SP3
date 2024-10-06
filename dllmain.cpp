@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "MinHook.h"
+#include "utf8_to_utf16.h"
 #include "Vanilla1121_functions.h"
 #include "inSight.h"
 #include "distanceBetween.h"
@@ -15,8 +16,6 @@
 
 using namespace std;
 
-
-std::wstring utf8_to_utf16(const std::string& utf8);
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
 LUA_CFUNCTION p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
@@ -126,6 +125,12 @@ int __fastcall detoured_UnitXP(void* L) {
                     lua_pushboolean(L, true);
                     return 1;
                 }
+
+                if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
+                    string soundName{ lua_tostring(L, 3) };
+                    lua_pushboolean(L, playSystemSound(soundName));
+                    return 1;
+                }
             }
             lua_pushboolean(L, false);
             return 1;
@@ -209,7 +214,7 @@ extern "C" {
             {u8"UnitXP_SP3_distanceBetween", p_UnitXP},
             {u8"UnitXP_SP3_modernNameplateDistance", p_UnitXP},
             {u8"UnitXP_SP3_target", p_UnitXP},
-            {u8"UnitXP_SP3_flashNotifyOS", p_UnitXP},
+            {u8"UnitXP_SP3_notify", p_UnitXP},
             {NULL, NULL}
         };
 
