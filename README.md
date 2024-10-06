@@ -252,7 +252,7 @@ You could check their existance to tell if certain function is available.
 - It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > No Enhanced Instructions (/arch:IA32)"
 - x32 has a limited memory space. I think it would be better our program use less memory: "C/C++ > Optimization > Optimization /O1 and Favor small code /Os"
 - I used C++ 17 features so "C/C++ > Language > C++ Language Standard > ISO C++ 17 Standard(/std:c++17)"
-
+- Linked with [libMinHook.x86.lib](https://github.com/TsudaKageyu/minhook) and Winmm.lib
 
 
 ### MIT License
