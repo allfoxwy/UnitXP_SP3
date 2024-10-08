@@ -13,16 +13,11 @@ Installation howto is inclued with released packages.
 
 
 
-### How to use them in game
+### How to use it in game
 
-- You could create a new macro in game.
+![menu](https://github.com/user-attachments/assets/8f92a151-abf1-491e-b53e-0e2583fe8c09)
 
-- Write function in macro, example: `/script local time = UnitXP("getTickCount", "anything would do");print(time);`
-
-- Pull the macro icon onto Action bar
-
-- Click that Action bar button
-
+- With LUA addon installed, you could acccess it from game's ESC menu.
 
 
 ### Targeting function (for TAB key)
@@ -30,6 +25,10 @@ Installation howto is inclued with released packages.
 This mod adds a few targeting functions to help you have a better TAB.
 
 Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
+
+Following functions could be accessed via Key Bindings menu, or via macro.
+
+![keybindings](https://github.com/user-attachments/assets/d6adad1b-9d8d-46c2-a207-569b7a567191)
 
 
 
