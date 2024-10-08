@@ -29,9 +29,10 @@ This mod adds a few targeting functions to help you have a better TAB.
 
 Currently when continuously trigger these functions, you may experience a small lag between switching target. I believe this is because game needs a server communication to obtain Target of Target information. I wish I could find a better way in future.
 
-Following functions could be accessed via Key Bindings menu, or via macro.
+Functions could be accessed via Key Bindings menu, or via macro.
 
-![keybindings](https://github.com/user-attachments/assets/d6adad1b-9d8d-46c2-a207-569b7a567191)
+![keybindings](https://github.com/user-attachments/assets/61ddc189-7fd5-4a6b-bd5d-23ddd51d4895)
+
 
 
 
