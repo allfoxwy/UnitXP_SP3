@@ -1,5 +1,5 @@
 # UnitXP Service Pack 3
-WoW Vanilla 1.12.1 mod giving Classic style nameplate hiding behaviour and a better TAB key function and background notifications.
+WoW Vanilla 1.12.1 mod giving Classic style nameplate hiding behaviour and better TAB key functions and background notifications.
 
 I don't take ANY responsibility if this mod is originate in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
 
