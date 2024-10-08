@@ -15,10 +15,12 @@ Installation howto is inclued with released packages.
 
 ### How to use it in game
 
+- With LUA addon installed, you could acccess it from game's ESC menu.
+
 ![menu](https://github.com/user-attachments/assets/f31dd4b4-7e47-4e42-9fc4-cf02c5b59fc1)
 
 
-- With LUA addon installed, you could acccess it from game's ESC menu.
+
 
 
 ### Targeting function (for TAB key)
