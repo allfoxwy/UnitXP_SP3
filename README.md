@@ -7,7 +7,7 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 ### How to install
 
-Installation howto is inclued with released packages.
+Installation howto is inclued with [released packages](https://github.com/allfoxwy/UnitXP_SP3/releases).
 
 
 
