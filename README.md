@@ -7,7 +7,15 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 ### How to install
 
-Installation howto is inclued with [released packages](https://github.com/allfoxwy/UnitXP_SP3/releases).
+1. Download  UnitXP-SP3-with-loader.zip  from https://github.com/allfoxwy/UnitXP_SP3/releases/latest
+2. Unzip everything into same place with WoW.exe
+3. Move "UnitXP_SP3_Addon" into WoWclient/Interface/AddOns/
+4. Run Enable sideload-DLL.exe
+5. Start game with WoW_sideload-DLL.exe
+
+Additional tips:
+- You could delete Enable sideload-DLL.exe after installation, it's a huge file because of Node.js
+- Currently Node.js need Windows 8.1 to operate
 
 
 
