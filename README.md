@@ -15,7 +15,7 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 Additional tips:
 - You could delete Enable sideload-DLL.exe after installation, it's a huge file because of Node.js
-- Currently Node.js needs Windows 8.1 to operate. UnitXP_SP3 itself works on elder Windows, you might try using VanillaFixes loader for it on elder Windows.
+- Currently Node.js needs Windows 8.1 to operate. UnitXP_SP3.dll itself works on elder Windows, you might try using VanillaFixes loader for it on elder Windows.
 
 
 
