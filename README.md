@@ -15,7 +15,7 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 Additional tips:
 - You could delete Enable sideload-DLL.exe after installation, it's a huge file because of Node.js
-- Currently Node.js need Windows 8.1 to operate
+- Currently Node.js needs Windows 8.1 to operate
 
 
 
