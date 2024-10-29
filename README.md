@@ -7,21 +7,21 @@ I don't take ANY responsibility if this mod is originate in Burning Legion, or i
 
 ### How to install
 
-1. Download  UnitXP-SP3-with-loader.zip  from https://github.com/allfoxwy/UnitXP_SP3/releases/latest
-2. Unzip everything into same place with WoW.exe
-3. Move "UnitXP_SP3_Addon" into WoWclient/Interface/AddOns/
-4. Run Enable sideload-DLL.exe
-5. Start game with WoW_sideload-DLL.exe
+1. Download  `UnitXP-SP3-with-loader.zip`  from https://github.com/allfoxwy/UnitXP_SP3/releases/latest
+2. Unzip everything into same place with `WoW.exe`
+3. Move `UnitXP_SP3_Addon` into WoWclient/Interface/AddOns/
+4. Run `Enable sideload-DLL.exe`
+5. Start game with `WoW_sideload-DLL.exe`
 
 Additional tips:
-- You could delete Enable sideload-DLL.exe after installation, it's a huge file because of Node.js
-- Currently Node.js needs Windows 8.1 to operate. UnitXP_SP3.dll itself works on elder Windows, you might try using VanillaFixes loader for it on elder Windows.
+- You could delete `Enable sideload-DLL.exe` after installation, it's a huge file because of Node.js
+- Currently Node.js needs Windows 8.1 to operate. `UnitXP_SP3.dll` itself works on elder Windows, you might try using VanillaFixes loader for it on elder Windows.
 
 
 
 ### How to use it in game
 
-- With [the LUA Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon) installed, you could acccess it from game's ESC menu.
+- With [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon) installed, you could acccess it from game's ESC menu.
 
 ![menu](https://github.com/user-attachments/assets/f31dd4b4-7e47-4e42-9fc4-cf02c5b59fc1)
 
