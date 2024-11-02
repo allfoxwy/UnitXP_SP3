@@ -201,6 +201,7 @@ UNIT_ID could be "player", "target"... also GUID string `"0x12345"`
 Return TRUE for in sight, FALSE for NOT in sight, NIL for error.
 
 This function has limitation:
+- This is an expensive function. Basically it is raytracing on CPU. So it is recommended to check distance (or apply other filters such as friend/foe) before calling this function.
 - It works locally, no server communication, not precisely accurate.
 - I don't know how to read object's height, so this function treat everything as Human height.
 
