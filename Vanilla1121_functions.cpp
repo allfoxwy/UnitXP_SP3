@@ -81,16 +81,17 @@ int lua_isstring(void* L, int index) {
 uint64_t UnitGUID(const char* unitID) {
     return p_UnitGUID(unitID);
 }
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, unsigned int queryFlags) {
-    return p_CWorld_Intersect(p1, p2, ignored, intersectPoint, distance, queryFlags);
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance) {
+    // 0x100171 flag would cause game crash in Hateforge Quarry
+    return p_CWorld_Intersect(p1, p2, ignored, intersectPoint, distance, 0x100111);
 }
 
 
 // WoW Visiable Object
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
-// There is an official function at 0x464890 which could doing the same thing.
+// It is doing the same thing as the official function at 0x468380
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
-    uint32_t objects = *reinterpret_cast<uint32_t*>(0x00b41414);
+    uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
     
     while (i != 0 && (i & 1) == 0) {
@@ -100,7 +101,7 @@ uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
             return i;
         }
 
-        i = *reinterpret_cast<uint32_t*>(i + 0x3c);
+        i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
     }
 
     return 0;
@@ -147,10 +148,7 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
     pos0.z += 2.4f;
     pos1.z += 2.4f;
 
-    // This line was the flags I used in first place
-    //bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100111);
-
-    bool result = p_CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100171);
+    bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance);
 
     if (result) {
         if (distance <= 1 && distance >= 0) {

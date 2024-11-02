@@ -80,7 +80,7 @@ int lua_isstring(void* L, int index);
 
 // WoW C function
 uint64_t UnitGUID(const char* unitID);
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, unsigned int queryFlags);
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance);
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
 // Get in-game unit reaction, return -1 for error

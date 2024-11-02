@@ -37,7 +37,7 @@ int shouldHaveNameplate(void* obj) {
     float distance = hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
 
 
-    const float seeThroughWallDistance = 8.0f;
+    const float seeThroughWallDistance = 10.0f;
 
     // We are not adding nameplate to loss sight unit
     if (distance > seeThroughWallDistance && inSight == false) {

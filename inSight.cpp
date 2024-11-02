@@ -9,6 +9,51 @@
 
 using namespace std;
 
+
+// Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
+bool inViewingFrustum(C3Vector posObject, float checkCone) {
+	C3Vector posCamera = vanilla1121_getCameraPosition();
+	C3Vector posPlayer = vanilla1121_getObjectPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
+	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
+	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+	// TODO: I don't have a way to find out what the current system is
+	// To workaround, we test the distance. If they are too far away, we judge that situation as error
+	float testDistance0 = UnitXP_distanceBetween(posCamera, posPlayer);
+	float testDistance1 = UnitXP_distanceBetween(posCamera, posObject);
+	if (testDistance0 > guardAgainstTransportsCoordinates || testDistance1 > guardAgainstTransportsCoordinates) {
+		return false;
+	}
+
+	C3Vector vecObject;
+	vecObject.x = posObject.x - posCamera.x;
+	vecObject.y = posObject.y - posCamera.y;
+	vecObject.z = posObject.z - posCamera.z;
+
+	C3Vector vecPlayer;
+	vecPlayer.x = posPlayer.x - posCamera.x;
+	vecPlayer.y = posPlayer.y - posCamera.y;
+	vecPlayer.z = posPlayer.z - posCamera.z;
+
+	float dotProduct = vecObject.x * vecPlayer.x + vecObject.y * vecPlayer.y + vecObject.z * vecPlayer.z;
+	float lenVecObject = hypot(vecObject.x, vecObject.y, vecObject.z);
+	float lenVecPlayer = hypot(vecPlayer.x, vecPlayer.y, vecPlayer.z);
+
+	// I tested in game and find out that even Vanilla Tweaks change this value, the screen border of objects still follow original FoV somehow
+	// I suspect game has additional transformation before Direct X FoV, or Vanilla Tweaks did on a wrong address...
+	//float fov = vanilla1121_getCameraFoV();
+	const float fov = 1.5708f;
+
+	float angleBetweenPlayerAndObject = acos(dotProduct / (lenVecObject * lenVecPlayer));
+
+	if (angleBetweenPlayerAndObject > fov / checkCone) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
 int camera_inSight(void* obj) {
@@ -28,27 +73,31 @@ int camera_inSight(void* obj) {
 		return -1;
 	}
 
+	if (inViewingFrustum(pos1, 2.0f) == false) {
+		return 0;
+	}
+
 	//TODO: I can't find height of object
 	pos1.z += 2.4f;
 
 	C3Vector intersectPoint = { 0,0,0 };
 	float distance = 1.0f;
 
-	bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance, 0x100171);
+	bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance);
 
 	if (result) {
 		if (distance <= 1 && distance >= 0) {
 			// intersect between points, loss sight
-			return false;
+			return 0;
 		}
 		else {
 			// intersect after points, still in sight
-			return true;
+			return 1;
 		}
 	}
 	else {
 		// no intersect, in sight
-		return true;
+		return 1;
 	}
 }
 

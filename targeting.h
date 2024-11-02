@@ -14,8 +14,6 @@ typedef uint64_t(*MOB_SELECTFUNCTION_WITH_MARK)(uint64_t current, std::vector<mo
 
 // Factor which define targeting range cone in front of camera. Minimum 2 is exactly same as FoV. Default is 2.2. Bigger value narrows the cone.
 extern float targetingRangeCone;
-// Return true if position is in camera viewing frustum
-bool inViewingFrustum(C3Vector posObject);
 
 // Return true when found a target
 bool targetNearestEnemy(float distanceLimit);
