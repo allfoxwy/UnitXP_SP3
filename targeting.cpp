@@ -27,6 +27,14 @@ bool targetNearestEnemy(float distanceLimit) {
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
@@ -84,6 +92,14 @@ bool targetWorldBoss(float distanceLimit) {
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
@@ -277,6 +293,14 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
@@ -349,6 +373,14 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
         int mark = vanilla1121_getTargetMark(currentObjectGUID);
@@ -422,6 +454,14 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
         uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_objIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
