@@ -20,8 +20,8 @@ float UnitXP_distanceBetween(void* obj0, void* obj1) {
 		return -1;
 	}
 
-	C3Vector pos0 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj0));
-	C3Vector pos1 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj1));
+	C3Vector pos0 = vanilla1121_getUnitPosition(reinterpret_cast<uint32_t>(obj0));
+	C3Vector pos1 = vanilla1121_getUnitPosition(reinterpret_cast<uint32_t>(obj1));
 
 	return UnitXP_distanceBetween(pos0, pos1);
 }

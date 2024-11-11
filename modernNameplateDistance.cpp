@@ -33,7 +33,7 @@ int shouldHaveNameplate(void* obj) {
     bool inSight = (camera_inSight(obj) > 0);
     
     C3Vector pos0 = vanilla1121_getCameraPosition();
-    C3Vector pos1 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj));
+    C3Vector pos1 = vanilla1121_getUnitPosition(reinterpret_cast<uint32_t>(obj));
     float distance = hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
 
 

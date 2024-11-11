@@ -95,7 +95,8 @@ int vanilla1121_objIsControlledByPlayer(uint32_t object);
 int vanilla1121_getObject_s_classification(uint32_t object);
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
-C3Vector vanilla1121_getObjectPosition(uint32_t object);
+// This function only work for Unit and Player type objects
+C3Vector vanilla1121_getUnitPosition(uint32_t unit);
 // Return true for "in sight"; false for "not in sight";
 bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1);
 // Return true for in-combat; false for not-in-combat or unchecked

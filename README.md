@@ -55,7 +55,7 @@ Target nearest enemy. It is the one and the only one nearest enemy. No bullshit.
 - Only target enemy in front of player camera.
 - Maximum range is 200 yards.
 - In PvP, it ignores Pets and Totems.
-- When player is in-combat, it only target in-combat enemy.
+- In PvE, when player is in-combat, it only target in-combat enemy.
 
 
 
@@ -83,7 +83,7 @@ With following rules:
 - Only target enemy in front of player camera.
 - In PvP, it ignores Pets and Totems.
 - Maximum range is 200 yards.
-- When player is in-combat, it only target in-combat enemy.
+- In PvE, when player is in-combat, it only target in-combat enemy.
 - When continuously triggered, it guarantees that every marked mob in range would be targeted for once.
 
 
@@ -102,7 +102,7 @@ These functions are designed for ***melee***:
 - Only target enemy in line of sight.
 - Only target enemy in front of player camera.
 - In PvP, it ignores Pets and Totems.
-- When player is in-combat, it only target in-combat enemy.
+- In PvE, when player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
 - Attack range is divided into 3 parts (0-8, 8-25, 25-41). If there is enemy in near range part, further range parts would be ignored.
 - In 0 to 8 yards. It cycles all enemies.
@@ -125,7 +125,7 @@ These functions are designed for ***ranged***:
 - Only target enemy in line of sight.
 - Only target enemy in front of player camera.
 - In PvP, it ignores Pets and Totems.
-- When player is in-combat, it only target in-combat enemy.
+- In PvE, when player is in-combat, it only target in-combat enemy.
 - Max range is 41 yards. Enemy further than that is ignored.
 - When continuously triggered, it guarantees that every mob in range would be targeted for once.
 - When no target, it selects the nearest.
@@ -144,7 +144,7 @@ World boss needs special attention:
 - Only target enemy in line of sight.
 - Only target enemy in front of player camera.
 - Maximum range is 200 yards.
-- When player is in-combat, it only target in-combat enemy.
+- In PvE, when player is in-combat, it only target in-combat enemy.
 - When continuously triggered, it guarantees that every world boss in range would be targeted for once.
 
 
@@ -257,7 +257,7 @@ You could check their existance to tell if certain function is available.
 
 ### Some notes for compiling the code
 
-- I used MS VS 2022. There are elder post says GCC won't work.
+- I used MS VS 2022. Note that GCC has a different calling convention than MS compiler, Blizz used MS compiler so we couldn't use GCC (nor MinGW).
 - I staticly link [MinHook](https://github.com/TsudaKageyu/minhook). So UnitXP_SP3 also have "C/C++ > Code Generation > Runtime Library > Multi-threaded(/MT)"
 - It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > No Enhanced Instructions (/arch:IA32)"
 - x32 has a limited memory space. I think it would be better our program use less memory: "C/C++ > Optimization > Optimization /O1 and Favor small code /Os"

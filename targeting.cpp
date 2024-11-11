@@ -42,13 +42,14 @@ bool targetNearestEnemy(float distanceLimit) {
             && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8
-            && inViewingFrustum(vanilla1121_getObjectPosition(i), targetingRangeCone)
+            && inViewingFrustum(vanilla1121_getUnitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (selfInCombat) {
+
+            if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
@@ -108,13 +109,13 @@ bool targetWorldBoss(float distanceLimit) {
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_classification(i) == CLASSIFICATION_WORLDBOSS
             && vanilla1121_getObject_s_creatureType(i) != 8
-            && inViewingFrustum(vanilla1121_getObjectPosition(i), targetingRangeCone)
+            && inViewingFrustum(vanilla1121_getUnitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (selfInCombat) {
+            if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
@@ -308,13 +309,13 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
             && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8
-            && inViewingFrustum(vanilla1121_getObjectPosition(i), targetingRangeCone)
+            && inViewingFrustum(vanilla1121_getUnitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (selfInCombat) {
+            if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
@@ -390,13 +391,13 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
             && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8
-            && inViewingFrustum(vanilla1121_getObjectPosition(i), targetingRangeCone)
+            && inViewingFrustum(vanilla1121_getUnitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (selfInCombat) {
+            if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;
@@ -469,13 +470,13 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             && vanilla1121_canAttack(i) == 1
             && vanilla1121_objIsDead(i) == 0
             && vanilla1121_getObject_s_creatureType(i) != 8
-            && inViewingFrustum(vanilla1121_getObjectPosition(i), targetingRangeCone)
+            && inViewingFrustum(vanilla1121_getUnitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
             bool targetInCombat = vanilla1121_inCombat(i);
             bool selfInCombat = vanilla1121_inCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (selfInCombat) {
+            if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob;
                     new_mob.GUID = currentObjectGUID;

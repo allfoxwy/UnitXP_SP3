@@ -107,11 +107,12 @@ uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
     return 0;
 }
 
-C3Vector vanilla1121_getObjectPosition(uint32_t object) {
+// This function only work for Unit and Player type objects
+C3Vector vanilla1121_getUnitPosition(uint32_t unit) {
     return {
-        *reinterpret_cast<float*>(object + 0x09B8),
-        *reinterpret_cast<float*>(object + 0x09B8 + 0x4),
-        *reinterpret_cast<float*>(object + 0x09B8 + 0x8),
+        *reinterpret_cast<float*>(unit + 0x09B8),
+        *reinterpret_cast<float*>(unit + 0x09B8 + 0x4),
+        *reinterpret_cast<float*>(unit + 0x09B8 + 0x8),
     };
 }
 
@@ -138,8 +139,8 @@ bool vanilla1121_inCombat(uint32_t object) {
 }
 // return true for "in sight"; false for "not in sight";
 bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
-    C3Vector pos0 = vanilla1121_getObjectPosition(object0);
-    C3Vector pos1 = vanilla1121_getObjectPosition(object1);
+    C3Vector pos0 = vanilla1121_getUnitPosition(object0);
+    C3Vector pos1 = vanilla1121_getUnitPosition(object1);
 
     C3Vector intersectPoint = { 0,0,0 };
     float distance = 1.0f;

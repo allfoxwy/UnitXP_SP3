@@ -13,7 +13,7 @@ using namespace std;
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
 bool inViewingFrustum(C3Vector posObject, float checkCone) {
 	C3Vector posCamera = vanilla1121_getCameraPosition();
-	C3Vector posPlayer = vanilla1121_getObjectPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+	C3Vector posPlayer = vanilla1121_getUnitPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
@@ -62,7 +62,7 @@ int camera_inSight(void* obj) {
 	}
 
 	C3Vector pos0 = vanilla1121_getCameraPosition();
-	C3Vector pos1 = vanilla1121_getObjectPosition(reinterpret_cast<uint32_t>(obj));
+	C3Vector pos1 = vanilla1121_getUnitPosition(reinterpret_cast<uint32_t>(obj));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
