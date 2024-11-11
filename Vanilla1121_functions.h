@@ -56,7 +56,7 @@ enum InGameClassification {
 };
 
 // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 // TODO: I don't have a way to find out what the current system is
 // To workaround, we test the distance. If they are too far away, we judge that situation as error
 extern float guardAgainstTransportsCoordinates;
@@ -84,29 +84,29 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vec
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
 // Get in-game unit reaction, return -1 for error
-int vanilla1121_getReaction(uint32_t targetObject);
+int vanilla1121_unitReaction(uint32_t unit);
 // -1 for error. This function is different from getReaction because enemy player could turn off PvP
-int vanilla1121_canAttack(uint32_t targetObject);
+int vanilla1121_unitCanBeAttacked(uint32_t unit);
 // Return 1 for dead, 0 for alive, -1 for error
-int vanilla1121_objIsDead(uint32_t object);
+int vanilla1121_unitIsDead(uint32_t unit);
 // Return 1 for player controlling, 0 for not, -1 for error
-int vanilla1121_objIsControlledByPlayer(uint32_t object);
+int vanilla1121_unitIsControlledByPlayer(uint32_t unit);
 // Get object's classification: normal, elite, rare elite, world boss, rare. Return -1 for error.
-int vanilla1121_getObject_s_classification(uint32_t object);
+int vanilla1121_unitClassification(uint32_t unit);
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
-// This function only work for Unit and Player type objects
-C3Vector vanilla1121_getUnitPosition(uint32_t unit);
+// This function only work for Unit and Player type objects, or game would crash
+C3Vector vanilla1121_unitPosition(uint32_t unit);
 // Return true for "in sight"; false for "not in sight";
-bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1);
+bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1);
 // Return true for in-combat; false for not-in-combat or unchecked
-bool vanilla1121_inCombat(uint32_t object);
+bool vanilla1121_unitInCombat(uint32_t unit);
 // Get in-game object type
-int vanilla1121_getType(uint32_t targetObject);
-// Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
-uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object);
-// Get object's creature type. I'm not sure when error what would be returned from original function, so current it returns -1 when object is 0 or return original function's result.
-int vanilla1121_getObject_s_creatureType(uint32_t object);
+int vanilla1121_objectType(uint32_t targetObject);
+// Get unit's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
+uint64_t vanilla1121_unitTargetGUID(uint32_t unit);
+// Get unit's creature type. Returns -1 when unit is 0 or return original function's result.
+int vanilla1121_unitCreatureType(uint32_t unit);
 // Get active camera position
 C3Vector vanilla1121_getCameraPosition();
 // Get Field of View value

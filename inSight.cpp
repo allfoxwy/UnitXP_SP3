@@ -13,10 +13,10 @@ using namespace std;
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
 bool inViewingFrustum(C3Vector posObject, float checkCone) {
 	C3Vector posCamera = vanilla1121_getCameraPosition();
-	C3Vector posPlayer = vanilla1121_getUnitPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+	C3Vector posPlayer = vanilla1121_unitPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
-	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
 	float testDistance0 = UnitXP_distanceBetween(posCamera, posPlayer);
@@ -62,10 +62,10 @@ int camera_inSight(void* obj) {
 	}
 
 	C3Vector pos0 = vanilla1121_getCameraPosition();
-	C3Vector pos1 = vanilla1121_getUnitPosition(reinterpret_cast<uint32_t>(obj));
+	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(obj));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
-	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
 	float testDistance = UnitXP_distanceBetween(pos0, pos1);
@@ -109,7 +109,7 @@ int UnitXP_inSight(void* obj0, void* obj1) {
 	}
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
-	// If we pass coordinates from different system into vanilla1121_inLineOfSight(), game crashes
+	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
 	float distance = UnitXP_distanceBetween(obj0, obj1);
@@ -118,10 +118,9 @@ int UnitXP_inSight(void* obj0, void* obj1) {
 	}
 
 
-	if (vanilla1121_inLineOfSight(
+	if (vanilla1121_unitInLineOfSight(
 		reinterpret_cast<uint32_t>(obj0),
-		reinterpret_cast<uint32_t>(obj1)
-	)) {
+		reinterpret_cast<uint32_t>(obj1))) {
 		return 1;
 	}
 	else {

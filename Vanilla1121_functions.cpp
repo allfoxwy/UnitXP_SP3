@@ -87,9 +87,6 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vec
 }
 
 
-// WoW Visiable Object
-// Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
-// It is doing the same thing as the official function at 0x468380
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -107,8 +104,8 @@ uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
     return 0;
 }
 
-// This function only work for Unit and Player type objects
-C3Vector vanilla1121_getUnitPosition(uint32_t unit) {
+
+C3Vector vanilla1121_unitPosition(uint32_t unit) {
     return {
         *reinterpret_cast<float*>(unit + 0x09B8),
         *reinterpret_cast<float*>(unit + 0x09B8 + 0x4),
@@ -116,14 +113,14 @@ C3Vector vanilla1121_getUnitPosition(uint32_t unit) {
     };
 }
 
-// Return true for in-combat; false for not-in-combat or unchecked
-bool vanilla1121_inCombat(uint32_t object) {
-    if (object == 0) {
+
+bool vanilla1121_unitInCombat(uint32_t unit) {
+    if (unit == 0) {
         return false;
     }
 
     // some kind of attribute, including in-combat information
-    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
         return false;
@@ -137,10 +134,10 @@ bool vanilla1121_inCombat(uint32_t object) {
         return false;
     }
 }
-// return true for "in sight"; false for "not in sight";
-bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
-    C3Vector pos0 = vanilla1121_getUnitPosition(object0);
-    C3Vector pos1 = vanilla1121_getUnitPosition(object1);
+
+bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
+    C3Vector pos0 = vanilla1121_unitPosition(unit0);
+    C3Vector pos1 = vanilla1121_unitPosition(unit1);
 
     C3Vector intersectPoint = { 0,0,0 };
     float distance = 1.0f;
@@ -166,13 +163,13 @@ bool vanilla1121_inLineOfSight(uint32_t object0, uint32_t object1) {
         return true;
     }
 }
-// Target the unit with GUID
+
 void vanilla1121_target(uint64_t targetGUID) {
     p_Target(&targetGUID);
     return;
 }
-// Get in-game object type
-int vanilla1121_getType(uint32_t targetObject) {
+
+int vanilla1121_objectType(uint32_t targetObject) {
     if (targetObject == 0) {
         return OBJECT_TYPE_Null;
     }
@@ -180,9 +177,9 @@ int vanilla1121_getType(uint32_t targetObject) {
     return *reinterpret_cast<uint32_t*>(targetObject + 0x14);
 }
 
-// Get in-game unit reaction, return -1 for error
-int vanilla1121_getReaction(uint32_t targetObject) {
-    uint32_t target = targetObject;
+
+int vanilla1121_unitReaction(uint32_t unit) {
+    uint32_t target = unit;
     uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
     if (target == 0 || self == 0) {
         return -1;
@@ -191,9 +188,9 @@ int vanilla1121_getReaction(uint32_t targetObject) {
     return p_UnitReaction(self, target);
 }
 
-// This function is different from getReaction because enemy player could turn off PvP
-int vanilla1121_canAttack(uint32_t targetObject) {
-    uint32_t target = targetObject;
+
+int vanilla1121_unitCanBeAttacked(uint32_t unit) {
+    uint32_t target = unit;
     uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
     if (target == 0 || self == 0) {
         return -1;
@@ -207,14 +204,14 @@ int vanilla1121_canAttack(uint32_t targetObject) {
     }
 }
 
-// Return 1 for dead, 0 for alive, -1 for error
-int vanilla1121_objIsDead(uint32_t object) {
-    if (object == 0) {
+
+int vanilla1121_unitIsDead(uint32_t unit) {
+    if (unit == 0) {
         return -1;
     }
 
     // some kind of attribute, including death information
-    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
         return -1;
@@ -230,15 +227,14 @@ int vanilla1121_objIsDead(uint32_t object) {
     }
 }
 
-// Return 1 for player controlling, 0 for not, -1 for error
-// Somehow companions are not counted as player controlling
-int vanilla1121_objIsControlledByPlayer(uint32_t object) {
-    if (object == 0) {
+
+int vanilla1121_unitIsControlledByPlayer(uint32_t unit) {
+    if (unit == 0) {
         return -1;
     }
 
     // some kind of attribute, including in-combat information
-    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
         return -1;
@@ -253,14 +249,14 @@ int vanilla1121_objIsControlledByPlayer(uint32_t object) {
     }
 }
 
-// Get object's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.
-uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object) {
-    if (object == 0) {
+
+uint64_t vanilla1121_unitTargetGUID(uint32_t unit) {
+    if (unit == 0) {
         return 0;
     }
 
     // some kind of attribute, including in-combat information
-    uint32_t attr = *reinterpret_cast<uint32_t*>(object + 0x110);
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
         return 0;
@@ -270,20 +266,20 @@ uint64_t vanilla1121_getObject_s_targetGUID(uint32_t object) {
     
     return data;
 }
-// Get object's classification: normal, elite, rare elite, world boss, rare. Return -1 for error.
-int vanilla1121_getObject_s_classification(uint32_t object) {
-    if (object == 0) {
+
+int vanilla1121_unitClassification(uint32_t unit) {
+    if (unit == 0) {
         return -1;
    }
 
     // some kind of attribute
-    uint32_t attr0 = *reinterpret_cast<uint32_t*>(object + 0xb30);
+    uint32_t attr0 = *reinterpret_cast<uint32_t*>(unit + 0xb30);
     if (attr0 == 0 || (attr0 & 1) != 0) {
         // we don't have attribute info.
         return -1;
     }
 
-    uint32_t attr1 = *reinterpret_cast<uint32_t*>(object + 0x110);
+    uint32_t attr1 = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr1 == 0 || (attr1 & 1) != 0) {
         // we don't have attribute info.
         return -1;
@@ -299,12 +295,12 @@ int vanilla1121_getObject_s_classification(uint32_t object) {
         return -1;
     }
 }
-// Get object's creature type
-int vanilla1121_getObject_s_creatureType(uint32_t object) {
-    if (object == 0) {
+
+int vanilla1121_unitCreatureType(uint32_t unit) {
+    if (unit == 0) {
         return -1;
     }
-    return p_getCreatureType(object);
+    return p_getCreatureType(unit);
 }
 C3Vector vanilla1121_getCameraPosition() {
     uint32_t cptr = p_getCamera();
