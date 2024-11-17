@@ -109,8 +109,7 @@ bool targetWorldBoss(float distanceLimit) {
             && vanilla1121_unitIsDead(i) == 0
             && vanilla1121_unitClassification(i) == CLASSIFICATION_WORLDBOSS
             && vanilla1121_unitCreatureType(i) != 8
-            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
-            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
+            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
 
             bool targetInCombat = vanilla1121_unitInCombat(i);
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
@@ -391,8 +390,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
             && vanilla1121_unitCreatureType(i) != 8
-            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
-            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
+            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
 
             bool targetInCombat = vanilla1121_unitInCombat(i);
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
