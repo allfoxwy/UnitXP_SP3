@@ -6,6 +6,7 @@
 #include "modernNameplateDistance.h"
 #include "inSight.h"
 #include "distanceBetween.h"
+#include "timer.h"
 
 
 // The technique of hooking __thiscall function is from: https://tresp4sser.wordpress.com/2012/10/06/how-to-hook-thiscall-functions/
@@ -25,7 +26,7 @@ extern bool modernNameplateDistance = true;
 
 
 // -1 for error, 0 for no, 1 for yes
-int shouldHaveNameplate(void* unit) {
+static int shouldHaveNameplate(void* unit) {
     if (!unit) {
         return -1;
     }
@@ -69,6 +70,24 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
             nameplate_item = next_item;
         }
     }
+
+    // Timer should not block FPS under nearly 60
+    if (gLockTrigger.try_lock_for(std::chrono::milliseconds(1000 / 60))) {
+        void* L = GetContext();
+        while (gTimerTriggeredFunctions.size() > 0) {
+            auto i = gTimerTriggeredFunctions.begin();
+
+            lua_pushstring(L, (i->second).data());
+            lua_gettable(L, LUA_GLOBALSINDEX);
+            lua_pushnumber(L, i->first);
+            lua_pcall(L, 1, 0, 0);
+
+            gTimerTriggeredFunctions.erase(i);
+        }
+
+        gLockTrigger.unlock();
+    }
+
     return p_original_renderWorld(self);
 }
 

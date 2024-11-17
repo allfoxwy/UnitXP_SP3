@@ -13,6 +13,7 @@
 #include "modernNameplateDistance.h"
 #include "targeting.h"
 #include "notifyOS.h"
+#include "timer.h"
 
 using namespace std;
 
@@ -116,6 +117,17 @@ int __fastcall detoured_UnitXP(void* L) {
             }
             lua_pushboolean(L, modernNameplateDistance);
             return 1;
+        }
+        else if (cmd == "timer" && lua_gettop(L) > 2) {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {
+                lua_pushnumber(L, armTimer(static_cast<uint64_t>(lua_tonumber(L, 3)), static_cast<uint64_t>(lua_tonumber(L, 4)), lua_tostring(L, 5)));
+                return 1;
+            }
+            if (subcmd == "disarm" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                disarmTimer(static_cast<CppTime::timer_id>(lua_tonumber(L, 3)));
+                return 0;
+            }
         }
         else if (cmd == "notify") {
             if (lua_gettop(L) >= 2) {

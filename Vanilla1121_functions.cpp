@@ -18,6 +18,8 @@ LUA_PUSHNUMBER p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
 LUA_TONUMBER p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
 LUA_ISNUMBER p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
 LUA_ISNUMBER p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
+LUA_GETTABLE p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
+LUA_PCALL p_lua_pcall = reinterpret_cast<LUA_PCALL>(0x6F41A0);
 
 
 // WoW C function
@@ -74,6 +76,12 @@ int lua_isnumber(void* L, int index) {
 }
 int lua_isstring(void* L, int index) {
     return p_lua_isstring(L, index);
+}
+void lua_gettable(void* L, int index) {
+    return p_lua_gettable(L, index);
+}
+int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
+    return p_lua_pcall(L, nArgs, nResults, errFunction);
 }
 
 

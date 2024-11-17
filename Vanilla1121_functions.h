@@ -17,6 +17,8 @@ typedef void(__fastcall* LUA_PUSHNUMBER)(void* L, double n);
 typedef double(__fastcall* LUA_TONUMBER)(void* L, int index);
 typedef int(__fastcall* LUA_ISNUMBER)(void* L, int index);
 typedef const char* (__fastcall* LUA_TOSTRING)(void* L, int index);
+typedef void(__fastcall* LUA_GETTABLE)(void* L, int index);
+typedef int(__fastcall* LUA_PCALL)(void* L, int nArgs, int nResults, int errFunction);
 typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
 typedef struct {
     float y;
@@ -76,6 +78,9 @@ void lua_pushboolean(void* L, int boolean_value);
 void lua_pushnumber(void* L, double n);
 int lua_isnumber(void* L, int index);
 int lua_isstring(void* L, int index);
+void lua_gettable(void* L, int index);
+int lua_pcall(void* L, int nArgs, int nResults, int errFunction);
+#define LUA_GLOBALSINDEX (-10001)
 
 
 // WoW C function

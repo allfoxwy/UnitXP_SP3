@@ -168,12 +168,12 @@ For example: "We target raid mark first. However when no mark, we cycle in magic
 
 - `/script local _=(UnitXP("target","nextMarkedEnemyInCycle") or UnitXP("target","nextEnemyInCycle"));`
 
-This code works because targeting functions return TRUE or FALSE indicating if they got a target. LUA logic operators support short-cut evaluation, that is, they evaluate their second operand only when necessary. 
+This code works because targeting functions return TRUE or FALSE indicating if they got a target. Lua logic operators support short-cut evaluation, that is, they evaluate their second operand only when necessary. 
 
 
 
 
-### Hide nameplate behind wall (for V key)
+### Proper nameplates
 
 Vanilla client only check distance for nameplates. This makes mobs behind wall/door also show up their nameplates.
 
@@ -181,7 +181,7 @@ This mod changes Vanilla behaviour to Classic style:
 - Only those mobs in player's sight would receive a nameplate
 - If you move your camera really close, you could see through a wall for a short distance
 
-LUA nameplate addon would work out-of-box, no need to change anything.
+Lua nameplate addon would work out-of-box, no need to change anything.
 
 By default this feature is enabled. You could toggle its switch:
 
@@ -225,7 +225,7 @@ Return a number, or NIL for error.
 
 Flash would stop when game back to foreground.
 
-To make this function link with certain game events like whisper/trade/invitation etc, we need [the LUA Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
+To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
 
 
 
@@ -236,14 +236,34 @@ To make this function link with certain game events like whisper/trade/invitatio
 
 Only work when game is in background.
 
-To make this function link with certain game events like whisper/trade/invitation etc, we need [the LUA Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
+To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
+
+
+### Timer
+
+- `/script local timerID = UnitXP("timer", "arm", 1000, 3000, "callbackFunctionNameString");`
+- `/script UnitXP("timer", "disarm", timerID);`
+
+Vanilla way doing periodic work is to use GetTime() in an OnUpdate() function and check if the time is come. This is basically doing [busy waiting](https://en.wikipedia.org/wiki/Busy_waiting). And because of the game is single-threaded, these timer pulling call would cost FPS. Mostly these function call are useless. For example on a 60 Hz display, we need triggering an event every second, then there would be 59 useless function call before every 1 useful call. Blizz later added C_Timer facility in patch 6.0.2 to solve this problem.
+
+This mod adding a new timer facility to the game. These timers are running in a serperated thread so that their pulling call would not block game thread. When a timer triggers, it would call the corresponding Lua callback in game thread. The callback is passed with a single parameter which is `timer ID`. It is safe to `arm` or to `disarm` timers in callbacks.
+
+The `arm` method in above example has 2 numberic parameter: The first `1000` means the timer would goes off when 1000ms after the `arm` method. The second `3000` means the timer would repeatly run every 3000ms after first trigger. If we pass a `0` to second numberic parameter, the timer would only goes off for once then disarm itself.
+
+Beware that the timer is running in a seperated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
+
+Timer accuracy is decided by FPS: There would be at most 1 callback for each timer per frame. And because of operating system's scheduling decision it is possible that there could be no timer callback during a frame.
+
+
+
+
 
 
 ### Tell if UnitXP_SP3 functions available
 
 These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip them.
 
-When mod loads, it adds some globals to LUA:
+When mod loads, it adds some globals to Lua:
 - Vanilla1121mod.UnitXP_SP3
 - Vanilla1121mod.UnitXP_SP3_inSight
 - Vanilla1121mod.UnitXP_SP3_distanceBetween
