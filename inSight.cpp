@@ -25,12 +25,12 @@ bool inViewingFrustum(C3Vector posObject, float checkCone) {
 		return false;
 	}
 
-	C3Vector vecObject;
+	C3Vector vecObject = {};
 	vecObject.x = posObject.x - posCamera.x;
 	vecObject.y = posObject.y - posCamera.y;
 	vecObject.z = posObject.z - posCamera.z;
 
-	C3Vector vecPlayer;
+	C3Vector vecPlayer = {};
 	vecPlayer.x = posPlayer.x - posCamera.x;
 	vecPlayer.y = posPlayer.y - posCamera.y;
 	vecPlayer.z = posPlayer.z - posCamera.z;
@@ -56,13 +56,13 @@ bool inViewingFrustum(C3Vector posObject, float checkCone) {
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
-int camera_inSight(void* obj) {
-	if (!obj) {
+int camera_inSight(void* unit) {
+	if (!unit) {
 		return -1;
 	}
 
 	C3Vector pos0 = vanilla1121_getCameraPosition();
-	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(obj));
+	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
@@ -103,8 +103,8 @@ int camera_inSight(void* obj) {
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
-int UnitXP_inSight(void* obj0, void* obj1) {
-	if (!obj0 || !obj1) {
+int UnitXP_inSight(void* unit0, void* unit1) {
+	if (!unit0 || !unit1) {
 		return -1;
 	}
 
@@ -112,15 +112,15 @@ int UnitXP_inSight(void* obj0, void* obj1) {
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
-	float distance = UnitXP_distanceBetween(obj0, obj1);
+	float distance = UnitXP_distanceBetween(unit0, unit1);
 	if (distance > guardAgainstTransportsCoordinates) {
 		return -1;
 	}
 
 
 	if (vanilla1121_unitInLineOfSight(
-		reinterpret_cast<uint32_t>(obj0),
-		reinterpret_cast<uint32_t>(obj1))) {
+		reinterpret_cast<uint32_t>(unit0),
+		reinterpret_cast<uint32_t>(unit1))) {
 		return 1;
 	}
 	else {
@@ -132,8 +132,7 @@ int UnitXP_inSight(void* obj0, void* obj1) {
 int UnitXP_inSight(uint64_t guid0, uint64_t guid1) {
 	return UnitXP_inSight(
 		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),
-		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1))
-	);
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1)));
 }
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error

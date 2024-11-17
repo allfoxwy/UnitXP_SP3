@@ -25,15 +25,15 @@ extern bool modernNameplateDistance = true;
 
 
 // -1 for error, 0 for no, 1 for yes
-int shouldHaveNameplate(void* obj) {
-    if (!obj) {
+int shouldHaveNameplate(void* unit) {
+    if (!unit) {
         return -1;
     }
 
-    bool inSight = (camera_inSight(obj) > 0);
+    bool inSight = (camera_inSight(unit) > 0);
     
     C3Vector pos0 = vanilla1121_getCameraPosition();
-    C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(obj));
+    C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit));
     float distance = hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
 
 
