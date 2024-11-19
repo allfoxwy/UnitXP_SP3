@@ -269,7 +269,7 @@ However, even simply link AddOn's OnUpdate() function with a Timer instead of UI
 
 ### Tell if UnitXP_SP3 functions available
 
-Currently you could check `if UnitXP("inSight", "player", "player")` is true or not to know if client has UnitXP_SP3 installed.
+Currently you could check `if pcall(UnitXP, "inSight", "player", "player")` is true to know if client has UnitXP_SP3 installed.
 
 
 
