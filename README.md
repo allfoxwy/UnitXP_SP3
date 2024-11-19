@@ -1,5 +1,5 @@
 # UnitXP Service Pack 3
-WoW Vanilla 1.12.1 mod giving Classic style nameplate hiding behaviour and better TAB key functions and background notifications.
+WoW Vanilla 1.12.1 mod giving proper Classic-style nameplate hiding behavior, TAB key targeting functions, background notifications, and more.
 
 I don't take ANY responsibility if this mod is originate in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
 
@@ -177,7 +177,7 @@ This code works because targeting functions return TRUE or FALSE indicating if t
 
 Vanilla client only check distance for nameplates. This makes mobs behind wall/door also show up their nameplates.
 
-This mod changes Vanilla behaviour to Classic style:
+This mod changes Vanilla behavior to Classic style:
 - Only those mobs in player's sight would receive a nameplate
 - If you move your camera really close, you could see through a wall for a short distance
 
@@ -252,26 +252,24 @@ The `arm` method in above example has 2 numberic parameter: The first `1000` mea
 
 Beware that the timer is running in a seperated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
 
-Timer accuracy is decided by FPS: There would be at most 1 callback for each timer per frame. And because of operating system's scheduling decision it is possible that there could be no timer callback during a frame.
+Timer accuracy is decided by FPS: There would be at most 1 callback for each timer per frame. It is possible that there could be no timer callback during a frame.
 
 
+
+### OnUpdate() and Timer
+
+As Timer requires Lua AddOns forming a different structure to make full use of it. This usually is not a trivial work.
+
+However, even simply link AddOn's OnUpdate() function with a Timer instead of UIFrame:OnUpdate should provide benefits:
+- AddOn might not need a FPS speed repeating OnUpdate(). We could use a slower Timer for it.
+- UnitXP_SP3 would line triggered Timers in a FIFO queue. For each callback in queue, UnitXP_SP3 would check time before execution. If callbacks already used up 1/80 second during a single rendering frame, those remaining callbacks in queue would be delayed to next frame. This behavior should smooth some graphical stutter, as repeating Lua code now have a timely threshold to follow.
 
 
 
 
 ### Tell if UnitXP_SP3 functions available
 
-These only work with included [vanilla-dll-sideloader](https://github.com/allfoxwy/vanilla-dll-sideloader), VanillaFixes loader skip them.
-
-When mod loads, it adds some globals to Lua:
-- Vanilla1121mod.UnitXP_SP3
-- Vanilla1121mod.UnitXP_SP3_inSight
-- Vanilla1121mod.UnitXP_SP3_distanceBetween
-- Vanilla1121mod.UnitXP_SP3_modernNameplateDistance
-- Vanilla1121mod.UnitXP_SP3_target
-- Vanilla1121mod.UnitXP_SP3_notify
-
-You could check their existance to tell if certain function is available.
+Currently you could check `if UnitXP("inSight", "player", "player")` is true or not to know if client has UnitXP_SP3 installed.
 
 
 

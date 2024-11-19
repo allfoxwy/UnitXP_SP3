@@ -86,13 +86,14 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
                 break;
             }
             
-            auto i = gTimerTriggeredFunctions.front();
+            auto& i = gTimerTriggeredFunctions.front();
 
             lua_pushstring(L, i.second.data());
             lua_gettable(L, LUA_GLOBALSINDEX);
             lua_pushnumber(L, i.first);
             lua_pcall(L, 1, 0, 0);
 
+            gAlreadyTriggeredTimers.erase(i.first);
             gTimerTriggeredFunctions.pop_front();
         }
 
