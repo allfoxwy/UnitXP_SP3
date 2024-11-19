@@ -5,6 +5,8 @@
 #include <sstream>
 #include <limits>
 
+#include "profileapi.h"
+
 #include "MinHook.h"
 #include "utf8_to_utf16.h"
 #include "Vanilla1121_functions.h"
@@ -20,6 +22,10 @@ using namespace std;
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
 LUA_CFUNCTION p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
+
+// The frequency of the performance counter is fixed at system boot and is consistent across all processors on modern system, so we could cache it
+extern LARGE_INTEGER performanceCounterFrequency;
+LARGE_INTEGER performanceCounterFrequency{};
 
 
 int __fastcall detoured_UnitXP(void* L) {
@@ -163,6 +169,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     case DLL_PROCESS_ATTACH:
 
         DisableThreadLibraryCalls(hModule);
+
+        QueryPerformanceFrequency(&performanceCounterFrequency);
 
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);

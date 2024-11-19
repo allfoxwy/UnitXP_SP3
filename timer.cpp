@@ -11,7 +11,7 @@ using namespace CppTime;
 
 CppTime::Timer gTimer{};
 
-extern unordered_map<timer_id, string> gTimerTriggeredFunctions{};
+extern std::list< std::pair<CppTime::timer_id, std::string> > gTimerTriggeredFunctions{};
 extern timed_mutex gLockTrigger{};
 static unordered_map<timer_id, string> gFunctionMap{};
 static timed_mutex gLockTimer{};
@@ -20,7 +20,7 @@ static timed_mutex gLockTimer{};
 
 static void timerCallback(timer_id id) {
 	gLockTrigger.lock();
-	gTimerTriggeredFunctions.insert(make_pair(id, gFunctionMap.at(id)));
+	gTimerTriggeredFunctions.push_back(make_pair(id, gFunctionMap.at(id)));
 	gLockTrigger.unlock();
 }
 
