@@ -239,7 +239,7 @@ Only work when game is in background.
 To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
 
 
-### Timer
+### Timer (Not Yet Released , still in development)
 
 - `/script local timerID = UnitXP("timer", "arm", 1000, 3000, "callbackFunctionNameString");`
 - `/script UnitXP("timer", "disarm", timerID);`
