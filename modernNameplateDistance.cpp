@@ -71,10 +71,10 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
         }
     }
 
-    // We would spend at most 1/60 second on timer processing per frame. Work might postpone to later frames
+    // We would spend at most 1/80 second on timer processing per frame. Work might postpone to later frames
     LARGE_INTEGER start_time{}, now_time{}, duration{};
     QueryPerformanceCounter(&start_time);
-    if (gLockTrigger.try_lock_for(std::chrono::milliseconds(1000 / 60))) {
+    if (gLockTrigger.try_lock_for(std::chrono::milliseconds(1000 / 80))) {
         void* L = GetContext();
         while (gTimerTriggeredFunctions.size() > 0) {
             extern LARGE_INTEGER performanceCounterFrequency;
@@ -82,7 +82,7 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
             duration.QuadPart = now_time.QuadPart - start_time.QuadPart;
             duration.QuadPart *= 1000; // We expecting millisecond(ms)
             duration.QuadPart /= performanceCounterFrequency.QuadPart;
-            if (duration.QuadPart > 1000 / 60) {
+            if (duration.QuadPart > 1000 / 80) {
                 break;
             }
             
