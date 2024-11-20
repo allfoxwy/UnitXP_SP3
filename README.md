@@ -175,9 +175,9 @@ This code works because targeting functions return TRUE or FALSE indicating if t
 
 ### Proper nameplates
 
-Vanilla client only check distance for nameplates. This makes mobs behind wall/door also show up their nameplates.
+Vanilla client only check distance for nameplates. Mobs behind wall/door would also show up their nameplates.
 
-This mod changes Vanilla behavior to Classic style:
+This mod changes Vanilla behavior to Classic-style:
 - Only those mobs in player's sight would receive a nameplate
 - If you move your camera really close, you could see through a wall for a short distance
 
@@ -246,13 +246,21 @@ To make this function link with certain game events like whisper/trade/invitatio
 
 Vanilla way doing periodic work is to use GetTime() in an OnUpdate() function and check if the time is come. This is basically doing [busy waiting](https://en.wikipedia.org/wiki/Busy_waiting). And because of the game is single-threaded, these timer pulling call would cost FPS. Mostly these function call are useless. For example on a 60 Hz display, we need triggering an event every second, then there would be 59 useless function call before every 1 useful call. Blizz later added C_Timer facility in patch 6.0.2 to solve this problem.
 
-This mod adding a new timer facility to the game. These timers are running in a serperated thread so that their pulling call would not block game thread. When a timer triggers, it would call the corresponding Lua callback in game thread. The callback is passed with a single parameter which is `timer ID`. It is safe to `arm` or to `disarm` timers in callbacks.
+This mod adding a new timer facility to the game. These timers are running in a separated thread so that their pulling call would not block game thread. When a timer triggers, it would call the corresponding Lua callback in game thread. The callback is passed with a single parameter which is `timer ID`. It is safe to `arm` or to `disarm` timers in callbacks.
 
-The `arm` method in above example has 2 numberic parameter: The first `1000` means the timer would goes off when 1000ms after the `arm` method. The second `3000` means the timer would repeatly run every 3000ms after first trigger. If we pass a `0` to second numberic parameter, the timer would only goes off for once then disarm itself.
+The `arm` method in above example has 2 numberic parameter: The first `1000` means the timer would goes off when 1000ms after the `arm` method. The second `3000` means the timer would repeat every 3000ms after first trigger. If we pass a `0` to second numberic parameter, the timer would only goes off for once then disarm itself.
 
-Beware that the timer is running in a seperated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
+`timerID` is a 32-bits unsigned integer which should be able to safely store in Lua's number type. As by default Lua should use double-precision float for numbers and it would have 52-bits in its fraction part.
 
-Timer accuracy is decided by FPS: There would be at most 1 callback for each timer per frame. It is possible that there could be no timer callback during a frame.
+When `disarm` a timer, its `timerID` would not be reused. This should be fine as 32-bits is a lot of IDs.
+
+Note that `disarm` a timer means it would not be triggered in future, however if it is already triggered and its Lua callback is already [in queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer), this callback is still going to be fired later. This behavior should be fine as Lua callback is encapsulated by a pcall() ignoring error.
+
+Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
+
+Timer accuracy is influenced by FPS. There would be at most 1 callback for each timer per frame. It is possible that there could be no timer callback during a frame. The underlying C++ code using MS VC++ std::condition_variable.wait_until(). I'm not sure how accurate is it. 
+
+
 
 
 

@@ -1,7 +1,8 @@
 #ifndef CPPTIME_H_
 #define CPPTIME_H_
 
-/**
+/** This file is modified from https://github.com/eglimi/cpptime
+ * 
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Michael Egli
@@ -78,11 +79,9 @@
  * In addition, a std::multiset is used that holds all time points when
  * timeouts expire.
  *
- * Using a vector to store timeout events has some implications. It is very
- * fast to remove an event, because the timer_id is the vector's index. On the
- * other hand, this makes it also more complicated to manage the timer_ids. The
- * current solution is to keep track of ids that are freed in order to re-use
- * them. A stack is used for this.
+ * The timer_id is uint32_t and have no rollover check. They never be reused.
+ * This should be safe as Lua by default use double-precision float which could
+ * hold up to 52bits in its fraction part.
  *
  * Examples
  * --------
@@ -105,13 +104,13 @@
 #include <set>
 #include <stack>
 #include <thread>
-#include <vector>
+#include <unordered_map>
 
 namespace CppTime
 {
 
 // Public types
-using timer_id = std::size_t;
+using timer_id = uint32_t;
 using handler_t = std::function<void(timer_id)>;
 using clock = std::chrono::high_resolution_clock;
 using timestamp = std::chrono::time_point<clock>;
@@ -128,19 +127,6 @@ struct Event {
 	duration period;
 	handler_t handler;
 	bool valid;
-	Event()
-	    : id(0), start(duration::zero()), period(duration::zero()), handler(nullptr), valid(false)
-	{
-	}
-	template <typename Func>
-	Event(timer_id id, timestamp start, duration period, Func &&handler)
-	    : id(id), start(start), period(period), handler(std::forward<Func>(handler)), valid(true)
-	{
-	}
-	Event(Event &&r) = default;
-	Event &operator=(Event &&ev) = default;
-	Event(const Event &r) = delete;
-	Event &operator=(const Event &r) = delete;
 };
 
 // A time event structure that holds the next timeout and a reference to its
@@ -169,19 +155,20 @@ class Timer
 	// Use to terminate the timer thread.
 	bool done = false;
 
-	// The vector that holds all active events.
-	std::vector<detail::Event> events;
+	// Holds all active events.
+	std::unordered_map<timer_id, detail::Event> events;
 	// Sorted queue that has the next timeout at its top.
 	std::multiset<detail::Time_event> time_events;
 
-	// A list of ids to be re-used. If possible, ids are used from this pool.
-	std::stack<CppTime::timer_id> free_ids;
+	// Next usable timer id
+	uint32_t next_id = 0;
 
 public:
-	Timer() : m{}, cond{}, worker{}, events{}, time_events{}, free_ids{}
+	Timer() : m{}, cond{}, worker{}, events{}, time_events{}
 	{
 		scoped_m lock(m);
 		done = false;
+		next_id = 0;
 		worker = std::thread([this] { run(); });
 	}
 
@@ -194,9 +181,6 @@ public:
 		worker.join();
 		events.clear();
 		time_events.clear();
-		while(!free_ids.empty()) {
-			free_ids.pop();
-		}
 	}
 
 	/**
@@ -207,23 +191,14 @@ public:
 	 * \param period The periodicity at which the timer fires. Only used for periodic timers.
 	 */
 	timer_id add(
-	    const timestamp &when, handler_t &&handler, const duration &period = duration::zero())
+		const timestamp& when, handler_t&& handler, const duration& period = duration::zero())
 	{
 		scoped_m lock(m);
-		timer_id id = 0;
-		// Add a new event. Prefer an existing and free id. If none is available, add
-		// a new one.
-		if(free_ids.empty()) {
-			id = events.size();
-			detail::Event e(id, when, period, std::move(handler));
-			events.push_back(std::move(e));
-		} else {
-			id = free_ids.top();
-			free_ids.pop();
-			detail::Event e(id, when, period, std::move(handler));
-			events[id] = std::move(e);
-		}
-		time_events.insert(detail::Time_event{when, id});
+		timer_id id = next_id;
+		next_id++; // I think we won't use up uint32_t
+		detail::Event e{ id, when, period, std::move(handler), true };
+		events.insert({ id,e });
+		time_events.insert(detail::Time_event{ when, id });
 		lock.unlock();
 		cond.notify_all();
 		return id;
@@ -256,17 +231,17 @@ public:
 	bool remove(timer_id id)
 	{
 		scoped_m lock(m);
-		if(events.size() == 0 || events.size() <= id) {
+		
+		if (events.erase(id) == 0) {
 			return false;
 		}
-		events[id].valid = false;
-		events[id].handler = nullptr;
+
 		auto it = std::find_if(time_events.begin(), time_events.end(),
 		    [&](const detail::Time_event &te) { return te.ref == id; });
 		if(it != time_events.end()) {
-			free_ids.push(it->ref);
 			time_events.erase(it);
 		}
+
 		lock.unlock();
 		cond.notify_all();
 		return true;
@@ -289,21 +264,23 @@ private:
 					// Remove time event
 					time_events.erase(time_events.begin());
 
+					// Patch from https://github.com/eglimi/cpptime/pull/9
+					// VS would metion this line doing a copy and suggest using a reference. But we should keep the copy as that is the intention of the patch.
+					auto tempHandler = events.at(te.ref).handler;
+
 					// Invoke the handler
 					lock.unlock();
-					events[te.ref].handler(te.ref);
+					tempHandler(te.ref);
 					lock.lock();
 
-					if(events[te.ref].valid && events[te.ref].period.count() > 0) {
+					if(events.find(te.ref) != events.end() && events.at(te.ref).period.count() > 0) {
 						// The event is valid and a periodic timer.
-						te.next += events[te.ref].period;
+						te.next += events.at(te.ref).period;
 						time_events.insert(te);
 					} else {
 						// The event is either no longer valid because it was removed in the
 						// callback, or it is a one-shot timer.
-						events[te.ref].valid = false;
-						events[te.ref].handler = nullptr;
-						free_ids.push(te.ref);
+						events.erase(te.ref);
 					}
 				} else {
 					cond.wait_until(lock, te.next);

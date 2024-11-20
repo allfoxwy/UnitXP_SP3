@@ -17,34 +17,33 @@ extern std::deque< std::pair<CppTime::timer_id, std::string> > gTimerTriggeredFu
 extern std::unordered_set<CppTime::timer_id> gAlreadyTriggeredTimers{};
 extern timed_mutex gLockTrigger{};
 static unordered_map<timer_id, string> gFunctionMap{};
-static timed_mutex gLockTimer{};
+static mutex gLockTimer{};
 
 static void timerCallback(timer_id id) {
-	gLockTrigger.lock();
+	lock_guard lg{ gLockTrigger };
 
 	// We only accept 1 callback per timer per frame, discard the rest.
-	if (gAlreadyTriggeredTimers.find(id) == gAlreadyTriggeredTimers.end()) {
-		gTimerTriggeredFunctions.push_back(make_pair(id, gFunctionMap.at(id)));
-		gAlreadyTriggeredTimers.insert(id);
+	if (gAlreadyTriggeredTimers.insert(id).second == true) {
+		gTimerTriggeredFunctions.push_back({ id, gFunctionMap.at(id) });
 	}
-
-	gLockTrigger.unlock();
 }
 
 timer_id armTimer(uint64_t when, uint64_t interval, string handlerName) {
-	gLockTimer.lock();
+	lock_guard lg{ gLockTimer };
+
 	timer_id newTimer = gTimer.add(when * 1000, timerCallback, interval * 1000); // We expecting time in millseconds(ms)
-	gFunctionMap.insert(make_pair(newTimer, handlerName));
-	gLockTimer.unlock();
+	gFunctionMap.insert({ newTimer, handlerName });
 
 	return newTimer;
 }
 
 void disarmTimer(int timerID) {
-	gLockTimer.lock();
-	gFunctionMap.erase(timerID);
+	lock_guard lg{ gLockTimer };
+
 	gTimer.remove(timerID);
-	gLockTimer.unlock();
+	gFunctionMap.erase(timerID);
+
+	// As we could not check gTimerTriggeredFunctions because of deadlock. Those "already triggered, but not yet on screen" timers would still goes off later
 }
 
 
