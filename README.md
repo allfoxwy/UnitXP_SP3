@@ -269,7 +269,7 @@ Timer accuracy is influenced by FPS. There would be at most 1 callback for each 
 As Timer requires Lua AddOns forming a different structure to make full use of it. This usually is not a trivial work.
 
 However, even simply link AddOn's OnUpdate() function with a Timer instead of UIFrame:OnUpdate should provide benefits:
-- AddOn might not need a FPS speed repeating OnUpdate(). We could use a slower Timer for it.
+- AddOn might not need a FPS speed OnUpdate(). We could use a slower Timer for it.
 - UnitXP_SP3 would line triggered Timers in a FIFO queue. For each callback in queue, UnitXP_SP3 would check time before execution. If callbacks already used up 1/80 second during a single rendering frame, those remaining callbacks in queue would be delayed to next frame. This behavior should smooth some graphical stutter, as repeating Lua code now have a loose time threshold to follow.
 
 
