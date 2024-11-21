@@ -258,7 +258,7 @@ Note that `disarm` a timer means it would not be triggered in future, however if
 
 This behavior would not crash the game or cause Lua error as callback is encapsulated by a pcall() ignoring error.
 
-However, consider that we are making an AddOn for Warrior Revenge, we might set `local revengeAvailable = true` then `arm` a 5-seconds Timer for later `revengeAvailable = false`. During this 5 seconds, we used Revenge and got another Block. At this point we should `disarm` the former Timer and `arm` a new one. The problem araise: it is possiable the old Timer already put its callback in [in execution queue](#onupdate-and-timer) before we `disarm` it. The solution is that `timer ID` would not be reused so we could double check the `timer ID` to make sure we are acting on the new Timer.
+However, consider that we are making an AddOn for Warrior Revenge, we might set `local revengeAvailable = true` then `arm` a 5-seconds Timer for later `revengeAvailable = false`. During this 5 seconds, we used Revenge and got another Block. At this point we should `disarm` the former Timer and `arm` a new one. The problem araise: it is possible the old Timer already put its callback in [in execution queue](#onupdate-and-timer) before we `disarm` it. The solution is that `timer ID` would not be reused so we could double check the `timer ID` to make sure we are acting on the new Timer.
 
 Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
 
