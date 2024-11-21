@@ -254,11 +254,15 @@ The `arm` method in above example has 2 numberic parameter: The first `1000` mea
 
 When `disarm` a timer, its `timerID` would not be reused. This should be fine as 32-bits is a lot of IDs.
 
-Note that `disarm` a timer means it would not be triggered in future, however if it is already triggered and its Lua callback is already [in execution queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer), this callback is still going to be fired later. This behavior should be fine as Lua callback is encapsulated by a pcall() ignoring error.
+Note that `disarm` a timer means it would not be triggered in future, however if it is already triggered and its Lua callback is already [in execution queue](#onupdate-and-timer), this callback is still going to be fired later.
+
+This behavior would not crash the game or cause Lua error as callback is encapsulated by a pcall() ignoring error.
+
+However, consider that we are making an AddOn for Warrior Revenge, we might set `local revengeAvailable = true` then `arm` a 5-seconds Timer for later `revengeAvailable = false`. During this 5 seconds, we used Revenge and got another Block. At this point we should `disarm` the former Timer and `arm` a new one. The problem araise: it is possiable the old Timer already put its callback in [in execution queue](#onupdate-and-timer) before we `disarm` it. The solution is that `timer ID` would not be reused so we could double check the `timer ID` to make sure we are acting on the new Timer.
 
 Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
 
-Timer accuracy is influenced by FPS and operating system's scheduling. There would be at most 1 callback for each timer [in execution queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer). And it is possible that there could be no timer callback during a rendering frame. AddOns should NOT expect precise timing. This situation is same for GetTime() either: when FPS is low, AddOn might miss GetTime() when the timing is come.
+Timer accuracy is influenced by FPS and operating system's scheduling. There would be at most 1 callback for each timer [in execution queue](#onupdate-and-timer). And it is possible that there could be no timer callback during a rendering frame. AddOns should NOT expect precise timing. This situation is same for GetTime() either: when FPS is low, AddOn might miss GetTime() when the timing is come.
 
 
 
