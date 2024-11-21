@@ -254,11 +254,11 @@ The `arm` method in above example has 2 numberic parameter: The first `1000` mea
 
 When `disarm` a timer, its `timerID` would not be reused. This should be fine as 32-bits is a lot of IDs.
 
-Note that `disarm` a timer means it would not be triggered in future, however if it is already triggered and its Lua callback is already [in queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer), this callback is still going to be fired later. This behavior should be fine as Lua callback is encapsulated by a pcall() ignoring error.
+Note that `disarm` a timer means it would not be triggered in future, however if it is already triggered and its Lua callback is already [in execution queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer), this callback is still going to be fired later. This behavior should be fine as Lua callback is encapsulated by a pcall() ignoring error.
 
 Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
 
-Timer accuracy is influenced by FPS. There would be at most 1 callback for each timer per frame. It is possible that there could be no timer callback during a frame. The underlying C++ code using MS VC++ std::condition_variable.wait_until(). I'm not sure how accurate is it. 
+Timer accuracy is influenced by FPS and operating system's scheduling. There would be at most 1 callback for each timer [in execution queue](https://github.com/allfoxwy/UnitXP_SP3#onupdate-and-timer). And it is possible that there could be no timer callback during a rendering frame. AddOns should NOT expect precise timing. This situation is same for GetTime() either: when FPS is low, AddOn might miss GetTime() when the timing is come.
 
 
 
@@ -268,9 +268,9 @@ Timer accuracy is influenced by FPS. There would be at most 1 callback for each 
 
 As Timer requires Lua AddOns forming a different structure to make full use of it. This usually is not a trivial work.
 
-However, even simply link AddOn's OnUpdate() function with a Timer instead of UIFrame:OnUpdate should provide benefits:
-- AddOn might not need a FPS speed OnUpdate(). We could use a slower Timer for it.
-- UnitXP_SP3 would line triggered Timers in a FIFO queue. For each callback in queue, UnitXP_SP3 would check time before execution. If callbacks already used up 1/80 second during a single rendering frame, those remaining callbacks in queue would be delayed to next frame. This behavior should smooth some graphical stutter, as repeating Lua code now have a loose time threshold to follow.
+However, even simply link AddOn's OnUpdate() function with a Timer instead of game's UIFrame:OnUpdate should provide benefits:
+- AddOn might not need a FPS-speed OnUpdate(). We could use a slower Timer for it.
+- UnitXP_SP3 would line up triggered callbacks in a FIFO queue. For each callback in the queue, UnitXP_SP3 would check time before execution. If callbacks already used up 1/80 second during a single rendering frame, those remaining callbacks in queue would be delayed to next frame. This behavior should smooth some graphical stutter, as repeating Lua code now have a loose time threshold to follow.
 
 
 

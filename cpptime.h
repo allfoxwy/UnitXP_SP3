@@ -5,7 +5,8 @@
  * 
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Michael Egli
+ * Origin from Copyright (c) 2015 Michael Egli
+ * Modified for UnitXP_SP3 by allfox and the thankful community
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,70 +30,6 @@
  * \copyright Michael Egli
  * \date      11-Jul-2015
  *
- * \file cpptime.h
- *
- * C++11 timer component
- * =====================
- *
- * A portable, header-only C++11 timer component.
- *
- * Overview
- * --------
- *
- * This component can be used to manage a set of timeouts. It is implemented in
- * pure C++11. It is therefore very portable given a compliant compiler.
- *
- * A timeout can be added with one of the `add()` functions, and removed with
- * the `remove()` function. A timeout can be set to be either one-shot or
- * periodic. If it is one-shot, the callback is invoked once and the timeout
- * event is then automatically removed. If the timeout is periodic, it is
- * always renewed and never automatically removed.
- *
- * When a timeout is removed or when a one-shot timeout expires, the handler
- * will be deleted to clean-up any resources.
- *
- * Removing a timeout is possible from within the callback. In this case, you
- * must be careful not to access any captured variables, if any, after calling
- * `remove()`, because they are no longer valid.
- *
- * Timeout Units
- * -------------
- *
- * The preferred functions for adding timeouts are those that take a
- * `std::chrono::...` argument. However, for convenience, there is also an API
- * that takes a uint64_t. When using this API, all values are expected to be
- * given in microseconds (us).
- *
- * For periodic timeouts, a separate timeout can be specified for the initial
- * (first) timeout, and the periodicity after that.
- *
- * To avoid drifts, times are added by simply adding the period to the initially
- * calculated (or provided) time. Also, we use `wait until` type of API to wait
- * for a timeout instead of a `wait for` API.
- *
- * Data Structure
- * --------------
- *
- * Internally, a std::vector is used to store timeout events. The timer_id
- * returned from the `add` functions are used as index to this vector.
- *
- * In addition, a std::multiset is used that holds all time points when
- * timeouts expire.
- *
- * The timer_id is uint32_t and have no rollover check. They never be reused.
- * This should be safe as Lua by default use double-precision float which could
- * hold up to 52bits in its fraction part.
- *
- * Examples
- * --------
- *
- * More examples can be found in the `tests` folder.
- *
- * ~~~
- * CppTime::Timer t;
- * t.add(std::chrono::seconds(1), [](CppTime::timer_id){ std::cout << "got it!"; });
- * std::this_thread::sleep_for(std::chrono::seconds(2));
- * ~~~
  */
 
 // Includes
@@ -102,19 +39,25 @@
 #include <functional>
 #include <mutex>
 #include <set>
+#include <unordered_set>
+#include <deque>
 #include <stack>
 #include <thread>
 #include <unordered_map>
+#include <string>
+
+#include "Vanilla1121_functions.h"
 
 namespace CppTime
 {
 
 // Public types
 using timer_id = uint32_t;
-using handler_t = std::function<void(timer_id)>;
+using handler_t = std::string; // Lua function name in string
 using clock = std::chrono::high_resolution_clock;
 using timestamp = std::chrono::time_point<clock>;
 using duration = std::chrono::microseconds;
+const auto timeslice = duration(1000 * 1000 / 80); // Expected execution timeslice (it's a loose expection)
 
 // Private definitions. Do not rely on this namespace.
 namespace detail
@@ -151,6 +94,7 @@ class Timer
 	std::mutex m;
 	std::condition_variable cond;
 	std::thread worker;
+	std::timed_mutex trigger;
 
 	// Use to terminate the timer thread.
 	bool done = false;
@@ -159,12 +103,16 @@ class Timer
 	std::unordered_map<timer_id, detail::Event> events;
 	// Sorted queue that has the next timeout at its top.
 	std::multiset<detail::Time_event> time_events;
+	// FIFO queue for execution
+	std::deque< std::pair<CppTime::timer_id, std::string> > execution_fifo;
+	// A hash list for quick check if a timer is already in queue
+	std::unordered_set<CppTime::timer_id> already_in_fifo;
 
 	// Next usable timer id
 	uint32_t next_id = 0;
 
 public:
-	Timer() : m{}, cond{}, worker{}, events{}, time_events{}
+	Timer() : m{}, cond{}, worker{}, events{}, time_events{}, execution_fifo{}, already_in_fifo{}
 	{
 		scoped_m lock(m);
 		done = false;
@@ -174,13 +122,20 @@ public:
 
 	~Timer()
 	{
-		scoped_m lock(m);
-		done = true;
-		lock.unlock();
-		cond.notify_all();
-		worker.join();
-		events.clear();
-		time_events.clear();
+		{
+			scoped_m lock(m);
+			done = true;
+			lock.unlock();
+			cond.notify_all();
+			worker.join();
+			events.clear();
+			time_events.clear();
+		}
+		{
+			std::lock_guard lg{ trigger };
+			execution_fifo.clear();
+			already_in_fifo.clear();
+		}
 	}
 
 	/**
@@ -190,13 +145,12 @@ public:
 	 * \param handler The callable that is invoked when the timer fires.
 	 * \param period The periodicity at which the timer fires. Only used for periodic timers.
 	 */
-	timer_id add(
-		const timestamp& when, handler_t&& handler, const duration& period = duration::zero())
+	timer_id add(const timestamp when, const handler_t handler, const duration period = duration::zero())
 	{
 		scoped_m lock(m);
 		timer_id id = next_id;
 		next_id++; // I think we won't use up uint32_t
-		detail::Event e{ id, when, period, std::move(handler), true };
+		detail::Event e{ id, when, period, handler, true };
 		events.insert({ id,e });
 		time_events.insert(detail::Time_event{ when, id });
 		lock.unlock();
@@ -209,20 +163,19 @@ public:
 	 * `time_point` for the first timeout.
 	 */
 	template <class Rep, class Period>
-	inline timer_id add(const std::chrono::duration<Rep, Period> &when, handler_t &&handler,
-	    const duration &period = duration::zero())
+	inline timer_id add(const std::chrono::duration<Rep, Period> when, handler_t handler, const duration period = duration::zero())
 	{
-		return add(clock::now() + std::chrono::duration_cast<std::chrono::microseconds>(when),
-		    std::move(handler), period);
+		return add(clock::now() + std::chrono::duration_cast<std::chrono::microseconds>(when), handler, period);
 	}
 
 	/**
 	 * Overloaded `add` function that uses a uint64_t instead of a `time_point` for
 	 * the first timeout and the period.
 	 */
-	inline timer_id add(const uint64_t when, handler_t &&handler, const uint64_t period = 0)
+	inline timer_id add(const uint64_t when, handler_t handler, const uint64_t period = 0)
 	{
-		return add(duration(when), std::move(handler), duration(period));
+		// We expecting time in milliseconds
+		return add(duration(when * 1000), handler, duration(period * 1000));
 	}
 
 	/**
@@ -247,6 +200,31 @@ public:
 		return true;
 	}
 
+	/*
+	* Execute the callback queue.
+	*/
+	void execute()
+	{
+		auto start = clock::now();
+		if (trigger.try_lock_for(timeslice))
+		{
+			void* L = GetContext();
+			while (clock::now() - start <= timeslice && execution_fifo.size() > 0)
+			{
+				auto& i = execution_fifo.front();
+
+				lua_pushstring(L, i.second.data());
+				lua_gettable(L, LUA_GLOBALSINDEX);
+				lua_pushnumber(L, i.first);
+				lua_pcall(L, 1, 0, 0);
+
+				execution_fifo.pop_front();
+				already_in_fifo.erase(i.first);
+			}
+			trigger.unlock();
+		}
+	}
+
 private:
 	void run()
 	{
@@ -263,16 +241,26 @@ private:
 
 					// Remove time event
 					time_events.erase(time_events.begin());
+					
+					// Copy the handler before releasing the lock
+					handler_t handler{ events.at(te.ref).handler };
 
-					// Patch from https://github.com/eglimi/cpptime/pull/9
-					// VS would metion this line doing a copy and suggest using a reference. But we should keep the copy as that is the intention of the patch.
-					auto tempHandler = events.at(te.ref).handler;
-
-					// Invoke the handler
 					lock.unlock();
-					tempHandler(te.ref);
+					{
+						std::lock_guard lg{ trigger };
+
+						// Add to execution queue
+						// We only accept 1 callback per timer, discard the rest.
+						if (already_in_fifo.insert(te.ref).second == true) {
+							execution_fifo.push_back({ te.ref, handler });
+						}
+					}
 					lock.lock();
 
+					/*It may look like the following check if te.ref still in events is unnecessary,
+					* HOWEVER remember that we are working in threads, betweeen trigger releasing and lock.lock(),
+					* it is possible that the operating system schedule an execute() and Lua callback remove the timer.
+					*/
 					if(events.find(te.ref) != events.end() && events.at(te.ref).period.count() > 0) {
 						// The event is valid and a periodic timer.
 						te.next += events.at(te.ref).period;
