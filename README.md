@@ -239,7 +239,18 @@ Only work when game is in background.
 To make this function link with certain game events like whisper/trade/invitation etc, we need [the Lua Addon](https://github.com/allfoxwy/UnitXP_SP3_Addon).
 
 
-### Timer (Not Yet Released , still in development)
+### Adjust camera height
+
+- `/script local height = UnitXP("cameraHeight", "set", 1.0);`
+- `/script local height = UnitXP("cameraHeight", "get");`
+
+Unlike Classic, Vanilla game's camera is pointing right into the center of player. However player could be taller if they pick Tauren or Druid bear, player herself/himself might block the camera.
+
+This mod providing a way to put camera higher by adding a small height. Range from 0 to 6 in float number.
+
+
+
+### Timer
 
 - `/script local timerID = UnitXP("timer", "arm", 1000, 3000, "callbackFunctionNameString");`
 - `/script UnitXP("timer", "disarm", timerID);`

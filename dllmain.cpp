@@ -5,8 +5,6 @@
 #include <sstream>
 #include <limits>
 
-#include "profileapi.h"
-
 #include "MinHook.h"
 #include "utf8_to_utf16.h"
 #include "Vanilla1121_functions.h"
@@ -16,17 +14,13 @@
 #include "targeting.h"
 #include "notifyOS.h"
 #include "timer.h"
+#include "cameraHeight.h"
 
 using namespace std;
 
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
 LUA_CFUNCTION p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
-
-// The frequency of the performance counter is fixed at system boot and is consistent across all processors on modern system, so we could cache it
-extern LARGE_INTEGER performanceCounterFrequency;
-LARGE_INTEGER performanceCounterFrequency{};
-
 
 int __fastcall detoured_UnitXP(void* L) {
     if (lua_gettop(L) >= 2) {
@@ -135,6 +129,17 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
+        else if (cmd == "cameraHeight") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "set" && lua_isnumber(L, 3)) {
+                float userValue = static_cast<float>(lua_tonumber(L, 3));
+                if (userValue >= 0 && userValue <= 6) {
+                    cameraAddHeight = userValue;
+                }
+            }
+            lua_pushnumber(L, cameraAddHeight);
+            return 1;
+        }
         else if (cmd == "notify") {
             if (lua_gettop(L) >= 2) {
                 string subcmd{ lua_tostring(L, 2) };
@@ -170,8 +175,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
         DisableThreadLibraryCalls(hModule);
 
-        QueryPerformanceFrequency(&performanceCounterFrequency);
-
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -188,6 +191,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for renderWorld function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_cameraHeight_0x5126B0, &detoured_cameraHeight_0x5126B0, reinterpret_cast<LPVOID*>(&p_original_cameraHeight_0x5126B0)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for cameraHeight function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -199,7 +206,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-
+        if (MH_RemoveHook(p_cameraHeight_0x5126B0) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for cameraHeight function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_RemoveHook(p_renderWorld) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for renderWorld function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
