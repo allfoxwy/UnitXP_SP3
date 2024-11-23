@@ -300,7 +300,7 @@ Currently you could check `if pcall(UnitXP, "inSight", "player", "player")` is t
 
 - I used MS VS 2022. Note that GCC has a different calling convention than MS compiler, Blizz used MS compiler so we couldn't use GCC (nor MinGW).
 - I staticly link [MinHook](https://github.com/TsudaKageyu/minhook). So UnitXP_SP3 also have "C/C++ > Code Generation > Runtime Library > Multi-threaded(/MT)"
-- It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > No Enhanced Instructions (/arch:IA32)"
+- It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > Streaming SIMD Extensions (X86) (/arch:SSE)"
 - x32 has a limited memory space. I think it would be better our program use less memory: "C/C++ > Optimization > Optimization /O1 and Favor small code /Os"
 - I used C++ 17 features so "C/C++ > Language > C++ Language Standard > ISO C++ 17 Standard(/std:c++17)"
 - Linked with [libMinHook.x86.lib](https://github.com/TsudaKageyu/minhook) and Winmm.lib
