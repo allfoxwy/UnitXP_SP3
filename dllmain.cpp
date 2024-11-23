@@ -133,9 +133,13 @@ int __fastcall detoured_UnitXP(void* L) {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "set" && lua_isnumber(L, 3)) {
                 float userValue = static_cast<float>(lua_tonumber(L, 3));
-                if (userValue >= 0 && userValue <= 6) {
-                    cameraAddHeight = userValue;
+                if (userValue < 0.0f) {
+                    userValue = 0.0f;
                 }
+                if (userValue > 6.0f) {
+                    userValue = 6.0f;
+                }
+                cameraAddHeight = userValue;
             }
             lua_pushnumber(L, cameraAddHeight);
             return 1;
