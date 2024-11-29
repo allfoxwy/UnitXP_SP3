@@ -254,6 +254,7 @@ This mod providing a way to put camera higher by adding a small height. Range fr
 
 - `/script local timerID = UnitXP("timer", "arm", 1000, 3000, "callbackFunctionNameString");`
 - `/script UnitXP("timer", "disarm", timerID);`
+- `/script local runningTimersCount = UnitXP("timer", "size");`
 
 Vanilla way doing periodic work is to use GetTime() in an OnUpdate() function and check if the time is come. This is basically doing [busy waiting](https://en.wikipedia.org/wiki/Busy_waiting). And because of the game is single-threaded, these timer pulling call would cost FPS. Mostly these function call are useless. For example on a 60 Hz display, we need triggering an event every second, then there would be 59 useless function call before every 1 useful call. Blizz later added C_Timer facility in patch 6.0.2 to solve this problem.
 
@@ -271,7 +272,9 @@ This behavior would not crash the game or cause Lua error as callback is encapsu
 
 However, consider that we are making an AddOn for Warrior Revenge, we might set `local revengeAvailable = true` then `arm` a 5-seconds Timer for later `revengeAvailable = false`. During this 5 seconds, we used Revenge and got another Block. At this point we should `disarm` the former Timer and `arm` a new one. The problem araise: it is possible the old Timer already put its callback in [in execution queue](#onupdate-and-timer) before we `disarm` it. The solution is that `timer ID` would not be reused so we could double check the `timer ID` in callback function to make sure we are acting on the new Timer.
 
-Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` or `PLAYER_LEAVING_WORLD` event and call `disarm` method to shut down cleanly.
+Beware that the timer is running in a separated thread so game's `/reload` would NOT disarm a repeating timer. AddOns need to take care of their own repeating timer in `PLAYER_LOGOUT` event and call `disarm` method to shut down cleanly.
+
+`size` method would return how many timers are running.
 
 Timer accuracy is influenced by FPS and operating system's scheduling. There would be at most 1 callback for each timer [in execution queue](#onupdate-and-timer). And it is possible that there could be no timer callback during a rendering frame. AddOns should NOT expect precise timing. This situation is same for GetTime() either: when FPS is low, AddOn might miss GetTime() when the timing is come.
 
@@ -290,19 +293,21 @@ However, even simply link AddOn's OnUpdate() function with a Timer instead of ga
 
 
 
-### Tell if UnitXP_SP3 functions available
+### Tell if UnitXP_SP3 functions are available
 
-Currently you could check `if pcall(UnitXP, "inSight", "player", "player")` is true to know if client has UnitXP_SP3 installed.
+- `/script local UnitXP_SP3 = pcall(UnitXP, "nop", "nop");`
+
+The `nop` method always return true. So we could use a pcall to check if UnitXP SP3 is installed.
 
 
 
 ### Some notes for compiling the code
 
 - I used MS VS 2022. Note that GCC has a different calling convention than MS compiler, Blizz used MS compiler so we couldn't use GCC (nor MinGW).
-- I staticly link [MinHook](https://github.com/TsudaKageyu/minhook). So UnitXP_SP3 also have "C/C++ > Code Generation > Runtime Library > Multi-threaded(/MT)"
-- It's an elder game so we don't use advanced instructions from modern CPU: "C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > Streaming SIMD Extensions (X86) (/arch:SSE)"
-- x32 has a limited memory space. I think it would be better our program use less memory: "C/C++ > Optimization > Optimization /O1 and Favor small code /Os"
-- I used C++ 17 features so "C/C++ > Language > C++ Language Standard > ISO C++ 17 Standard(/std:c++17)"
+- I staticly link [MinHook](https://github.com/TsudaKageyu/minhook). So UnitXP_SP3 also have `C/C++ > Code Generation > Runtime Library > Multi-threaded(/MT)`
+- It's an elder game so we don't use advanced instructions from modern CPU: `C/C++ > Code Generation > Runtime Library > Enable Enhanced Instruction Set > Streaming SIMD Extensions (X86) (/arch:SSE)`
+- `C/C++ > Optimization > Optimization /O1` but `Favor fast code /Ot` and `No Enable Intrinsic Functions`: UnitXP_SP3 is hooking into __thiscall functions. There is a report about this would break _ReturnAddress() intrinsic. So we are using `/O1 + /Ot` which equals `/O2 - /Oi`.
+- I used C++ 17 features so `C/C++ > Language > C++ Language Standard > ISO C++ 17 Standard(/std:c++17)`
 - Linked with [libMinHook.x86.lib](https://github.com/TsudaKageyu/minhook) and Winmm.lib
 
 
