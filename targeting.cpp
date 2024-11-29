@@ -36,18 +36,17 @@ bool targetNearestEnemy(float distanceLimit) {
         }
 
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && distance <= distanceLimit
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
-            && vanilla1121_unitCreatureType(i) != 8
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
 
-            bool targetInCombat = vanilla1121_unitInCombat(i);
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
-
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
@@ -102,16 +101,16 @@ bool targetWorldBoss(float distanceLimit) {
         }
 
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && distance <= distanceLimit
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
             && vanilla1121_unitClassification(i) == CLASSIFICATION_WORLDBOSS
-            && vanilla1121_unitCreatureType(i) != 8
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
-
-            bool targetInCombat = vanilla1121_unitInCombat(i);
+            
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -302,16 +301,16 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
         }
 
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && distance <= 41.0f
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
-            && vanilla1121_unitCreatureType(i) != 8
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
-
-            bool targetInCombat = vanilla1121_unitInCombat(i);
+            
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -382,17 +381,16 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
         }
 
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
-
+        bool targetInCombat = vanilla1121_unitInCombat(i);
         int mark = vanilla1121_getTargetMark(currentObjectGUID);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && mark > 0
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
-            && vanilla1121_unitCreatureType(i) != 8
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
-
-            bool targetInCombat = vanilla1121_unitInCombat(i);
+            
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -462,16 +460,16 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
         }
 
         float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
             && distance <= 41.0f
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
-            && vanilla1121_unitCreatureType(i) != 8
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
-
-            bool targetInCombat = vanilla1121_unitInCombat(i);
+            
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {

@@ -48,7 +48,7 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-        else if (cmd == "target" && lua_gettop(L) >= 2) {
+        else if (cmd == "target") {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "nearestEnemy") {
                 lua_pushboolean(L, targetNearestEnemy(FLT_MAX));
@@ -106,19 +106,17 @@ int __fastcall detoured_UnitXP(void* L) {
             return 1;
         }
         else if (cmd == "modernNameplateDistance") {
-            if (lua_gettop(L) >= 2) {
-                string subcmd{ lua_tostring(L, 2) };
-                if (subcmd == "enable") {
-                    modernNameplateDistance = true;
-                }
-                else if (subcmd == "disable") {
-                    modernNameplateDistance = false;
-                }
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                modernNameplateDistance = true;
+            }
+            else if (subcmd == "disable") {
+                modernNameplateDistance = false;
             }
             lua_pushboolean(L, modernNameplateDistance);
             return 1;
         }
-        else if (cmd == "timer" && lua_gettop(L) > 2) {
+        else if (cmd == "timer") {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {
                 lua_pushnumber(L, gTimer.add(static_cast<uint64_t>(lua_tonumber(L, 3)), lua_tostring(L, 5), static_cast<uint64_t>(lua_tonumber(L, 4))));
@@ -128,6 +126,12 @@ int __fastcall detoured_UnitXP(void* L) {
                 lua_pushboolean(L, gTimer.remove(static_cast<CppTime::timer_id>(lua_tonumber(L, 3))));
                 return 1;
             }
+            if (subcmd == "size") {
+                lua_pushnumber(L, gTimer.size());
+                return 1;
+            }
+            lua_pushnil(L);
+            return 1;
         }
         else if (cmd == "cameraHeight") {
             string subcmd{ lua_tostring(L, 2) };
@@ -145,21 +149,24 @@ int __fastcall detoured_UnitXP(void* L) {
             return 1;
         }
         else if (cmd == "notify") {
-            if (lua_gettop(L) >= 2) {
-                string subcmd{ lua_tostring(L, 2) };
-                if (subcmd == "taskbarIcon") {
-                    flashTaskbarIcon();
-                    lua_pushboolean(L, true);
-                    return 1;
-                }
-
-                if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
-                    string soundName{ lua_tostring(L, 3) };
-                    lua_pushboolean(L, playSystemSound(soundName));
-                    return 1;
-                }
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "taskbarIcon") {
+                flashTaskbarIcon();
+                lua_pushboolean(L, true);
+                return 1;
             }
-            lua_pushboolean(L, false);
+
+            if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
+                string soundName{ lua_tostring(L, 3) };
+                lua_pushboolean(L, playSystemSound(soundName));
+                return 1;
+            }
+
+            lua_pushnil(L);
+            return 1;
+        }
+        else if (cmd == "nop") {
+            lua_pushboolean(L, true);
             return 1;
         }
     }

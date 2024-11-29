@@ -194,10 +194,20 @@ public:
 		if(it != time_events.end()) {
 			time_events.erase(it);
 		}
-
+		
 		lock.unlock();
 		cond.notify_all();
 		return true;
+	}
+
+	/**
+	* Tell how many timers are running.
+	*/
+	size_t size()
+	{
+		scoped_m lock(m);
+
+		return events.size();
 	}
 
 	/*
