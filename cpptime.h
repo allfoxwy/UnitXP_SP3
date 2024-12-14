@@ -45,6 +45,7 @@
 #include <thread>
 #include <unordered_map>
 #include <string>
+#include <atomic>
 
 #include "Vanilla1121_functions.h"
 
@@ -57,7 +58,7 @@ using handler_t = std::string; // Lua function name in string
 using clock = std::chrono::high_resolution_clock;
 using timestamp = std::chrono::time_point<clock>;
 using duration = std::chrono::microseconds;
-const auto timeslice = duration(1000 * 1000 / 80); // Expected execution timeslice (it's a loose expection)
+const auto timeslice = duration(1000 * 1000 / 80); // Expected execution timeslice (it's a loose expectation)
 
 // Private definitions. Do not rely on this namespace.
 namespace detail
@@ -97,7 +98,7 @@ class Timer
 	std::timed_mutex trigger;
 
 	// Use to terminate the timer thread.
-	bool done = false;
+	std::atomic_bool done = false;
 
 	// Holds all active events.
 	std::unordered_map<timer_id, detail::Event> events;
@@ -109,33 +110,29 @@ class Timer
 	std::unordered_set<CppTime::timer_id> already_in_fifo;
 
 	// Next usable timer id
-	uint32_t next_id = 0;
+	std::atomic_uint32_t next_id = 0;
+
+	// According to https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices
+	// Creating thread in global object's constructor is risky.
+	// So here is a flag to delay it to a later stage.
+	std::atomic_bool threadIsRunning = false;
 
 public:
 	Timer() : m{}, cond{}, worker{}, events{}, time_events{}, execution_fifo{}, already_in_fifo{}
 	{
-		scoped_m lock(m);
 		done = false;
+		threadIsRunning = false;
 		next_id = 0;
-		worker = std::thread([this] { run(); });
 	}
 
 	~Timer()
 	{
-		{
-			scoped_m lock(m);
-			done = true;
-			lock.unlock();
-			cond.notify_all();
-			worker.join();
-			events.clear();
-			time_events.clear();
-		}
-		{
-			std::lock_guard lg{ trigger };
-			execution_fifo.clear();
-			already_in_fifo.clear();
-		}
+		done = true;
+		cond.notify_all();
+
+		// We are not cleaning queues
+		// Because I don't know how WoW quit its main thread, is it gracefully quit or a kill?
+		// Anyway, these queues won't be executed anymore as game is no longer rendering, so leaving them for OS cleaning should be fine.
 	}
 
 	/**
@@ -148,8 +145,17 @@ public:
 	timer_id add(const timestamp when, const handler_t handler, const duration period = duration::zero())
 	{
 		scoped_m lock(m);
-		timer_id id = next_id;
-		next_id++; // I think we won't use up uint32_t
+
+		if (threadIsRunning == false) {
+			worker = std::thread([this] { run(); });
+			worker.detach();
+
+			// It may look like this line is redundant.
+			// However the newly created thread need to wait OS for scheduling, so tuning flag in it would be delayed.
+			threadIsRunning = true;
+		}
+
+		timer_id id = next_id++; // I think we won't use up uint32_t
 		detail::Event e{ id, when, period, handler, true };
 		events.insert({ id,e });
 		time_events.insert(detail::Time_event{ when, id });
@@ -200,7 +206,7 @@ public:
 		return true;
 	}
 
-	/**
+	/*
 	* Tell how many timers are running.
 	*/
 	size_t size()
@@ -215,21 +221,32 @@ public:
 	*/
 	void execute()
 	{
+		if (done || threadIsRunning == false)
+		{
+			return;
+		}
+
 		auto start = clock::now();
 		if (trigger.try_lock_for(timeslice))
 		{
-			void* L = GetContext();
-			while (clock::now() - start <= timeslice && execution_fifo.size() > 0)
+			if (done || threadIsRunning == false)
 			{
-				auto& i = execution_fifo.front();
+				trigger.unlock();
+				return;
+			}
+
+			void* L = GetContext();
+			while (!done && threadIsRunning && clock::now() - start <= timeslice && execution_fifo.size() > 0)
+			{
+				auto i = execution_fifo.front();
 
 				lua_pushstring(L, i.second.data());
 				lua_gettable(L, LUA_GLOBALSINDEX);
 				lua_pushnumber(L, i.first);
 				lua_pcall(L, 1, 0, 0);
 
-				execution_fifo.pop_front();
 				already_in_fifo.erase(i.first);
+				execution_fifo.pop_front();
 			}
 			trigger.unlock();
 		}
@@ -238,6 +255,8 @@ public:
 private:
 	void run()
 	{
+		threadIsRunning = true;
+
 		scoped_m lock(m);
 
 		while(!done) {
@@ -285,6 +304,8 @@ private:
 				}
 			}
 		}
+
+		threadIsRunning = false;
 	}
 };
 
