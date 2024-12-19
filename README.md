@@ -181,13 +181,28 @@ This mod changes Vanilla behavior to Classic-style:
 - Only those mobs in player's sight would receive a nameplate
 - If you move your camera really close, you could see through a wall for a short distance
 
-Lua nameplate addon would work out-of-box, no need to change anything.
+Third party Lua nameplate AddOns would work out-of-box, no need to change anything.
 
 By default this feature is enabled. You could toggle its switch:
 
 - `/script UnitXP("modernNameplateDistance", "enable");`
 
 - `/script UnitXP("modernNameplateDistance", "disable");`
+
+
+
+### Only show nameplate on target
+
+When fighting multiple enemies, nameplates sometimes get in the way because there could be too many of them.
+
+This mod adds a mode in which only target receives nameplate.
+
+It requires `Proper nameplates` feature to be also enabled.
+
+- `/script UnitXP("onlyTargetHasNameplate", "enable");`
+
+- `/script UnitXP("onlyTargetHasNameplate", "disable");`
+
 
 
 

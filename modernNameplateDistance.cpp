@@ -23,12 +23,27 @@ extern RENDERWORLD p_original_renderWorld = NULL;
 extern REMOVENAMEPLATE p_removeNameplate = reinterpret_cast<REMOVENAMEPLATE>(0x608A10);
 
 extern bool modernNameplateDistance = true;
+extern bool onlyTargetHasNameplate = false;
 
 
 // -1 for error, 0 for no, 1 for yes
 static int shouldHaveNameplate(void* unit) {
     if (!unit) {
         return -1;
+    }
+
+    if (onlyTargetHasNameplate) {
+        uint64_t targetGUID = UnitGUID("target");
+        if (targetGUID > 0) {
+            uint64_t nameplateUnitGUID = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit) + 0x30);
+
+            if (nameplateUnitGUID == targetGUID) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
     }
 
     bool inSight = (camera_inSight(unit) > 0);
