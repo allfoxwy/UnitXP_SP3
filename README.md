@@ -260,7 +260,7 @@ Vanilla way doing periodic work is to use GetTime() in an OnUpdate() function an
 
 This mod adding a new timer facility to the game. These timers are running in a separated thread so that their pulling call would not block game thread. When a timer triggers, it would call the corresponding Lua callback in game thread. The callback is passed with a single parameter which is `timer ID`. It is safe to `arm` or to `disarm` timers in callbacks.
 
-The `arm` method in above example has 2 numberic parameter: The first `1000` means the timer would goes off when 1000ms after the `arm` method. The second `3000` means the timer would repeat every 3000ms after first trigger. If we pass a `0` to second numberic parameter, the timer would only goes off for once then disarm itself.
+The `arm` method in above example has 2 numberic parameter: The first `1000` means the timer would goes off when 1000ms after the `arm` method. The second `3000` means the timer would repeat every 3000ms after first trigger. If we pass a `0` to second numberic parameter, the timer would only goes off for once then disarm itself. `timerID` starts from 1. The `arm` method return 0 for error.
 
 `timerID` is a 32-bits unsigned integer which should be able to safely store in Lua's number type. As by default Lua should use double-precision float for numbers and it would have 52-bits in its fraction part.
 

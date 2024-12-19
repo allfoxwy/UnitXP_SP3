@@ -48,6 +48,7 @@
 #include <atomic>
 
 #include "Vanilla1121_functions.h"
+#include "utf8_to_utf16.h"
 
 namespace CppTime
 {
@@ -110,7 +111,7 @@ class Timer
 	std::unordered_set<CppTime::timer_id> already_in_fifo;
 
 	// Next usable timer id
-	std::atomic_uint32_t next_id = 0;
+	std::atomic_uint32_t next_id = 1;
 
 	// According to https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices
 	// Creating thread in global object's constructor is risky.
@@ -122,20 +123,33 @@ public:
 	{
 		done = false;
 		threadIsRunning = false;
-		next_id = 0;
+		next_id = 1;
 	}
 
-	~Timer()
-	{
-		done = true;
-		cond.notify_all();
+	/*
+	* End of Timer thread
+	* We need this function because we can't join thread in destructor, because of DLL loader lock
+	* We would call it in gameQuit detoured function
+	*/
+	void end() {
+		if (!done && threadIsRunning) {
+			done = true;
+			cond.notify_all();
+			if (worker.joinable()) {
+				worker.join();
+			}
+			else {
+				MessageBoxW(NULL, utf8_to_utf16(u8"Somehow, Timer thread is not joinable.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+			}
+			
 
-		// We are not cleaning queues
-		// Because I don't know how WoW quit its main thread, is it gracefully quit or a kill?
-		// Anyway, these queues won't be executed anymore as game is no longer rendering, so leaving them for OS cleaning should be fine.
+			// We are not cleaning queues
+			// Because I don't know how WoW quit its main thread, is it gracefully quit or a kill?
+			// Anyway, these queues won't be executed anymore as game is no longer rendering, so leaving them for OS cleaning should be fine.
+		}
 	}
 
-	/**
+	/*
 	 * Add a new timer.
 	 *
 	 * \param when The time at which the handler is invoked.
@@ -144,11 +158,14 @@ public:
 	 */
 	timer_id add(const timestamp when, const handler_t handler, const duration period = duration::zero())
 	{
+		if (done) {
+			return 0;
+		}
+
 		scoped_m lock(m);
 
 		if (threadIsRunning == false) {
 			worker = std::thread([this] { run(); });
-			worker.detach();
 
 			// It may look like this line is redundant.
 			// However the newly created thread need to wait OS for scheduling, so tuning flag in it would be delayed.
@@ -189,6 +206,10 @@ public:
 	 */
 	bool remove(timer_id id)
 	{
+		if (done) {
+			return false;
+		}
+
 		scoped_m lock(m);
 		
 		if (events.erase(id) == 0) {
@@ -211,6 +232,10 @@ public:
 	*/
 	size_t size()
 	{
+		if (done) {
+			return 0;
+		}
+
 		scoped_m lock(m);
 
 		return events.size();
@@ -238,6 +263,7 @@ public:
 			void* L = GetContext();
 			while (!done && threadIsRunning && clock::now() - start <= timeslice && execution_fifo.size() > 0)
 			{
+				// We do a copy here, because execution_fifo would pop_front() soon. Reference is error-prone.
 				auto i = execution_fifo.front();
 
 				lua_pushstring(L, i.second.data());
