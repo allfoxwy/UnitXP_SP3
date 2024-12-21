@@ -28,6 +28,7 @@ extern bool prioritizeMarkedNameplate = false;
 
 static bool nameplatesHasMarkOnThem = false;
 
+
 // -1 for error, 0 for no, 1 for yes
 static int shouldHaveNameplate(void* unit) {
     if (!unit) {
@@ -36,16 +37,38 @@ static int shouldHaveNameplate(void* unit) {
 
     uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit) + 0x30);
 
+    // It's super complex about the combination of prioritize target or/and mark
     if (prioritizeMarkedNameplate || prioritizeTargetNameplate) {
         uint64_t targetGUID = UnitGUID("target");
         if (targetGUID > 0 || nameplatesHasMarkOnThem) {
-            if (targetGUID == guidUnderNameplate) {
-                return 1;
+            if (prioritizeTargetNameplate && prioritizeMarkedNameplate) {
+                if (guidUnderNameplate == targetGUID || vanilla1121_getTargetMark(guidUnderNameplate) > 0) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
             }
-            if (vanilla1121_getTargetMark(guidUnderNameplate) > 0) {
-                return 1;
+            if (prioritizeTargetNameplate && !prioritizeMarkedNameplate) {
+                if (targetGUID > 0) {
+                    if (guidUnderNameplate == targetGUID) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
             }
-            return 0;
+            if (!prioritizeTargetNameplate && prioritizeMarkedNameplate) {
+                if (nameplatesHasMarkOnThem) {
+                    if (vanilla1121_getTargetMark(guidUnderNameplate) > 0) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                }
+            }
         }
     }
 
