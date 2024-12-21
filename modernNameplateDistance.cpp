@@ -126,6 +126,13 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
             uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(nameplate_item + 0x4e8);
 
             void* unitUnderNameplate = reinterpret_cast<void*>(vanilla1121_getVisiableObject(guidUnderNameplate));
+
+            // While it unlikely exists, we skip object which is not Unit.
+            int type = vanilla1121_objectType(reinterpret_cast<uint32_t>(unitUnderNameplate));
+            if (type != OBJECT_TYPE_Unit && type != OBJECT_TYPE_Player) {
+                nameplate_item = next_item;
+                continue;
+            }
             
             if (shouldHaveNameplate(unitUnderNameplate) == 0) {
                 p_removeNameplate(reinterpret_cast<uint32_t>(unitUnderNameplate));
@@ -135,16 +142,22 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
         }
     }
 
-    gTimer.execute();
+    if (self) {
+        gTimer.execute();
+    }
 
     return p_original_renderWorld(self);
 }
 
 
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2) {
-    if (modernNameplateDistance && self && unknown1 && unknown2) {
-        if (shouldHaveNameplate(self) == 0) {
-            return;
+    if (self && modernNameplateDistance) {
+        // While it unlikely exists, we skip object which is not Unit.
+        int type = vanilla1121_objectType(reinterpret_cast<uint32_t>(self));
+        if (type == OBJECT_TYPE_Unit || type == OBJECT_TYPE_Player) {
+            if (shouldHaveNameplate(self) == 0) {
+                return;
+            }
         }
     }
     return p_original_addNameplate(self, unknown1, unknown2);

@@ -182,7 +182,7 @@ int vanilla1121_objectType(uint32_t targetObject) {
         return OBJECT_TYPE_Null;
     }
 
-    return *reinterpret_cast<uint32_t*>(targetObject + 0x14);
+    return *reinterpret_cast<int*>(targetObject + 0x14);
 }
 
 

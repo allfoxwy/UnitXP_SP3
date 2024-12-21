@@ -26,7 +26,7 @@ bool targetNearestEnemy(float distanceLimit) {
 
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-        uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+        int type = vanilla1121_objectType(i);
 
         // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
         // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
@@ -91,7 +91,7 @@ bool targetWorldBoss(float distanceLimit) {
 
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-        uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+        int type = vanilla1121_objectType(i);
 
         // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
         // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
@@ -291,7 +291,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
 
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-        uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+        int type = vanilla1121_objectType(i);
 
         // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
         // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
@@ -371,7 +371,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
 
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-        uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+        int type = vanilla1121_objectType(i);
 
         // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
         // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
@@ -450,7 +450,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
 
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
-        uint32_t type = *reinterpret_cast<uint32_t*>(i + 0x14);
+        int type = vanilla1121_objectType(i);
 
         // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
         // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
