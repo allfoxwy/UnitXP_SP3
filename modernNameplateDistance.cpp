@@ -23,8 +23,10 @@ extern RENDERWORLD p_original_renderWorld = NULL;
 extern REMOVENAMEPLATE p_removeNameplate = reinterpret_cast<REMOVENAMEPLATE>(0x608A10);
 
 extern bool modernNameplateDistance = true;
-extern bool onlyTargetHasNameplate = false;
+extern bool prioritizeTargetNameplate = false;
+extern bool prioritizeMarkedNameplate = false;
 
+static bool nameplatesHasMarkOnThem = false;
 
 // -1 for error, 0 for no, 1 for yes
 static int shouldHaveNameplate(void* unit) {
@@ -32,17 +34,18 @@ static int shouldHaveNameplate(void* unit) {
         return -1;
     }
 
-    if (onlyTargetHasNameplate) {
-        uint64_t targetGUID = UnitGUID("target");
-        if (targetGUID > 0) {
-            uint64_t nameplateUnitGUID = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit) + 0x30);
+    uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit) + 0x30);
 
-            if (nameplateUnitGUID == targetGUID) {
+    if (prioritizeMarkedNameplate || prioritizeTargetNameplate) {
+        uint64_t targetGUID = UnitGUID("target");
+        if (targetGUID > 0 || nameplatesHasMarkOnThem) {
+            if (targetGUID == guidUnderNameplate) {
                 return 1;
             }
-            else {
-                return 0;
+            if (vanilla1121_getTargetMark(guidUnderNameplate) > 0) {
+                return 1;
             }
+            return 0;
         }
     }
 
@@ -64,8 +67,32 @@ static int shouldHaveNameplate(void* unit) {
     }
 }
 
+// For target mark, we need check all nameplates before we make decision of should 1 of them have nameplate
+static void refreshMarkStatus() {
+    nameplatesHasMarkOnThem = false;
+
+    // Linked list saving all nameplates
+    uint32_t nameplate_item = *reinterpret_cast<uint32_t*>(0xc4d92c);
+
+    while (nameplate_item != 0 && (nameplate_item & 1) == 0) {
+        uint32_t next_item = *reinterpret_cast<uint32_t*>(nameplate_item + 0x4e0);
+        uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(nameplate_item + 0x4e8);
+
+        if (vanilla1121_getTargetMark(guidUnderNameplate) > 0) {
+            nameplatesHasMarkOnThem = true;
+            return;
+        }
+
+        nameplate_item = next_item;
+    }
+}
+
 int __fastcall detoured_renderWorld(void* self, void* ignored) {
     if (self && modernNameplateDistance) {
+
+        if (prioritizeMarkedNameplate) {
+            refreshMarkStatus();
+        }
 
         // Linked list saving all nameplates
         uint32_t nameplate_item = *reinterpret_cast<uint32_t*>(0xc4d92c);
@@ -73,7 +100,6 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
         while (nameplate_item != 0 && (nameplate_item & 1) == 0) {
             // Save Next address, because we might delete current node
             uint32_t next_item = *reinterpret_cast<uint32_t*>(nameplate_item + 0x4e0);
-
             uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(nameplate_item + 0x4e8);
 
             void* unitUnderNameplate = reinterpret_cast<void*>(vanilla1121_getVisiableObject(guidUnderNameplate));

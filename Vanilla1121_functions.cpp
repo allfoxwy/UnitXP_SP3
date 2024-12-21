@@ -340,3 +340,5 @@ int vanilla1121_getTargetMark(uint64_t targetGUID) {
 
     return -1;
 }
+
+

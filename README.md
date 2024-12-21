@@ -191,19 +191,32 @@ By default this feature is enabled. You could toggle its switch:
 
 
 
-### Only show nameplate on target
+### Prioritize target nameplate
 
 When fighting multiple enemies, nameplates sometimes get in the way because there could be too many of them.
 
-This mod adds a mode in which only target receives nameplate.
+This option makes other nameplates disappear when you select a target. It doesn't mean target always receive a nameplate as the distance check is still in place.
 
 It requires `Proper nameplates` feature to be also enabled.
 
-- `/script UnitXP("onlyTargetHasNameplate", "enable");`
+- `/script UnitXP("prioritizeTargetNameplate", "enable");`
 
-- `/script UnitXP("onlyTargetHasNameplate", "disable");`
+- `/script UnitXP("prioritizeTargetNameplate", "disable");`
 
 
+
+
+### Prioritize marked nameplate
+
+When fighting multiple enemies, nameplates sometimes get in the way because there could be too many of them.
+
+This option makes other nameplates disappear when there is some marked nameplate. It doesn't mean mark always receive a nameplate as the distance check is still in place.
+
+It requires `Proper nameplates` feature to be also enabled.
+
+- `/script UnitXP("prioritizeMarkedNameplate", "enable");`
+
+- `/script UnitXP("prioritizeMarkedNameplate", "disable");`
 
 
 

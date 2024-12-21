@@ -121,3 +121,5 @@ float vanilla1121_getCameraFoV();
 // Return -1 for error
 // In fact there is an official function with same capability at 0x4bb190, but I'm not sure about its calling convention
 int vanilla1121_getTargetMark(uint64_t targetGUID);
+
+

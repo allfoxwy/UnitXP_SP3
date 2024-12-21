@@ -16,7 +16,8 @@ extern REMOVENAMEPLATE p_removeNameplate;
 
 
 extern bool modernNameplateDistance;
-extern bool onlyTargetHasNameplate;
+extern bool prioritizeTargetNameplate;
+extern bool prioritizeMarkedNameplate;
 
 
 int __fastcall detoured_renderWorld(void* self, void* ignored);

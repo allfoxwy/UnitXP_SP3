@@ -132,11 +132,14 @@ public:
 	* We would call it in gameQuit detoured function
 	*/
 	void end() {
-		if (!done && threadIsRunning) {
-			done = true;
+		done = true;
+
+		if (threadIsRunning) {
 			cond.notify_all();
 			if (worker.joinable()) {
 				worker.join();
+
+				// After join, threadIsRunning should be false already
 			}
 			else {
 				MessageBoxW(NULL, utf8_to_utf16(u8"Somehow, Timer thread is not joinable.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);

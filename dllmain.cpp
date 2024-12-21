@@ -117,15 +117,26 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, modernNameplateDistance);
             return 1;
         }
-        else if (cmd == "onlyTargetHasNameplate") {
+        else if (cmd == "prioritizeTargetNameplate") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "enable") {
-                onlyTargetHasNameplate = true;
+                prioritizeTargetNameplate = true;
             }
             else if (subcmd == "disable") {
-                onlyTargetHasNameplate = false;
+                prioritizeTargetNameplate = false;
             }
-            lua_pushboolean(L, modernNameplateDistance);
+            lua_pushboolean(L, prioritizeTargetNameplate);
+            return 1;
+        }
+        else if (cmd == "prioritizeMarkedNameplate") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                prioritizeMarkedNameplate = true;
+            }
+            else if (subcmd == "disable") {
+                prioritizeMarkedNameplate = false;
+            }
+            lua_pushboolean(L, prioritizeMarkedNameplate);
             return 1;
         }
         else if (cmd == "timer") {
