@@ -127,7 +127,9 @@ bool vanilla1121_unitInCombat(uint32_t unit) {
         return false;
     }
 
-    // some kind of attribute, including in-combat information
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
     uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
@@ -141,6 +143,58 @@ bool vanilla1121_unitInCombat(uint32_t unit) {
     else {
         return false;
     }
+}
+
+float vanilla1121_unitBoundingRadius(uint32_t unit) {
+    if (unit == 0) {
+        return -1.0f;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1.0f;
+    }
+
+    return *reinterpret_cast<float*>(attr + 0x1ec);
+}
+
+float vanilla1121_unitCombatReach(uint32_t unit) {
+    if (unit == 0) {
+        return -1.0f;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1.0f;
+    }
+
+    return *reinterpret_cast<float*>(attr + 0x1f0);
+}
+
+float vanilla1121_unitScaleX(uint32_t unit) {
+    if (unit == 0) {
+        return -1.0f;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1.0f;
+    }
+
+    // Get OBJECT_FIELD_SCALE_X. It's not in Unit but in Object descriptor so it's a minus.
+    return *reinterpret_cast<float*>(attr - 0x4 * 2);
 }
 
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
@@ -185,7 +239,6 @@ int vanilla1121_objectType(uint32_t targetObject) {
     return *reinterpret_cast<int*>(targetObject + 0x14);
 }
 
-
 int vanilla1121_unitReaction(uint32_t unit) {
     uint32_t target = unit;
     uint32_t self = vanilla1121_getVisiableObject(UnitGUID("player"));
@@ -218,7 +271,9 @@ int vanilla1121_unitIsDead(uint32_t unit) {
         return -1;
     }
 
-    // some kind of attribute, including death information
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
     uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
@@ -241,7 +296,9 @@ int vanilla1121_unitIsControlledByPlayer(uint32_t unit) {
         return -1;
     }
 
-    // some kind of attribute, including in-combat information
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
     uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
@@ -263,7 +320,9 @@ uint64_t vanilla1121_unitTargetGUID(uint32_t unit) {
         return 0;
     }
 
-    // some kind of attribute, including in-combat information
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
     uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
     if (attr == 0 || (attr & 1) != 0) {
         // we don't have attribute info.
@@ -280,7 +339,9 @@ int vanilla1121_unitClassification(uint32_t unit) {
         return -1;
    }
 
-    // some kind of attribute
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
     uint32_t attr0 = *reinterpret_cast<uint32_t*>(unit + 0xb30);
     if (attr0 == 0 || (attr0 & 1) != 0) {
         // we don't have attribute info.

@@ -84,7 +84,9 @@ int lua_pcall(void* L, int nArgs, int nResults, int errFunction);
 
 
 // WoW C function
+// Get GUID from UnitID
 uint64_t UnitGUID(const char* unitID);
+// Test intersect in world
 bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance);
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
@@ -122,4 +124,12 @@ float vanilla1121_getCameraFoV();
 // In fact there is an official function with same capability at 0x4bb190, but I'm not sure about its calling convention
 int vanilla1121_getTargetMark(uint64_t targetGUID);
 
+// Still need more info about how these 3 data work. What I know:
+// - Distance between 2 units is their Gaussian distance minus their own 2 combatReaches.
+// Return -1.0f for error.
+float vanilla1121_unitBoundingRadius(uint32_t unit);
+// Return -1.0f for error.
+float vanilla1121_unitCombatReach(uint32_t unit);
+// Return -1.0f for error.
+float vanilla1121_unitScaleX(uint32_t unit);
 

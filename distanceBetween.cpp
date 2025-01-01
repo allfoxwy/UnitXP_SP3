@@ -22,8 +22,14 @@ float UnitXP_distanceBetween(void* unit0, void* unit1) {
 
 	C3Vector pos0 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit0));
 	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit1));
+	
+	// We are ignoring error from vanilla1121_unitCombatReach()
+	float combatReach0 = max(0.0f, vanilla1121_unitCombatReach(reinterpret_cast<uint32_t>(unit0)));
+	float combatReach1 = max(0.0f, vanilla1121_unitCombatReach(reinterpret_cast<uint32_t>(unit1)));
 
-	return UnitXP_distanceBetween(pos0, pos1);
+	float result = UnitXP_distanceBetween(pos0, pos1) - combatReach0 - combatReach1;
+
+	return max(0.0f, result);
 }
 
 // return -1 for error
