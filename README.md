@@ -244,6 +244,8 @@ UNIT_ID could be "player", "target"... also GUID string `"0x12345"`
 
 Return a number, or NIL for error.
 
+The measurement is accurate for ranged attack/spells. However it is NOT fit into melee attack/spells.
+The game use a different logic for melee/ranged. Measure melee distance is complex and I yet figure it out.
 
 
 
@@ -326,6 +328,20 @@ However, even simply link AddOn's OnUpdate() function with a Timer instead of ga
 - `/script local UnitXP_SP3 = pcall(UnitXP, "nop", "nop");`
 
 The `nop` method always return true. So we could use a pcall to check if UnitXP SP3 is installed.
+
+
+
+
+### Decide UnitXP_SP3 version
+
+- `/script local compileTime = UnitXP("version", "coffTimeDateStamp");`
+- `/script local infoString = UnitXP("version", "additionalInformation");`
+
+The `coffTimeDateStamp` method return `UnitXP_SP3.dll` COFF header's TimeDateStamp. It is a Unix epoch time indicating when did this version of UnitXP_SP3 compile.
+Comparing two timestamps could tell which version is new.
+It could be easily convert into human-readable string using Lua date() function.
+
+The `additionalInformation` method return a not-important string to distinguish maintainer. It is for people who fork the project could start a different version bloodline.
 
 
 

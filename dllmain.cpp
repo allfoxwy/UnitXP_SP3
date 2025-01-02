@@ -194,9 +194,16 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, true);
             return 1;
         }
-        else if (cmd == "coffTimeDateStamp") {
-            lua_pushnumber(L, coffTimeDateStamp());
-            return 1;
+        else if (cmd == "version") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "coffTimeDateStamp") {
+                lua_pushnumber(L, coffTimeDateStamp());
+                return 1;
+            }
+            if (subcmd == "additionalInformation") {
+                lua_pushstring(L, "Konaka-main");
+                return 1;
+            }
         }
     }
     return p_original_UnitXP(L);
