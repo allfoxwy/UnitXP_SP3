@@ -20,6 +20,15 @@ float UnitXP_distanceBetween(void* unit0, void* unit1) {
 		return -1;
 	}
 
+	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+
 	C3Vector pos0 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit0));
 	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit1));
 	

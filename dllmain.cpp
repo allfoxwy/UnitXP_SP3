@@ -16,9 +16,11 @@
 #include "timer.h"
 #include "cameraHeight.h"
 #include "gameQuit.h"
+#include "coffTimeDateStamp.h"
 
 using namespace std;
 
+extern HMODULE moduleSelf = 0;
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
 LUA_CFUNCTION p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
@@ -192,6 +194,10 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, true);
             return 1;
         }
+        else if (cmd == "coffTimeDateStamp") {
+            lua_pushnumber(L, coffTimeDateStamp());
+            return 1;
+        }
     }
     return p_original_UnitXP(L);
 }
@@ -209,6 +215,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         // We should not disable Thread Library Calls even if we are not using it.
         // Because static version of C run-time library needs it: https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
         //DisableThreadLibraryCalls(hModule);
+
+        // Store module handle
+        moduleSelf = hModule;
 
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);

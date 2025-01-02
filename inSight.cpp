@@ -108,6 +108,15 @@ int UnitXP_inSight(void* unit0, void* unit1) {
 		return -1;
 	}
 
+	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
