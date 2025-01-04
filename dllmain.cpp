@@ -17,6 +17,7 @@
 #include "cameraHeight.h"
 #include "gameQuit.h"
 #include "coffTimeDateStamp.h"
+#include "screenshot.h"
 
 using namespace std;
 
@@ -250,6 +251,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameQuit function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_CTgaFile_Write_0x5a4810, &detoured_CTgaFile_Write_0x5a4810, reinterpret_cast<LPVOID*>(&p_original_CTgaFile_Write_0x5a4810)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for screenShot function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -263,6 +268,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_CTgaFile_Write_0x5a4810) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for screenShot function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_gameQuit_0x41f9b0) != MH_OK) {
@@ -297,19 +306,3 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 }
 
 
-extern "C" {
-    // This function would be called by vanilla-dll-sideloader when EnterWorld event happens
-    __declspec(dllexport) void FirstEnterWorld(void) {
-        lua_func_reg l[] = {
-            {u8"UnitXP_SP3", p_UnitXP},
-            {u8"UnitXP_SP3_inSight", p_UnitXP},
-            {u8"UnitXP_SP3_distanceBetween", p_UnitXP},
-            {u8"UnitXP_SP3_modernNameplateDistance", p_UnitXP},
-            {u8"UnitXP_SP3_target", p_UnitXP},
-            {u8"UnitXP_SP3_notify", p_UnitXP},
-            {NULL, NULL}
-        };
-
-        luaL_openlib(GetContext(), u8"Vanilla1121mod", l, 0);
-    }
-}
