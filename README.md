@@ -321,6 +321,11 @@ However, even simply link AddOn's OnUpdate() function with a Timer instead of ga
 - UnitXP_SP3 would line up triggered callbacks in a FIFO queue. For each callback in the queue, UnitXP_SP3 would check time before execution. If callbacks already used up 1/80 second during a single rendering frame, those remaining callbacks in queue would be delayed to next frame. This behavior should smooth some graphical stutter, as repeating Lua code now have a loose time threshold to follow.
 
 
+### Screenshot produce JPEG file
+
+The in-game screenshot produce TGA file but it's huge. 
+
+This mod would produce JPEG file instead.
 
 
 ### Tell if UnitXP_SP3 functions are available
