@@ -203,7 +203,7 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
             if (subcmd == "additionalInformation") {
-                lua_pushstring(L, "Konaka-main");
+                lua_pushstring(L, "Konaka-tcp_quickack");
                 return 1;
             }
         }
