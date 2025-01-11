@@ -5,9 +5,11 @@ An attempt to make Vanilla 1.12 modern...
 - Background notifications
 - Check line of sight in Lua
 - Measure distance in Lua
+- Performance tweak of disabling TCP delayed ACK
 - Proper nameplates
 - Screenshot produce JPEG file
 - Better Tab targeting functions
+
 
 Refer to [wiki](https://github.com/allfoxwy/UnitXP_SP3/wiki) for detail.
 
