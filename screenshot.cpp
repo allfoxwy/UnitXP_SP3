@@ -26,7 +26,7 @@ int __fastcall detoured_CTgaFile_Write_0x5a4810(uint32_t self, void* ignored, ch
 	}
 
 	const int bpp = 3;
-	const int quality = 85;
+	const int quality = 95;
 	uint16_t width = *reinterpret_cast<uint16_t*>(tgaHeaderAddr + 0xc);
 	uint16_t height = *reinterpret_cast<uint16_t*>(tgaHeaderAddr + 0xc + 2);
 

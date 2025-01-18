@@ -260,19 +260,19 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for screenShot function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHookApi(L"WSOCK32.DLL", "send", &detoured_send, reinterpret_cast<LPVOID*>(&p_original_send)) != MH_OK) {
+        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "send", &detoured_send, reinterpret_cast<LPVOID*>(&p_original_send), reinterpret_cast<LPVOID*>(&p_send)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket send function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHookApi(L"WSOCK32.DLL", "recv", &detoured_recv, reinterpret_cast<LPVOID*>(&p_original_recv)) != MH_OK) {
+        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "recv", &detoured_recv, reinterpret_cast<LPVOID*>(&p_original_recv), reinterpret_cast<LPVOID*>(&p_recv)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket recv function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHookApi(L"WSOCK32.DLL", "sendto", &detoured_sendto, reinterpret_cast<LPVOID*>(&p_original_sendto)) != MH_OK) {
+        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "sendto", &detoured_sendto, reinterpret_cast<LPVOID*>(&p_original_sendto), reinterpret_cast<LPVOID*>(&p_sendto)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket sendto function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHookApi(L"WSOCK32.DLL", "recvfrom", &detoured_recvfrom, reinterpret_cast<LPVOID*>(&p_original_recvfrom)) != MH_OK) {
+        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "recvfrom", &detoured_recvfrom, reinterpret_cast<LPVOID*>(&p_original_recvfrom), reinterpret_cast<LPVOID*>(&p_recvfrom)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket recvfrom function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
@@ -291,19 +291,19 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_original_recvfrom) != MH_OK) {
+            if (MH_RemoveHook(p_recvfrom) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket recvfrom function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_original_sendto) != MH_OK) {
+            if (MH_RemoveHook(p_sendto) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket sendto function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_original_recv) != MH_OK) {
+            if (MH_RemoveHook(p_recv) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket recv function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_original_send) != MH_OK) {
+            if (MH_RemoveHook(p_send) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket send function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }

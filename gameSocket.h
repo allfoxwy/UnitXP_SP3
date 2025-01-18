@@ -11,6 +11,11 @@ typedef int(WSAAPI* RECV)(SOCKET, char FAR*, int, int);
 typedef int(WSAAPI* SENDTO)(SOCKET, const char FAR*, int, int, const struct sockaddr FAR*, int);
 typedef int(WSAAPI* RECVFROM)(SOCKET, char FAR*, int, int, struct sockaddr FAR*, int FAR*);
 
+extern SEND p_send;
+extern RECV p_recv;
+extern SENDTO p_sendto;
+extern RECVFROM p_recvfrom;
+
 extern SEND p_original_send;
 extern RECV p_original_recv;
 extern SENDTO p_original_sendto;

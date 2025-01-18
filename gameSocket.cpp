@@ -7,6 +7,10 @@
 
 #include "gameSocket.h"
 
+extern SEND p_send = NULL;
+extern RECV p_recv = NULL;
+extern SENDTO p_sendto = NULL;
+extern RECVFROM p_recvfrom = NULL;
 extern SEND p_original_send = NULL;
 extern RECV p_original_recv = NULL;
 extern SENDTO p_original_sendto = NULL;
