@@ -1,7 +1,7 @@
 # UnitXP Service Pack 3
 
 An attempt to make Vanilla 1.12 modern...
-- Adjust camera height
+- Adjust camera
 - Background notifications
 - Check line of sight in Lua
 - Measure distance in Lua

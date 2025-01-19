@@ -80,7 +80,7 @@ int camera_inSight(void* unit) {
 	//TODO: I can't find height of object
 	pos1.z += 2.4f;
 
-	C3Vector intersectPoint = { 0,0,0 };
+	C3Vector intersectPoint = {};
 	float distance = 1.0f;
 
 	bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance);

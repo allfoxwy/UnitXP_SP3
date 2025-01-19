@@ -9,7 +9,7 @@
 using namespace std;
 
 
-float UnitXP_distanceBetween(C3Vector& pos0, C3Vector& pos1) {
+float UnitXP_distanceBetween(const C3Vector& pos0, const C3Vector& pos1) {
 	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
 }
 

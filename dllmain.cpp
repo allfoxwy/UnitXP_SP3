@@ -14,11 +14,11 @@
 #include "targeting.h"
 #include "notifyOS.h"
 #include "timer.h"
-#include "cameraHeight.h"
 #include "gameQuit.h"
 #include "coffTimeDateStamp.h"
 #include "screenshot.h"
 #include "gameSocket.h"
+#include "editCamera.h"
 
 using namespace std;
 
@@ -167,12 +167,42 @@ int __fastcall detoured_UnitXP(void* L) {
                 if (userValue < 0.0f) {
                     userValue = 0.0f;
                 }
+                if (userValue > 5.0f) {
+                    userValue = 5.0f;
+                }
+                cameraVerticalAddend = userValue;
+            }
+            lua_pushnumber(L, cameraVerticalAddend);
+            return 1;
+        }
+        else if (cmd == "cameraVerticalDisplacement") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "set" && lua_isnumber(L, 3)) {
+                float userValue = static_cast<float>(lua_tonumber(L, 3));
+                if (userValue < -1.0f) {
+                    userValue = -1.0f;
+                }
+                if (userValue > 5.0f) {
+                    userValue = 5.0f;
+                }
+                cameraVerticalAddend = userValue;
+            }
+            lua_pushnumber(L, cameraVerticalAddend);
+            return 1;
+        }
+        else if (cmd == "cameraHorizontalDisplacement") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "set" && lua_isnumber(L, 3)) {
+                float userValue = static_cast<float>(lua_tonumber(L, 3));
+                if (userValue < -6.0f) {
+                    userValue = -6.0f;
+                }
                 if (userValue > 6.0f) {
                     userValue = 6.0f;
                 }
-                cameraAddHeight = userValue;
+                cameraHorizontalAddend = userValue;
             }
-            lua_pushnumber(L, cameraAddHeight);
+            lua_pushnumber(L, cameraHorizontalAddend);
             return 1;
         }
         else if (cmd == "notify") {
@@ -248,10 +278,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for renderWorld function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHook(p_cameraHeight_0x5126B0, &detoured_cameraHeight_0x5126B0, reinterpret_cast<LPVOID*>(&p_original_cameraHeight_0x5126B0)) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for cameraHeight function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
         if (MH_CreateHook(p_gameQuit_0x41f9b0, &detoured_gameQuit_0x41f9b0, reinterpret_cast<LPVOID*>(&p_original_gameQuit_0x41f9b0)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameQuit function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -276,6 +302,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket recvfrom function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_CGCamera_updateCallback_0x511bc0, &detoured_CGCamera_updateCallback_0x511bc0, reinterpret_cast<LPVOID*>(&p_original_CGCamera_updateCallback_0x511bc0)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for camera updateCallback function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -289,6 +319,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_CGCamera_updateCallback_0x511bc0) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for camera updateCallback function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_recvfrom) != MH_OK) {
@@ -313,10 +347,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             }
             if (MH_RemoveHook(p_gameQuit_0x41f9b0) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameQuit function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-                return FALSE;
-            }
-            if (MH_RemoveHook(p_cameraHeight_0x5126B0) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for cameraHeight function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_renderWorld) != MH_OK) {

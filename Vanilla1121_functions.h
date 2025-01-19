@@ -21,8 +21,8 @@ typedef void(__fastcall* LUA_GETTABLE)(void* L, int index);
 typedef int(__fastcall* LUA_PCALL)(void* L, int nArgs, int nResults, int errFunction);
 typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
 typedef struct {
-    float y;
     float x;
+    float y;
     float z;
 } C3Vector;
 typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, unsigned int queryFlags);
@@ -114,10 +114,14 @@ int vanilla1121_objectType(uint32_t targetObject);
 uint64_t vanilla1121_unitTargetGUID(uint32_t unit);
 // Get unit's creature type. Returns -1 when unit is 0 or return original function's result.
 int vanilla1121_unitCreatureType(uint32_t unit);
+// Get camera pointer
+uint32_t vanilla1121_getCamera();
 // Get active camera position
 C3Vector vanilla1121_getCameraPosition();
 // Get Field of View value
 float vanilla1121_getCameraFoV();
+// Get the GUID whom the camera is looking at
+uint64_t vanilla1121_getCameraLookingAtGUID();
 // Get Raid/Party target mark.
 // Return icon index as https://wowwiki-archive.fandom.com/wiki/API_GetRaidTargetIndex
 // Return -1 for error

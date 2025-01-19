@@ -114,11 +114,14 @@ uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
 
 
 C3Vector vanilla1121_unitPosition(uint32_t unit) {
-    return {
-        *reinterpret_cast<float*>(unit + 0x09B8),
-        *reinterpret_cast<float*>(unit + 0x09B8 + 0x4),
-        *reinterpret_cast<float*>(unit + 0x09B8 + 0x8),
-    };
+    float* positionPtr = reinterpret_cast<float*>(unit + 0x9b8);
+    C3Vector result = {};
+
+    result.x = positionPtr[0];
+    result.y = positionPtr[1];
+    result.z = positionPtr[2];
+
+    return result;
 }
 
 
@@ -201,7 +204,7 @@ bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
     C3Vector pos0 = vanilla1121_unitPosition(unit0);
     C3Vector pos1 = vanilla1121_unitPosition(unit1);
 
-    C3Vector intersectPoint = { 0,0,0 };
+    C3Vector intersectPoint = {};
     float distance = 1.0f;
 
     //TODO: I can't find height of object
@@ -371,21 +374,46 @@ int vanilla1121_unitCreatureType(uint32_t unit) {
     }
     return p_getCreatureType(unit);
 }
+
+uint32_t vanilla1121_getCamera() {
+    return p_getCamera();
+}
+
 C3Vector vanilla1121_getCameraPosition() {
-    uint32_t cptr = p_getCamera();
+    uint32_t cptr = vanilla1121_getCamera();
     if (cptr == 0) {
-        return { 0,0,0 };
+        C3Vector nullResult = {};
+        nullResult.x = 0;
+        nullResult.y = 0;
+        nullResult.z = 0;
+        return nullResult;
     }
 
-    return {
-        *reinterpret_cast<float*>(cptr + 0x8),
-        *reinterpret_cast<float*>(cptr + 0x8 + 0x4),
-        *reinterpret_cast<float*>(cptr + 0x8 + 0x8)
-    };
+    float* positionPtr = reinterpret_cast<float*>(cptr + 0x8);
+    C3Vector result = {};
+    result.x = positionPtr[0];
+    result.y = positionPtr[1];
+    result.z = positionPtr[2];
+
+    return result;
 }
 
 float vanilla1121_getCameraFoV() {
-    return *reinterpret_cast<float*>(0x8089B4);
+    uint32_t cptr = vanilla1121_getCamera();
+    if (cptr == 0) {
+        return -1.0f;
+    }
+
+    return *reinterpret_cast<float*>(cptr + 0x40);
+}
+
+uint64_t vanilla1121_getCameraLookingAtGUID() {
+    uint32_t cptr = vanilla1121_getCamera();
+    if (cptr == 0) {
+        return 0;
+    }
+
+    return *reinterpret_cast<uint64_t*>(cptr + 0x88);
 }
 
 int vanilla1121_getTargetMark(uint64_t targetGUID) {
