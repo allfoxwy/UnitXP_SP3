@@ -43,7 +43,7 @@ int __fastcall detoured_UnitXP(void* L) {
             }
         }
         else if (cmd == "distanceBetween" && lua_gettop(L) >= 3) {
-            distanceMeters meter = METER_RANGED;
+            distanceMeters meter = METER_RANGED; // While in-DLL we default to METER_GAUSSIAN, for Lua we default to METER_RANGED
             if (lua_gettop(L) >= 4) {
                 string meterName{ lua_tostring(L,4) };
                 if (meterName == "meleeAutoAttack") {
@@ -54,6 +54,9 @@ int __fastcall detoured_UnitXP(void* L) {
                 }
                 else if (meterName == "chains") {
                     meter = METER_CHAINS;
+                }
+                else if (meterName == "Gaussian") {
+                    meter = METER_GAUSSIAN;
                 }
             }
 

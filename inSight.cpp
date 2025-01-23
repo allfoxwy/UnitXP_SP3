@@ -40,7 +40,7 @@ bool inViewingFrustum(C3Vector posObject, float checkCone) {
 	float lenVecPlayer = hypot(vecPlayer.x, vecPlayer.y, vecPlayer.z);
 
 	// I tested in game and find out that even Vanilla Tweaks change this value, the screen border of objects still follow original FoV somehow
-	// I suspect game has additional transformation before Direct X FoV, or Vanilla Tweaks did on a wrong address...
+	// I suspect game has additional transformation before Direct X FoV
 	//float fov = vanilla1121_getCameraFoV();
 	const float fov = 1.5708f;
 

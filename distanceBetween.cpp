@@ -72,11 +72,13 @@ float UnitXP_distanceBetween(void* unit0, void* unit1, distanceMeters meter) {
 
 		return max(0.0f, UnitXP_distanceBetween(pos0, pos1) - boundingRadius0 - boundingRadius1);
 	}
+	else if (meter == METER_RANGED) {
+		return max(0.0f, UnitXP_distanceBetween(pos0, pos1) - combatReach0 - combatReach1);
+	}
 	else {
-		// Default to METER_RANGED
-		float result = UnitXP_distanceBetween(pos0, pos1) - combatReach0 - combatReach1;
-
-		return max(0.0f, result);
+		// Default to METER_GAUSSIAN
+		// While in-DLL we default to METER_GAUSSIAN, for Lua we default to METER_RANGED
+		return UnitXP_distanceBetween(pos0, pos1);
 	}
 }
 
