@@ -127,9 +127,6 @@ uint64_t vanilla1121_getCameraLookingAtGUID();
 // Return -1 for error
 // In fact there is an official function with same capability at 0x4bb190, but I'm not sure about its calling convention
 int vanilla1121_getTargetMark(uint64_t targetGUID);
-
-// Still need more info about how these 3 data work. What I know:
-// - Distance between 2 units is their Gaussian distance minus their own 2 combatReaches.
 // Return -1.0f for error.
 float vanilla1121_unitBoundingRadius(uint32_t unit);
 // Return -1.0f for error.

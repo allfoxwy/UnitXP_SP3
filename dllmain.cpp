@@ -43,18 +43,21 @@ int __fastcall detoured_UnitXP(void* L) {
             }
         }
         else if (cmd == "distanceBetween" && lua_gettop(L) >= 3) {
-            float result = UnitXP_distanceBetween(lua_tostring(L, 2), lua_tostring(L, 3));
-            if (result >= 0) {
-                lua_pushnumber(L, result);
-                return 1;
+            distanceMeters meter = METER_RANGED;
+            if (lua_gettop(L) >= 4) {
+                string meterName{ lua_tostring(L,4) };
+                if (meterName == "meleeAutoAttack") {
+                    meter = METER_MELEE_AUTOATTACK;
+                }
+                else if (meterName == "AoE") {
+                    meter = METER_AOE;
+                }
+                else if (meterName == "chains") {
+                    meter = METER_CHAINS;
+                }
             }
-            else {
-                lua_pushnil(L);
-                return 1;
-            }
-        }
-        else if (cmd == "meleeDistanceBetween" && lua_gettop(L) >= 3) {
-            float result = UnitXP_distanceBetween(lua_tostring(L, 2), lua_tostring(L, 3), true);
+
+            float result = UnitXP_distanceBetween(lua_tostring(L, 2), lua_tostring(L, 3), meter);
             if (result >= 0) {
                 lua_pushnumber(L, result);
                 return 1;
