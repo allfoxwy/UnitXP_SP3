@@ -53,6 +53,17 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
+        else if (cmd == "meleeDistanceBetween" && lua_gettop(L) >= 3) {
+            float result = UnitXP_distanceBetween(lua_tostring(L, 2), lua_tostring(L, 3), true);
+            if (result >= 0) {
+                lua_pushnumber(L, result);
+                return 1;
+            }
+            else {
+                lua_pushnil(L);
+                return 1;
+            }
+        }
         else if (cmd == "target") {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "nearestEnemy") {

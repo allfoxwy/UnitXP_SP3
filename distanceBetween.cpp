@@ -15,7 +15,7 @@ float UnitXP_distanceBetween(const C3Vector& pos0, const C3Vector& pos1) {
 
 // return -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
-float UnitXP_distanceBetween(void* unit0, void* unit1) {
+float UnitXP_distanceBetween(void* unit0, void* unit1, bool melee = false) {
 	if (!unit0 || !unit1) {
 		return -1;
 	}
@@ -31,25 +31,38 @@ float UnitXP_distanceBetween(void* unit0, void* unit1) {
 
 	C3Vector pos0 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit0));
 	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit1));
-	
+
 	// We are ignoring error from vanilla1121_unitCombatReach()
 	float combatReach0 = max(0.0f, vanilla1121_unitCombatReach(reinterpret_cast<uint32_t>(unit0)));
 	float combatReach1 = max(0.0f, vanilla1121_unitCombatReach(reinterpret_cast<uint32_t>(unit1)));
 
-	float result = UnitXP_distanceBetween(pos0, pos1) - combatReach0 - combatReach1;
+	if (melee && abs(pos0.z - pos1.z) < 6.0f) {
+		// Melee distance calculation is following https://github.com/vmangos/core/blob/4aaec500a70d32e1234010e432e87982f6e4a527/src/game/Objects/Unit.cpp#L10526
 
-	return max(0.0f, result);
+		combatReach0 = max(1.5f, combatReach0);
+		combatReach1 = max(1.5f, combatReach1);
+
+		float totalReach = max(5.0f, combatReach0 + combatReach1 + 1.333333373069763f);
+
+		return max(0.0f, hypot(pos0.x - pos1.x, pos0.y - pos1.y) - totalReach);
+	}
+	else {
+		float result = UnitXP_distanceBetween(pos0, pos1) - combatReach0 - combatReach1;
+
+		return max(0.0f, result);
+	}
 }
 
 // return -1 for error
-float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1) {
+float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1, bool melee = false) {
 	return UnitXP_distanceBetween(
 		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),
-		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1)));
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1)),
+		melee);
 }
 
 // return -1 for error
-float UnitXP_distanceBetween(string unit0, string unit1) {
+float UnitXP_distanceBetween(string unit0, string unit1, bool melee = false) {
 	uint64_t guid0, guid1;
 
 	if (unit0.find(u8"0x") != unit0.npos) {
@@ -80,5 +93,5 @@ float UnitXP_distanceBetween(string unit0, string unit1) {
 		}
 	}
 
-	return UnitXP_distanceBetween(guid0, guid1);
+	return UnitXP_distanceBetween(guid0, guid1, melee);
 }
