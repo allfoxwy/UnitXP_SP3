@@ -50,15 +50,16 @@ float UnitXP_distanceBetween(void* unit0, void* unit1, distanceMeters meter) {
 	else if (meter == METER_AOE) {
 		// AoE distance is following Balake's fix https://github.com/vmangos/core/commit/fc0d6cfd6192b5c90072d77ab289f165ea540a00
 
+		// only 1 reach would be used
 		float totalReach = 0.0f;
 
 		// By Balake: testing on classic shows aoe range is bigger vs mob compared to vs player
 		// this probably means combat reach is not used vs player targets
 		if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) == OBJECT_TYPE_Unit) {
-			totalReach += combatReach0;
+			totalReach = combatReach0;
 		}
 		if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) == OBJECT_TYPE_Unit) {
-			totalReach += combatReach1;
+			totalReach = combatReach1;
 		}
 
 		return max(0.0f, UnitXP_distanceBetween(pos0, pos1) - totalReach);

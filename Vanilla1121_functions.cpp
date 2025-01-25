@@ -89,9 +89,15 @@ int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
 uint64_t UnitGUID(const char* unitID) {
     return p_UnitGUID(unitID);
 }
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance) {
-    // 0x100171 flag would cause game crash in Hateforge Quarry
-    return p_CWorld_Intersect(p1, p2, ignored, intersectPoint, distance, 0x100111);
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance) {
+    // The common knowledge of flag is 0x100171 or 0x100111:
+    // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
+    // *- 0x100111 works well.
+    // However according to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
+    // there is a switch to determine what flag to use. We try following the game.
+
+    uint32_t intersectFlag = *reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0 ? 0x1F0171 : 0x100171;
+    return p_CWorld_Intersect(p1, p2, 0, intersectPoint, distance, intersectFlag);
 }
 
 
@@ -211,7 +217,7 @@ bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
     pos0.z += 2.4f;
     pos1.z += 2.4f;
 
-    bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance);
+    bool result = CWorld_Intersect(&pos0, &pos1, &intersectPoint, &distance);
 
     if (result) {
         if (distance <= 1 && distance >= 0) {

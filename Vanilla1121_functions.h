@@ -25,7 +25,7 @@ typedef struct {
     float y;
     float z;
 } C3Vector;
-typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, unsigned int queryFlags);
+typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, uint32_t queryFlags);
 typedef void(__fastcall* TARGET)(uint64_t* GUID);
 typedef int(__thiscall* UNITREACTION)(uint32_t self, uint32_t targetObj);
 typedef bool(__thiscall* CANATTACK)(uint32_t self, uint32_t targetObj);
@@ -86,8 +86,8 @@ int lua_pcall(void* L, int nArgs, int nResults, int errFunction);
 // WoW C function
 // Get GUID from UnitID
 uint64_t UnitGUID(const char* unitID);
-// Test intersect in world
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance);
+// Test intersect in world, p1 and p2 for input, intersectPoint and distance for output.
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance);
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
 // Get in-game unit reaction, return -1 for error

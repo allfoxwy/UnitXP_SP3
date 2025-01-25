@@ -52,7 +52,7 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
 
 	C3Vector intersectPoint = {};
 	float distance = 1.0f;
-	bool collide = CWorld_Intersect(&a, &result, 0, &intersectPoint, &distance);
+	bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance);
 	if (collide) {
 		if (distance <= 1 && distance >= 0) {
 			// intersect between points, collide

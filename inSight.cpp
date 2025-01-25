@@ -83,7 +83,7 @@ int camera_inSight(void* unit) {
 	C3Vector intersectPoint = {};
 	float distance = 1.0f;
 
-	bool result = CWorld_Intersect(&pos0, &pos1, 0, &intersectPoint, &distance);
+	bool result = CWorld_Intersect(&pos0, &pos1, &intersectPoint, &distance);
 
 	if (result) {
 		if (distance <= 1 && distance >= 0) {
