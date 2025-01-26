@@ -19,6 +19,7 @@
 #include "screenshot.h"
 #include "gameSocket.h"
 #include "editCamera.h"
+#include "performanceProfiling.h"
 
 using namespace std;
 
@@ -258,6 +259,15 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, TCP_quickACK);
             return 1;
         }
+        else if (cmd == "performanceProfile") {
+            lua_pushstring(L, perfSummary().data());
+
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "reset") {
+                perfReset();
+            }
+            return 1;
+        }
     }
     return p_original_UnitXP(L);
 }
@@ -278,6 +288,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
         // Store module handle
         moduleSelf = hModule;
+
+        perfReset();
 
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);

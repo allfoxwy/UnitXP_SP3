@@ -7,6 +7,7 @@
 #include "inSight.h"
 #include "distanceBetween.h"
 #include "timer.h"
+#include "performanceProfiling.h"
 
 
 // The technique of hooking __thiscall function is from: https://tresp4sser.wordpress.com/2012/10/06/how-to-hook-thiscall-functions/
@@ -76,7 +77,7 @@ static int shouldHaveNameplate(void* unit) {
     
     C3Vector pos0 = vanilla1121_getCameraPosition();
     C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit));
-    float distance = hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
+    float distance = UnitXP_distanceBetween(pos0, pos1);
 
 
     const float seeThroughWallDistance = 10.0f;
@@ -112,6 +113,8 @@ static void refreshMarkStatus() {
 
 int __fastcall detoured_renderWorld(void* self, void* ignored) {
     if (self && modernNameplateDistance) {
+        perfSetSlotName(1, "remove nameplate");
+        perfMarkStart(1);
 
         if (prioritizeMarkedNameplate) {
             refreshMarkStatus();
@@ -133,32 +136,46 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
                 nameplate_item = next_item;
                 continue;
             }
-            
+
             if (shouldHaveNameplate(unitUnderNameplate) == 0) {
                 p_removeNameplate(reinterpret_cast<uint32_t>(unitUnderNameplate));
             }
 
             nameplate_item = next_item;
         }
+
+        perfMarkEnd(1);
     }
 
     if (self) {
+        perfSetSlotName(4, "timer callback");
+        perfMarkStart(4);
         gTimer.execute();
+        perfMarkEnd(4);
     }
 
-    return p_original_renderWorld(self);
+    perfSetSlotName(3, "original RenderWorld");
+    perfMarkStart(3);
+    int result = p_original_renderWorld(self);
+    perfMarkEnd(3);
+
+    return result;
 }
 
 
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2) {
     if (self && modernNameplateDistance) {
+        perfSetSlotName(2, "add nameplate");
+        perfMarkStart(2);
         // While it unlikely exists, we skip object which is not Unit.
         int type = vanilla1121_objectType(reinterpret_cast<uint32_t>(self));
         if (type == OBJECT_TYPE_Unit || type == OBJECT_TYPE_Player) {
             if (shouldHaveNameplate(self) == 0) {
+                perfMarkEnd(2);
                 return;
             }
         }
+        perfMarkEnd(2);
     }
     return p_original_addNameplate(self, unknown1, unknown2);
 }

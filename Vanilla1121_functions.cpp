@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "Vanilla1121_functions.h"
+#include "performanceProfiling.h"
 
 // To get lua_State pointer
 GETCONTEXT p_GetContext = reinterpret_cast<GETCONTEXT>(0x7040D0);
@@ -85,19 +86,31 @@ int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
 }
 
 
-// WoW C function
+// Get GUID from UNIT_ID
 uint64_t UnitGUID(const char* unitID) {
     return p_UnitGUID(unitID);
 }
+
 bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance) {
+    // Internet says distance needed to be initialized to 1.0f
+    *distance = 1.0f;
+    *intersectPoint = {};
+
     // The common knowledge of flag is 0x100171 or 0x100111:
     // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
     // *- 0x100111 works well.
-    // However according to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
-    // there is a switch to determine what flag to use. We try following the game.
+    uint32_t intersectFlag = 0x100111;
+    
+    // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
+    // there is a switch to determine what flag to use. In practice it means 0x1f0171, which is slower than 0x100111.
+    //uint32_t intersectFlag = *reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0 ? 0x1F0171 : 0x100171;
 
-    uint32_t intersectFlag = *reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0 ? 0x1F0171 : 0x100171;
-    return p_CWorld_Intersect(p1, p2, 0, intersectPoint, distance, intersectFlag);
+    perfSetSlotName(0, "CWorld_Intersect");
+    perfMarkStart(0);
+    bool result = p_CWorld_Intersect(p1, p2, 0, intersectPoint, distance, intersectFlag);
+    perfMarkEnd(0);
+
+    return result;
 }
 
 

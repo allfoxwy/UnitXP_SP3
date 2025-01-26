@@ -5,6 +5,7 @@
 #include "editCamera.h"
 #include "Vanilla1121_functions.h"
 #include "distanceBetween.h"
+#include "performanceProfiling.h"
 
 extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
 extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
@@ -33,7 +34,10 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
 		return result;
 	}
 
+	bool needCollisionCheck = false;
+
 	if (std::abs(horizontalDelta) > 0.1f) {
+		needCollisionCheck = true;
 		if (horizontalDelta > 0.0f) {
 			// Translate toward right
 			result.x = std::abs(horizontalDelta) * (b.y - a.y) / temp + a.x;
@@ -47,21 +51,26 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
 	}
 
 	if (std::abs(verticalDelta) > 0.1f) {
+		needCollisionCheck = true;
 		result.z += verticalDelta;
 	}
 
-	C3Vector intersectPoint = {};
-	float distance = 1.0f;
-	bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance);
-	if (collide) {
-		if (distance <= 1 && distance >= 0) {
-			// intersect between points, collide
+	if (needCollisionCheck) {
+		C3Vector intersectPoint = {};
+		float distance = 1.0f;
 
-			// 0.9f is a small fix to make collide distance less accurate,
-			// so that camera would not flash when collide on walls
-			result.x = distance * 0.9f * (result.x - a.x) + a.x;
-			result.y = distance * 0.9f * (result.y - a.y) + a.y;
-			result.z = distance * 0.9f * (result.z - a.z) + a.z;
+		bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance);
+
+		if (collide) {
+			if (distance <= 1 && distance >= 0) {
+				// intersect between points, collide
+
+				// 0.9f is a small fix to make collide distance less accurate,
+				// so that camera would not flash when collide on walls
+				result.x = distance * 0.9f * (result.x - a.x) + a.x;
+				result.y = distance * 0.9f * (result.y - a.y) + a.y;
+				result.z = distance * 0.9f * (result.z - a.z) + a.z;
+			}
 		}
 	}
 
@@ -69,11 +78,17 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
 }
 
 int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_t camera) {
+	perfSetSlotName(5, "oringinal camera update callback");
+	perfMarkStart(5);
 	int result = p_original_CGCamera_updateCallback_0x511bc0(unknown1, camera);
+	perfMarkEnd(5);
 
+	perfSetSlotName(6, "camera translate");
+	perfMarkStart(6);
 	uint32_t u = vanilla1121_getVisiableObject(*reinterpret_cast<uint64_t*>(camera + 0x88));
 	if (u > 0 &&
 		(vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
+
 		C3Vector targetPosition = vanilla1121_unitPosition(u);
 
 		float* editPtr = reinterpret_cast<float*>(camera + 0x8);
@@ -89,6 +104,7 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
 		editPtr[1] = translated.y;
 		editPtr[2] = translated.z;
 	}
+	perfMarkEnd(6);
 	
 	return result;
 }
