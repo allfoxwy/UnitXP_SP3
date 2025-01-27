@@ -65,11 +65,12 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
 			if (distance <= 1 && distance >= 0) {
 				// intersect between points, collide
 
-				// 0.9f is a small fix to make collide distance less accurate,
+				// 0.7f is a small fix to make collide distance less accurate,
 				// so that camera would not flash when collide on walls
-				result.x = distance * 0.9f * (result.x - a.x) + a.x;
-				result.y = distance * 0.9f * (result.y - a.y) + a.y;
-				result.z = distance * 0.9f * (result.z - a.z) + a.z;
+				result.x = 0.7f * (intersectPoint.x - a.x) + a.x;
+				result.y = 0.7f * (intersectPoint.y - a.y) + a.y;
+				result.z = 0.7f * (intersectPoint.z - a.z) + a.z;
+
 			}
 		}
 	}

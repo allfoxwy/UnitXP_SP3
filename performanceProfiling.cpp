@@ -72,6 +72,10 @@ void perfSetSlotName(int slot, std::string name) {
 	}
 }
 
+LARGE_INTEGER getPerformanceCounterFrequency() {
+	return performanceCounterFrequency;
+}
+
 static std::string timeString(const LARGE_INTEGER& t) {
 	LARGE_INTEGER temp = {};
 	temp.QuadPart = (t.QuadPart * 1000000) / performanceCounterFrequency.QuadPart;
@@ -101,7 +105,7 @@ std::string perfSummary() {
 
 		auto ni = perfSlotsName.find(i);
 		if (ni != perfSlotsName.end()) {
-			ss << "=== Profiling point " << ni->second << " ===" << std::endl;
+			ss << "=== Profiling point: " << ni->second << " ===" << std::endl;
 		}
 		else {
 			ss << "=== Profiling point " << i << " ===" << std::endl;
