@@ -5,4 +5,4 @@
 void flashTaskbarIcon();
 
 // Play a system sound
-bool playSystemSound(const string& soundName);
+bool playSystemSound(const string soundName);

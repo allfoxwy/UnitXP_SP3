@@ -46,7 +46,7 @@ int __fastcall detoured_UnitXP(void* L) {
         else if (cmd == "distanceBetween" && lua_gettop(L) >= 3) {
             distanceMeters meter = METER_RANGED; // While in-DLL we default to METER_GAUSSIAN, for Lua we default to METER_RANGED
             if (lua_gettop(L) >= 4) {
-                string meterName{ lua_tostring(L,4) };
+                string meterName{ lua_tostring(L, 4) };
                 if (meterName == "meleeAutoAttack") {
                     meter = METER_MELEE_AUTOATTACK;
                 }
@@ -72,7 +72,7 @@ int __fastcall detoured_UnitXP(void* L) {
             }
         }
         else if (cmd == "target") {
-            string subcmd{ lua_tostring(L,2) };
+            string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "nearestEnemy") {
                 lua_pushboolean(L, targetNearestEnemy(FLT_MAX));
                 return 1;
@@ -266,6 +266,7 @@ int __fastcall detoured_UnitXP(void* L) {
             if (subcmd == "reset") {
                 perfReset();
             }
+
             return 1;
         }
     }

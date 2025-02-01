@@ -165,6 +165,10 @@ public:
 			return 0;
 		}
 
+		if (handler.empty()) {
+			return 0;
+		}
+
 		scoped_m lock(m);
 
 		if (threadIsRunning == false) {

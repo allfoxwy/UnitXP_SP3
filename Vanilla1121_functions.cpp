@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "Vanilla1121_functions.h"
+#include "utf8_to_utf16.h"
 #include "performanceProfiling.h"
 
 // To get lua_State pointer
@@ -38,21 +39,35 @@ extern float guardAgainstTransportsCoordinates = 200.0f;
 
 // To get lua_State pointer
 void* GetContext(void) {
-    return p_GetContext();
+    void* result = p_GetContext();
+    if (!result) {
+        MessageBoxW(NULL, utf8_to_utf16(u8"Somehow, the Lua state is NULL. Game would crash soon.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+    }
+    return result;
 }
-
 
 // LUA language
-void lua_pushstring(void* L, const char* str) {
-    p_lua_pushstring(L, str);
+void lua_pushstring(void* L, std::string str) {
+    p_lua_pushstring(L, str.data());
     return;
 }
-void luaL_openlib(void* L, const char* name_space, lua_func_reg function_list[], int upvalues) {
-    p_luaL_openlib(L, name_space, function_list, upvalues);
+void luaL_openlib(void* L, std::string name_space, lua_func_reg function_list[], int upvalues) {
+    p_luaL_openlib(L, name_space.data(), function_list, upvalues);
     return;
 }
-const char* lua_tostring(void* L, int index) {
-    return p_lua_tostring(L, index);
+std::string lua_tostring(void* L, int index) {
+    // This pointer can not directly return to other function.
+    // According to https://www.lua.org/manual/5.0/manual.html
+    // "Because Lua has garbage collection, there is no guarantee that the pointer returned by lua_tostring will be valid after the corresponding value is removed from the stack."
+    // "If you need the string after the current function returns, then you should duplicate it or put it into the registry (see 3.18). "
+    const char* ptr = p_lua_tostring(L, index);
+
+    if (!ptr) {
+        return "";
+    }
+
+    std::string result{ ptr };
+    return result;
 }
 int lua_gettop(void* L) {
     return p_lua_gettop(L);
@@ -85,7 +100,6 @@ int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
     return p_lua_pcall(L, nArgs, nResults, errFunction);
 }
 
-
 // Get GUID from UNIT_ID
 uint64_t UnitGUID(const char* unitID) {
     return p_UnitGUID(unitID);
@@ -99,13 +113,22 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
     // The common knowledge of flag is 0x100171 or 0x100111:
     // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
     // *- 0x100111 works well.
-    uint32_t intersectFlag = 0x100111;
-    
+    //uint32_t intersectFlag = 0x100111;
+
     // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
     // there is a switch to determine what flag to use. In practice it means 0x1f0171, which is slower than 0x100111.
-    //uint32_t intersectFlag = *reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0 ? 0x1F0171 : 0x100171;
+    uint32_t intersectFlag = 0;
+    std::string perfName = "";
+    if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
+        intersectFlag = 0x1F0171;
+        perfName = "CWorld_Intersect with flag 0x1F0171";
+    }
+    else {
+        intersectFlag = 0x100171;
+        perfName = "CWorld_Intersect with flag 0x100171";
+    }
 
-    perfSetSlotName(0, "CWorld_Intersect");
+    perfSetSlotName(0, perfName);
     perfMarkStart(0);
     bool result = p_CWorld_Intersect(p1, p2, 0, intersectPoint, distance, intersectFlag);
     perfMarkEnd(0);

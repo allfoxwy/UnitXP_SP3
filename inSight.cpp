@@ -278,6 +278,10 @@ int UnitXP_inSight(uint64_t guid0, uint64_t guid1) {
 int UnitXP_inSight(string unit0, string unit1) {
 	uint64_t guid0, guid1;
 
+	if (unit0.empty() || unit1.empty()) {
+		return -1;
+	}
+
 	if (unit0.find(u8"0x") != unit0.npos) {
 		stringstream ss{ unit0 };
 		ss >> hex >> guid0;

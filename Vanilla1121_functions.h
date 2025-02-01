@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 // Signatures/Prototypes
 typedef void(__fastcall* LUA_PUSHSTRING)(void* L, const char* s);
@@ -68,9 +69,9 @@ void* GetContext(void);
 
 
 // LUA language
-void lua_pushstring(void* L, const char* str);
+void lua_pushstring(void* L, std::string str);
 void luaL_openlib(void* L, const char* name_space, lua_func_reg function_list[], int upvalues);
-const char* lua_tostring(void* L, int index);
+std::string lua_tostring(void* L, int index);
 double lua_tonumber(void* L, int index);
 int lua_gettop(void* L);
 void lua_pushnil(void* L);

@@ -95,17 +95,21 @@ float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1, distanceMeters mete
 float UnitXP_distanceBetween(string unit0, string unit1, distanceMeters meter) {
 	uint64_t guid0, guid1;
 
+	if (unit0.empty() || unit1.empty()) {
+		return -1.0f;
+	}
+
 	if (unit0.find(u8"0x") != unit0.npos) {
 		stringstream ss{ unit0 };
 		ss >> hex >> guid0;
 		if (ss.fail()) {
-			return -1;
+			return -1.0f;
 		}
 	}
 	else {
 		guid0 = UnitGUID(unit0.data());
 		if (guid0 == 0) {
-			return -1;
+			return -1.0f;
 		}
 	}
 
@@ -113,13 +117,13 @@ float UnitXP_distanceBetween(string unit0, string unit1, distanceMeters meter) {
 		stringstream ss{ unit1 };
 		ss >> hex >> guid1;
 		if (ss.fail()) {
-			return -1;
+			return -1.0f;
 		}
 	}
 	else {
 		guid1 = UnitGUID(unit1.data());
 		if (guid1 == 0) {
-			return -1;
+			return -1.0f;
 		}
 	}
 
