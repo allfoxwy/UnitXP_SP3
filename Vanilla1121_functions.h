@@ -102,7 +102,7 @@ int vanilla1121_unitIsControlledByPlayer(uint32_t unit);
 // Get object's classification: normal, elite, rare elite, world boss, rare. Return -1 for error.
 int vanilla1121_unitClassification(uint32_t unit);
 // Search visiable objects for GUID and return its address as uint32_t (Because uint32_t is easier to do math than void*)
-uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
+uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID);
 // This function only work for Unit and Player type objects, or game would crash
 C3Vector vanilla1121_unitPosition(uint32_t unit);
 // This function only work for Unit and Player type objects, or game would crash
@@ -138,7 +138,6 @@ float vanilla1121_unitCombatReach(uint32_t unit);
 float vanilla1121_unitScaleX(uint32_t unit);
 
 float vectorLength(const C3Vector& vec);
-
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b);
 float vectorDotProduct(const C3Vector& a, const C3Vector& b);
 void vectorNormalize(C3Vector& vec);

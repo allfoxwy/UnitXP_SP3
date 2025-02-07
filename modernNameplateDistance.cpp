@@ -126,17 +126,22 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
             uint32_t next_item = *reinterpret_cast<uint32_t*>(nameplate_item + 0x4e0);
             uint64_t guidUnderNameplate = *reinterpret_cast<uint64_t*>(nameplate_item + 0x4e8);
 
-            void* unitUnderNameplate = reinterpret_cast<void*>(vanilla1121_getVisiableObject(guidUnderNameplate));
+            uint32_t unitUnderNameplate = vanilla1121_getVisiableObject(guidUnderNameplate);
+
+            if (unitUnderNameplate == 0 || (unitUnderNameplate & 1) != 0) {
+                nameplate_item = next_item;
+                continue;
+            }
 
             // While it unlikely exists, we skip object which is not Unit.
-            int type = vanilla1121_objectType(reinterpret_cast<uint32_t>(unitUnderNameplate));
+            int type = vanilla1121_objectType(unitUnderNameplate);
             if (type != OBJECT_TYPE_Unit && type != OBJECT_TYPE_Player) {
                 nameplate_item = next_item;
                 continue;
             }
 
-            if (shouldHaveNameplate(unitUnderNameplate) == 0) {
-                p_removeNameplate(reinterpret_cast<uint32_t>(unitUnderNameplate));
+            if (shouldHaveNameplate(reinterpret_cast<void*>(unitUnderNameplate)) == 0) {
+                p_removeNameplate(unitUnderNameplate);
             }
 
             nameplate_item = next_item;
@@ -165,8 +170,15 @@ void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1,
     if (self && modernNameplateDistance) {
         perfSetSlotName(2, "add nameplate");
         perfMarkStart(2);
+        
+        uint32_t unit = reinterpret_cast<uint32_t>(self);
+        if (unit == 0 || (unit & 1) != 0) {
+            perfMarkEnd(2);
+            return;
+        }
+
         // While it unlikely exists, we skip object which is not Unit.
-        int type = vanilla1121_objectType(reinterpret_cast<uint32_t>(self));
+        int type = vanilla1121_objectType(unit);
         if (type == OBJECT_TYPE_Unit || type == OBJECT_TYPE_Player) {
             if (shouldHaveNameplate(self) == 0) {
                 perfMarkEnd(2);

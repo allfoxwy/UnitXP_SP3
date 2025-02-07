@@ -19,7 +19,7 @@ struct handle_data {
     HWND window_handle;
 };
 
-BOOL is_main_window(HWND handle)
+static BOOL is_main_window(HWND handle)
 {
     return GetWindow(handle, GW_OWNER) == (HWND)0 && IsWindowVisible(handle);
 }
@@ -35,16 +35,16 @@ BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam)
     return FALSE;
 }
 
-HWND find_main_window(DWORD process_id)
+static HWND find_main_window(DWORD process_id)
 {
-    handle_data data;
+    handle_data data = {};
     data.process_id = process_id;
     data.window_handle = 0;
     EnumWindows(enum_windows_callback, (LPARAM)&data);
     return data.window_handle;
 }
 
-bool gameInForeground() {
+static bool gameInForeground() {
     DWORD pid = GetCurrentProcessId();
     HWND window = find_main_window(pid);
 
@@ -59,7 +59,7 @@ void flashTaskbarIcon() {
     DWORD pid = GetCurrentProcessId();
     HWND window = find_main_window(pid);
 
-    FLASHWINFO param;
+    FLASHWINFO param = {};
     param.cbSize = sizeof(FLASHWINFO);
     param.hwnd = window;
     param.dwFlags = FLASHW_TRAY | FLASHW_TIMERNOFG;

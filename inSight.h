@@ -7,16 +7,17 @@
 
 using namespace std;
 
-int UnitXP_inSight(void * unit0, void * unit1);
-int UnitXP_inSight(uint64_t guid0, uint64_t guid1);
-int UnitXP_inSight(string unit0, string unit1);
-int camera_inSight(void * unit);
+// -1 for error
+int UnitXP_inSight(const void * unit0, const void * unit1);
+int UnitXP_inSight(const uint64_t guid0, const uint64_t guid1);
+int UnitXP_inSight(const string unit0, const string unit1);
+int camera_inSight(const void * unit);
 
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
 bool inViewingFrustum(const C3Vector& posObject, float checkCone);
 
 
-int UnitXP_inFrontOfPlayer(const C3Vector& pos);
-int UnitXP_inFrontOfPlayer(uint64_t guid);
-int UnitXP_inFrontOfPlayer(string unit);
-
+// Check if I am behind a mob, -1 for error
+int UnitXP_behind(const void* me, const void* mob);
+int UnitXP_behind(const uint64_t guidMe, const uint64_t guidMob);
+int UnitXP_behind(const string me, const string mob);

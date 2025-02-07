@@ -49,14 +49,14 @@ bool targetNearestEnemy(float distanceLimit) {
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
-                    struct mob_entity new_mob;
+                    struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
                     new_mob.distance = distance;
                     mobs.push_back(new_mob);
                 }
             }
             else {
-                struct mob_entity new_mob;
+                struct mob_entity new_mob = {};
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 mobs.push_back(new_mob);
@@ -114,14 +114,14 @@ bool targetWorldBoss(float distanceLimit) {
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
-                    struct mob_entity new_mob;
+                    struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
                     new_mob.distance = distance;
                     mobs.push_back(new_mob);
                 }
             }
             else {
-                struct mob_entity new_mob;
+                struct mob_entity new_mob = {};
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 mobs.push_back(new_mob);
@@ -163,7 +163,7 @@ bool targetWorldBoss(float distanceLimit) {
 }
 
 // Return the mark's order in list
-unsigned int markInList(const int mark, const vector<int>& list) {
+static unsigned int markInList(const int mark, const vector<int>& list) {
     for (unsigned int i = 0; i < list.size(); ++i) {
         if (list[i] == mark) {
             return i;
@@ -314,14 +314,14 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
-                    struct mob_entity new_mob;
+                    struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
                     new_mob.distance = distance;
                     list.push_back(new_mob);
                 }
             }
             else {
-                struct mob_entity new_mob;
+                struct mob_entity new_mob = {};
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 list.push_back(new_mob);
@@ -394,7 +394,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
-                    struct mob_entity new_mob;
+                    struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
                     new_mob.distance = distance;
                     new_mob.targetMark = mark;
@@ -404,7 +404,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
                 }
             }
             else {
-                struct mob_entity new_mob;
+                struct mob_entity new_mob = {};
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 new_mob.targetMark = mark;
@@ -473,7 +473,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
 
             if (type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
-                    struct mob_entity new_mob;
+                    struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
                     new_mob.distance = distance;
 
@@ -489,7 +489,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                 }
             }
             else {
-                struct mob_entity new_mob;
+                struct mob_entity new_mob = {};
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 if (new_mob.distance < 8.0f) {

@@ -149,36 +149,43 @@ bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
 	}
 }
 
-int UnitXP_inFrontOfPlayer(const C3Vector& pos) {
-	uint64_t playerGUID = UnitGUID("player");
-	if (playerGUID == 0) {
+int UnitXP_behind(const void* mevoid, const void* mobvoid) {
+	if (!mevoid || !mobvoid) {
 		return -1;
 	}
 
-	uint32_t player = vanilla1121_getVisiableObject(playerGUID);
-	if (player == 0) {
+	uint32_t unitMe = reinterpret_cast<uint32_t>(mevoid);
+	uint32_t unitMob = reinterpret_cast<uint32_t>(mobvoid);
+
+	if ((unitMe & 1) != 0 || (unitMob & 1) != 0) {
 		return -1;
 	}
 
-	if (vanilla1121_objectType(player) != OBJECT_TYPE_Player && vanilla1121_objectType(player) != OBJECT_TYPE_Unit) {
+	if (vanilla1121_objectType(unitMe) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(unitMe) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+	if (vanilla1121_objectType(unitMob) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(unitMob) != OBJECT_TYPE_Player) {
 		return -1;
 	}
 
-	C3Vector posPlayer = vanilla1121_unitPosition(player);
+	C3Vector posMe = vanilla1121_unitPosition(unitMe);
+	C3Vector posMob = vanilla1121_unitPosition(unitMob);
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
-	if (UnitXP_distanceBetween(posPlayer, pos) > guardAgainstTransportsCoordinates) {
+	if (UnitXP_distanceBetween(posMe, posMob) > guardAgainstTransportsCoordinates) {
 		return -1;
 	}
 
-	float playerFacing = vanilla1121_unitFacing(player);
+	float facing = vanilla1121_unitFacing(unitMob);
 
 	C3Vector vecLeft = {};
-	vecLeft.x = -std::sin(playerFacing);
-	vecLeft.y = std::cos(playerFacing);
+	vecLeft.x = -std::sin(facing);
+	vecLeft.y = std::cos(facing);
 	vecLeft.z = 0.0f;
 
 	C3Vector vecForward = {};
@@ -186,8 +193,8 @@ int UnitXP_inFrontOfPlayer(const C3Vector& pos) {
 	vecForward.y = vecLeft.x * std::sin(static_cast<float>(-M_PI_2)) + vecLeft.y * std::cos(static_cast<float>(-M_PI_2));
 
 	C3Vector vecCheck = {};
-	vecCheck.x = pos.x - posPlayer.x;
-	vecCheck.y = pos.y - posPlayer.y;
+	vecCheck.x = posMe.x - posMob.x;
+	vecCheck.y = posMe.y - posMob.y;
 	vecCheck.z = 0.0f;
 
 	float angle = angleBetweenVectors(vecForward, vecCheck);
@@ -204,51 +211,58 @@ int UnitXP_inFrontOfPlayer(const C3Vector& pos) {
 	}
 }
 
-int UnitXP_inFrontOfPlayer(uint64_t guid) {
-	if (guid == 0) {
+int UnitXP_behind(const uint64_t guidMe, const uint64_t guidMob) {
+	if (guidMe == 0 || guidMob == 0) {
 		return -1;
 	}
-
-	uint32_t u = vanilla1121_getVisiableObject(guid);
-	if (u == 0) {
-		return -1;
-	}
-
-	if (vanilla1121_objectType(u) != OBJECT_TYPE_Player && vanilla1121_objectType(u) != OBJECT_TYPE_Unit) {
-		return -1;
-	}
-
-	return UnitXP_inFrontOfPlayer(vanilla1121_unitPosition(u));
+	return UnitXP_behind(
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guidMe)),
+		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guidMob)));
 }
 
-int UnitXP_inFrontOfPlayer(string unit) {
-	if (unit.empty()) {
+// return 0 for "not in sight"; 1 for "in sight"; -1 for error
+int UnitXP_behind(const string unit0, const string unit1) {
+	uint64_t guid0 = 0, guid1 = 0;
+
+	if (unit0.empty() || unit1.empty()) {
 		return -1;
 	}
 
-	uint64_t guid = 0;
-
-	if (unit.find(u8"0x") != unit.npos) {
-		stringstream ss{ unit };
-		ss >> hex >> guid;
+	if (unit1.find(u8"0x") != unit1.npos) {
+		stringstream ss{ unit1 };
+		ss >> hex >> guid1;
 		if (ss.fail()) {
 			return -1;
 		}
 	}
 	else {
-		guid = UnitGUID(unit.data());
-		if (guid == 0) {
+		guid1 = UnitGUID(unit1.data());
+		if (guid1 == 0) {
 			return -1;
 		}
 	}
 
-	return UnitXP_inFrontOfPlayer(guid);
+	if (unit0.find(u8"0x") != unit0.npos) {
+		stringstream ss{ unit0 };
+		ss >> hex >> guid0;
+		if (ss.fail()) {
+			return -1;
+		}
+	}
+	else {
+		guid0 = UnitGUID(unit0.data());
+		if (guid0 == 0) {
+			return -1;
+		}
+	}
+
+	return UnitXP_behind(guid0, guid1);
 }
 
 
-static int test_camera_inSight(void* unit) {
+static int test_camera_inSight(const uint32_t unit) {
 	C3Vector pos0 = vanilla1121_getCameraPosition();
-	C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(unit));
+	C3Vector pos1 = vanilla1121_unitPosition(unit);
 
 	if (inViewingFrustum(pos1, 2.0f) == false) {
 		return 0;
@@ -280,14 +294,24 @@ static int test_camera_inSight(void* unit) {
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
-int camera_inSight(void* unit) {
-	if (!unit) {
+int camera_inSight(const void* unitvoid) {
+	if (!unitvoid) {
+		return -1;
+	}
+
+	uint32_t unit = reinterpret_cast<uint32_t>(unitvoid);
+
+	if ((unit & 1) != 0) {
+		return -1;
+	}
+
+	if (vanilla1121_objectType(unit) != OBJECT_TYPE_Player && vanilla1121_objectType(unit) != OBJECT_TYPE_Unit) {
 		return -1;
 	}
 
 	cameraCacheHousekeeping();
 
-	uint64_t guid = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit) + 0x30);
+	uint64_t guid = *reinterpret_cast<uint64_t*>(unit + 0x30);
 
 	LARGE_INTEGER now = {};
 	QueryPerformanceCounter(&now);
@@ -315,43 +339,29 @@ int camera_inSight(uint64_t guid) {
 	if (guid == 0) {
 		return -1;
 	}
-
-	uint32_t u = vanilla1121_getVisiableObject(guid);
-	if (u == 0) {
-		return -1;
-	}
-
-	if (vanilla1121_objectType(u) != OBJECT_TYPE_Player && vanilla1121_objectType(u) != OBJECT_TYPE_Unit) {
-		return -1;
-	}
-
-	return camera_inSight(reinterpret_cast<void*>(u));
-}
-
-static int test_UnitXP_inSight(void* unit0, void* unit1) {
-	if (vanilla1121_unitInLineOfSight(
-		reinterpret_cast<uint32_t>(unit0),
-		reinterpret_cast<uint32_t>(unit1))) {
-		return 1;
-	}
-	else {
-		return 0;
-	}
+	return camera_inSight(reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid)));
 }
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 // This function is using void* to prevent implicit conversion from uint32_t to uint64_t
-int UnitXP_inSight(void* unit0, void* unit1) {
-	if (!unit0 || !unit1) {
+int UnitXP_inSight(const void* unit0void, const void* unit1void) {
+	if (!unit0void || !unit1void) {
 		return -1;
 	}
 
-	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Unit &&
-		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit0)) != OBJECT_TYPE_Player) {
+	uint32_t unit0 = reinterpret_cast<uint32_t>(unit0void);
+	uint32_t unit1 = reinterpret_cast<uint32_t>(unit1void);
+	
+	if ((unit0 & 1) != 0 || (unit1 & 1) != 0) {
 		return -1;
 	}
-	if (vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Unit &&
-		vanilla1121_objectType(reinterpret_cast<uint32_t>(unit1)) != OBJECT_TYPE_Player) {
+
+	if (vanilla1121_objectType(unit0) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(unit0) != OBJECT_TYPE_Player) {
+		return -1;
+	}
+	if (vanilla1121_objectType(unit1) != OBJECT_TYPE_Unit &&
+		vanilla1121_objectType(unit1) != OBJECT_TYPE_Player) {
 		return -1;
 	}
 
@@ -359,15 +369,17 @@ int UnitXP_inSight(void* unit0, void* unit1) {
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 	// TODO: I don't have a way to find out what the current system is
 	// To workaround, we test the distance. If they are too far away, we judge that situation as error
-	float distance = UnitXP_distanceBetween(unit0, unit1);
+	C3Vector posUnit0 = vanilla1121_unitPosition(unit0);
+	C3Vector posUnit1 = vanilla1121_unitPosition(unit1);
+	float distance = UnitXP_distanceBetween(posUnit0, posUnit1);
 	if (distance > guardAgainstTransportsCoordinates) {
 		return -1;
 	}
 
 	unitCacheHousekeeping();
 
-	uint64_t guid0 = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit0) + 0x30);
-	uint64_t guid1 = *reinterpret_cast<uint64_t*>(reinterpret_cast<uint32_t>(unit1) + 0x30);
+	uint64_t guid0 = *reinterpret_cast<uint64_t*>(unit0 + 0x30);
+	uint64_t guid1 = *reinterpret_cast<uint64_t*>(unit1 + 0x30);
 
 	LARGE_INTEGER now = {};
 	QueryPerformanceCounter(&now);
@@ -382,7 +394,7 @@ int UnitXP_inSight(void* unit0, void* unit1) {
 		}
 	}
 
-	int result = test_UnitXP_inSight(unit0, unit1);
+	int result = vanilla1121_unitInLineOfSight(unit0, unit1);
 
 	QueryPerformanceCounter(&now);
 	now.QuadPart += cacheDither().QuadPart;
@@ -393,14 +405,17 @@ int UnitXP_inSight(void* unit0, void* unit1) {
 }
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
-int UnitXP_inSight(uint64_t guid0, uint64_t guid1) {
+int UnitXP_inSight(const uint64_t guid0, const uint64_t guid1) {
+	if (guid0 == 0 || guid1 == 0) {
+		return -1;
+	}
 	return UnitXP_inSight(
 		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),
 		reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1)));
 }
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
-int UnitXP_inSight(string unit0, string unit1) {
+int UnitXP_inSight(const string unit0, const string unit1) {
 	uint64_t guid0 = 0, guid1 = 0;
 
 	if (unit0.empty() || unit1.empty()) {

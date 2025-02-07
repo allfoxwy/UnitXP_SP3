@@ -71,9 +71,8 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-        else if (cmd == "inFrontOfPlayer") {
-            string unit{ lua_tostring(L,2) };
-            int result = UnitXP_inFrontOfPlayer(unit);
+        else if (cmd == "behind" && lua_gettop(L) >= 3) {
+            int result = UnitXP_behind(lua_tostring(L, 2), lua_tostring(L, 3));
             if (result >= 0) {
                 lua_pushboolean(L, result);
                 return 1;

@@ -139,7 +139,7 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
 }
 
 
-uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID) {
+uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
     
