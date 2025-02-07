@@ -204,10 +204,10 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 	}
 
 	if (angle < M_PI_2) {
-		return 1;
+		return 0;
 	}
 	else {
-		return 0;
+		return 1;
 	}
 }
 
