@@ -2,7 +2,6 @@
 
 #include <string>
 #include <sstream>
-#include <cmath>
 
 #include "distanceBetween.h"
 #include "Vanilla1121_functions.h"
@@ -11,7 +10,11 @@ using namespace std;
 
 
 float UnitXP_distanceBetween(const C3Vector& pos0, const C3Vector& pos1) {
-	return hypot(pos0.x - pos1.x, pos0.y - pos1.y, pos0.z - pos1.z);
+	C3Vector v = {};
+	v.x = pos0.x - pos1.x;
+	v.y = pos0.y - pos1.y;
+	v.z = pos0.z - pos1.z;
+	return vectorLength(v);
 }
 
 // return -1 for error
@@ -45,7 +48,12 @@ float UnitXP_distanceBetween(void* unit0, void* unit1, distanceMeters meter) {
 
 		float totalReach = max(5.0f, combatReach0 + combatReach1 + 1.333333373069763f);
 
-		return max(0.0f, hypot(pos0.x - pos1.x, pos0.y - pos1.y) - totalReach);
+		C3Vector v = {};
+		v.x = pos0.x - pos1.x;
+		v.y = pos0.y - pos1.y;
+		v.z = 0.0f;
+
+		return max(0.0f, vectorLength(v) - totalReach);
 	}
 	else if (meter == METER_AOE) {
 		// AoE distance is following Balake's fix https://github.com/vmangos/core/commit/fc0d6cfd6192b5c90072d77ab289f165ea540a00
@@ -93,7 +101,7 @@ float UnitXP_distanceBetween(uint64_t guid0, uint64_t guid1, distanceMeters mete
 
 // return -1 for error
 float UnitXP_distanceBetween(string unit0, string unit1, distanceMeters meter) {
-	uint64_t guid0, guid1;
+	uint64_t guid0 = 0, guid1 = 0;
 
 	if (unit0.empty() || unit1.empty()) {
 		return -1.0f;

@@ -1,7 +1,5 @@
 #include "pch.h"
 
-#include <cmath>
-
 #include "Vanilla1121_functions.h"
 #include "modernNameplateDistance.h"
 #include "inSight.h"

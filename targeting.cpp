@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
-#include <cmath>
 
 using namespace std;
 

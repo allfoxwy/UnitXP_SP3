@@ -70,7 +70,7 @@ void* GetContext(void);
 
 // LUA language
 void lua_pushstring(void* L, std::string str);
-void luaL_openlib(void* L, const char* name_space, lua_func_reg function_list[], int upvalues);
+void luaL_openlib(void* L, std::string name_space, lua_func_reg function_list[], int upvalues);
 std::string lua_tostring(void* L, int index);
 double lua_tonumber(void* L, int index);
 int lua_gettop(void* L);
@@ -105,6 +105,8 @@ int vanilla1121_unitClassification(uint32_t unit);
 uint32_t vanilla1121_getVisiableObject(uint64_t targetGUID);
 // This function only work for Unit and Player type objects, or game would crash
 C3Vector vanilla1121_unitPosition(uint32_t unit);
+// This function only work for Unit and Player type objects, or game would crash
+float vanilla1121_unitFacing(uint32_t unit);
 // Return true for "in sight"; false for "not in sight";
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1);
 // Return true for in-combat; false for not-in-combat or unchecked
@@ -135,3 +137,10 @@ float vanilla1121_unitCombatReach(uint32_t unit);
 // Return -1.0f for error.
 float vanilla1121_unitScaleX(uint32_t unit);
 
+float vectorLength(const C3Vector& vec);
+
+C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b);
+float vectorDotProduct(const C3Vector& a, const C3Vector& b);
+void vectorNormalize(C3Vector& vec);
+// Return 4 * M_PI for error
+float angleBetweenVectors(const C3Vector& a, const C3Vector& b);

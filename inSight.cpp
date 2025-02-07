@@ -1,14 +1,15 @@
 #include "pch.h"
 
+#define _USE_MATH_DEFINES
+
 #include <string>
 #include <sstream>
-#include <cmath>
 #include <unordered_map>
 #include <map>
 #include <random>
 #include <profileapi.h>
 
-#include "Vanilla1121_functions.h"
+#include "inSight.h"
 #include "distanceBetween.h"
 #include "performanceProfiling.h"
 
@@ -95,9 +96,23 @@ static void unitCacheHousekeeping() {
 }
 
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
-bool inViewingFrustum(C3Vector posObject, float checkCone) {
+bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
+	uint64_t playerGUID = UnitGUID("player");
+	if (playerGUID == 0) {
+		return false;
+	}
+
+	uint32_t player = vanilla1121_getVisiableObject(playerGUID);
+	if (player == 0) {
+		return false;
+	}
+
+	if (vanilla1121_objectType(player) != OBJECT_TYPE_Player && vanilla1121_objectType(player) != OBJECT_TYPE_Unit) {
+		return false;
+	}
+
+	C3Vector posPlayer = vanilla1121_unitPosition(player);
 	C3Vector posCamera = vanilla1121_getCameraPosition();
-	C3Vector posPlayer = vanilla1121_unitPosition(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
 
 	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
 	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
@@ -119,24 +134,117 @@ bool inViewingFrustum(C3Vector posObject, float checkCone) {
 	vecPlayer.y = posPlayer.y - posCamera.y;
 	vecPlayer.z = posPlayer.z - posCamera.z;
 
-	float dotProduct = vecObject.x * vecPlayer.x + vecObject.y * vecPlayer.y + vecObject.z * vecPlayer.z;
-	float lenVecObject = hypot(vecObject.x, vecObject.y, vecObject.z);
-	float lenVecPlayer = hypot(vecPlayer.x, vecPlayer.y, vecPlayer.z);
-
 	// I tested in game and find out that even Vanilla Tweaks change this value, the screen border of objects still follow original FoV somehow
 	// I suspect game has additional transformation before Direct X FoV
 	//float fov = vanilla1121_getCameraFoV();
 	const float fov = 1.5708f;
 
-	float angleBetweenPlayerAndObject = acos(dotProduct / (lenVecObject * lenVecPlayer));
+	float angle = angleBetweenVectors(vecObject, vecPlayer);
 
-	if (angleBetweenPlayerAndObject > fov / checkCone) {
+	if (angle > fov / checkCone) {
 		return false;
 	}
 	else {
 		return true;
 	}
 }
+
+int UnitXP_inFrontOfPlayer(const C3Vector& pos) {
+	uint64_t playerGUID = UnitGUID("player");
+	if (playerGUID == 0) {
+		return -1;
+	}
+
+	uint32_t player = vanilla1121_getVisiableObject(playerGUID);
+	if (player == 0) {
+		return -1;
+	}
+
+	if (vanilla1121_objectType(player) != OBJECT_TYPE_Player && vanilla1121_objectType(player) != OBJECT_TYPE_Unit) {
+		return -1;
+	}
+
+	C3Vector posPlayer = vanilla1121_unitPosition(player);
+
+	// When player jump onto transports (boat/zeppelin) their coordinates system would change.
+	// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
+	// TODO: I don't have a way to find out what the current system is
+	// To workaround, we test the distance. If they are too far away, we judge that situation as error
+	if (UnitXP_distanceBetween(posPlayer, pos) > guardAgainstTransportsCoordinates) {
+		return -1;
+	}
+
+	float playerFacing = vanilla1121_unitFacing(player);
+
+	C3Vector vecLeft = {};
+	vecLeft.x = -std::sin(playerFacing);
+	vecLeft.y = std::cos(playerFacing);
+	vecLeft.z = 0.0f;
+
+	C3Vector vecForward = {};
+	vecForward.x = vecLeft.x * std::cos(static_cast<float>(-M_PI_2)) - vecLeft.y * std::sin(static_cast<float>(-M_PI_2));
+	vecForward.y = vecLeft.x * std::sin(static_cast<float>(-M_PI_2)) + vecLeft.y * std::cos(static_cast<float>(-M_PI_2));
+
+	C3Vector vecCheck = {};
+	vecCheck.x = pos.x - posPlayer.x;
+	vecCheck.y = pos.y - posPlayer.y;
+	vecCheck.z = 0.0f;
+
+	float angle = angleBetweenVectors(vecForward, vecCheck);
+
+	if (angle > 2 * M_PI) {
+		return -1;
+	}
+
+	if (angle < M_PI_2) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int UnitXP_inFrontOfPlayer(uint64_t guid) {
+	if (guid == 0) {
+		return -1;
+	}
+
+	uint32_t u = vanilla1121_getVisiableObject(guid);
+	if (u == 0) {
+		return -1;
+	}
+
+	if (vanilla1121_objectType(u) != OBJECT_TYPE_Player && vanilla1121_objectType(u) != OBJECT_TYPE_Unit) {
+		return -1;
+	}
+
+	return UnitXP_inFrontOfPlayer(vanilla1121_unitPosition(u));
+}
+
+int UnitXP_inFrontOfPlayer(string unit) {
+	if (unit.empty()) {
+		return -1;
+	}
+
+	uint64_t guid = 0;
+
+	if (unit.find(u8"0x") != unit.npos) {
+		stringstream ss{ unit };
+		ss >> hex >> guid;
+		if (ss.fail()) {
+			return -1;
+		}
+	}
+	else {
+		guid = UnitGUID(unit.data());
+		if (guid == 0) {
+			return -1;
+		}
+	}
+
+	return UnitXP_inFrontOfPlayer(guid);
+}
+
 
 static int test_camera_inSight(void* unit) {
 	C3Vector pos0 = vanilla1121_getCameraPosition();
@@ -201,6 +309,23 @@ int camera_inSight(void* unit) {
 	cameraSightCache[guid] = make_pair(now, result);
 
 	return result;
+}
+
+int camera_inSight(uint64_t guid) {
+	if (guid == 0) {
+		return -1;
+	}
+
+	uint32_t u = vanilla1121_getVisiableObject(guid);
+	if (u == 0) {
+		return -1;
+	}
+
+	if (vanilla1121_objectType(u) != OBJECT_TYPE_Player && vanilla1121_objectType(u) != OBJECT_TYPE_Unit) {
+		return -1;
+	}
+
+	return camera_inSight(reinterpret_cast<void*>(u));
 }
 
 static int test_UnitXP_inSight(void* unit0, void* unit1) {
@@ -276,24 +401,10 @@ int UnitXP_inSight(uint64_t guid0, uint64_t guid1) {
 
 // return 0 for "not in sight"; 1 for "in sight"; -1 for error
 int UnitXP_inSight(string unit0, string unit1) {
-	uint64_t guid0, guid1;
+	uint64_t guid0 = 0, guid1 = 0;
 
 	if (unit0.empty() || unit1.empty()) {
 		return -1;
-	}
-
-	if (unit0.find(u8"0x") != unit0.npos) {
-		stringstream ss{ unit0 };
-		ss >> hex >> guid0;
-		if (ss.fail()) {
-			return -1;
-		}
-	}
-	else {
-		guid0 = UnitGUID(unit0.data());
-		if (guid0 == 0) {
-			return -1;
-		}
 	}
 
 	if (unit1.find(u8"0x") != unit1.npos) {
@@ -306,6 +417,24 @@ int UnitXP_inSight(string unit0, string unit1) {
 	else {
 		guid1 = UnitGUID(unit1.data());
 		if (guid1 == 0) {
+			return -1;
+		}
+	}
+
+	if (unit0.find(u8"camera") != unit0.npos) {
+		return camera_inSight(guid1);
+	}
+
+	if (unit0.find(u8"0x") != unit0.npos) {
+		stringstream ss{ unit0 };
+		ss >> hex >> guid0;
+		if (ss.fail()) {
+			return -1;
+		}
+	}
+	else {
+		guid0 = UnitGUID(unit0.data());
+		if (guid0 == 0) {
 			return -1;
 		}
 	}

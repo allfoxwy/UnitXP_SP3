@@ -10,3 +10,4 @@ extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511
 
 extern float cameraHorizontalAddend;
 extern float cameraVerticalAddend;
+extern bool cameraFollowTarget;

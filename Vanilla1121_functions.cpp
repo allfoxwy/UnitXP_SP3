@@ -1,6 +1,8 @@
 #include "pch.h"
 
-#include <cstdint>
+#define _USE_MATH_DEFINES
+
+#include <cmath>
 
 #include "Vanilla1121_functions.h"
 #include "utf8_to_utf16.h"
@@ -166,6 +168,9 @@ C3Vector vanilla1121_unitPosition(uint32_t unit) {
     return result;
 }
 
+float vanilla1121_unitFacing(uint32_t unit) {
+    return *reinterpret_cast<float*>(unit + 0x9c4);
+}
 
 bool vanilla1121_unitInCombat(uint32_t unit) {
     if (unit == 0) {
@@ -472,4 +477,45 @@ int vanilla1121_getTargetMark(uint64_t targetGUID) {
     return -1;
 }
 
+float vectorLength(const C3Vector& vec) {
+    return std::hypot(vec.x, vec.y, vec.z);
+}
 
+C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b) {
+    C3Vector result = {};
+
+    result.x = a.y * b.z - a.z * b.y;
+    result.y = -(a.x * b.z - a.z * b.x);
+    result.z = a.x * b.y - a.y * b.x;
+
+    return result;
+}
+
+float vectorDotProduct(const C3Vector& a, const C3Vector& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+void vectorNormalize(C3Vector& vec) {
+    float len = vectorLength(vec);
+    vec.x /= len;
+    vec.y /= len;
+    vec.z /= len;
+}
+
+float angleBetweenVectors(const C3Vector& a, const C3Vector& b) {
+    float lenA = vectorLength(a);
+    float lenB = vectorLength(b);
+    
+    if (lenA == 0.0f || lenB == 0.0f) {
+        return static_cast<float>(4 * M_PI);
+    }
+
+    float dotProduct = vectorDotProduct(a, b);
+
+    float cosValue = dotProduct / (lenA * lenB);
+    if (cosValue > 1.0f || cosValue < -1.0f) {
+        return static_cast<float>(4 * M_PI);
+    }
+
+    return std::acos(cosValue);
+}

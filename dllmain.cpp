@@ -71,6 +71,18 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
+        else if (cmd == "inFrontOfPlayer") {
+            string unit{ lua_tostring(L,2) };
+            int result = UnitXP_inFrontOfPlayer(unit);
+            if (result >= 0) {
+                lua_pushboolean(L, result);
+                return 1;
+            }
+            else {
+                lua_pushnil(L);
+                return 1;
+            }
+        }
         else if (cmd == "target") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "nearestEnemy") {
@@ -221,6 +233,17 @@ int __fastcall detoured_UnitXP(void* L) {
                 cameraHorizontalAddend = userValue;
             }
             lua_pushnumber(L, cameraHorizontalAddend);
+            return 1;
+        }
+        else if (cmd == "cameraFollowTarget") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                cameraFollowTarget = true;
+            }
+            if (subcmd == "disable") {
+                cameraFollowTarget = false;
+            }
+            lua_pushboolean(L, cameraFollowTarget);
             return 1;
         }
         else if (cmd == "notify") {
