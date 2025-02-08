@@ -115,10 +115,12 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
     // The common knowledge of flag is 0x100171 or 0x100111:
     // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
     // *- 0x100111 works well.
-    //uint32_t intersectFlag = 0x100111;
+    uint32_t intersectFlag = 0x100111;
+    std::string perfName = "CWorld_Intersect with flag 0x100111";
 
     // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
-    // there is a switch to determine what flag to use. In practice it means 0x1f0171, which is slower than 0x100111.
+    // There is a switch to determine what flag to use. The switch is the game option of Water Collision.
+    /*
     uint32_t intersectFlag = 0;
     std::string perfName = "";
     if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
@@ -129,6 +131,7 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
         intersectFlag = 0x100171;
         perfName = "CWorld_Intersect with flag 0x100171";
     }
+    */
 
     perfSetSlotName(0, perfName);
     perfMarkStart(0);
@@ -138,7 +141,9 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
     return result;
 }
 
-
+/*
+* This implementation is the same as 0x468380
+* However it's a O(n) linear search
 uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -155,7 +160,16 @@ uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
 
     return 0;
 }
+*/
 
+uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
+    // In 0x464870 the significant 4 bytes of GUID is a hash bucket index, then double checked the lower 4 bytes for sure.
+    // It would be certainly faster than O(n)
+    typedef uint32_t(__fastcall* GETOBJECT_BYGUID)(uint64_t);
+    GETOBJECT_BYGUID getObject_byGUID = reinterpret_cast<GETOBJECT_BYGUID>(0x464870);
+
+    return getObject_byGUID(targetGUID);
+}
 
 C3Vector vanilla1121_unitPosition(uint32_t unit) {
     float* positionPtr = reinterpret_cast<float*>(unit + 0x9b8);
