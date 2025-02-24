@@ -1,6 +1,9 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
+#define _USE_MATH_DEFINES
+
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <limits>
@@ -82,6 +85,21 @@ int __fastcall detoured_UnitXP(void* L) {
                 lua_pushnil(L);
                 return 1;
             }
+        }
+        else if (cmd == "behindThreshold") {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "set" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                double n = lua_tonumber(L, 3);
+                if (n < 0) {
+                    n = 0;
+                }
+                if (n > M_PI) {
+                    n = M_PI;
+                }
+                behind_threshold = static_cast<float>(n);
+            }
+            lua_pushnumber(L, behind_threshold);
+            return 1;
         }
         else if (cmd == "target") {
             string subcmd{ lua_tostring(L, 2) };

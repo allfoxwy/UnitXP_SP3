@@ -21,3 +21,5 @@ bool inViewingFrustum(const C3Vector& posObject, float checkCone);
 int UnitXP_behind(const void* me, const void* mob);
 int UnitXP_behind(const uint64_t guidMe, const uint64_t guidMob);
 int UnitXP_behind(const string me, const string mob);
+
+extern float behind_threshold;

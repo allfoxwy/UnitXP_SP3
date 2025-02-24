@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <unordered_map>
@@ -14,6 +15,8 @@
 #include "performanceProfiling.h"
 
 using namespace std;
+
+extern float behind_threshold = static_cast<float>(M_PI_2);
 
 // We implement 2 cache to workaround issue #10
 // Idea is to call CWorld_Intersect less
@@ -201,7 +204,7 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 		return -1;
 	}
 
-	if (angle < M_PI_2) {
+	if (angle < behind_threshold) {
 		return 0;
 	}
 	else {
