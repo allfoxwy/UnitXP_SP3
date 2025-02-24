@@ -4,6 +4,7 @@ An attempt to make Vanilla 1.12 modern...
 - Adjust camera
 - Background notifications
 - Check line of sight in Lua
+- Debug interface for in-game Lua
 - Measure distance in Lua
 - Performance tweak of disabling TCP delayed ACK
 - Proper nameplates

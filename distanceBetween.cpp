@@ -58,7 +58,6 @@ float UnitXP_distanceBetween(const void* unit0void, const void* unit1void, dista
 		C3Vector v = {};
 		v.x = pos0.x - pos1.x;
 		v.y = pos0.y - pos1.y;
-		v.z = 0.0f;
 
 		return max(0.0f, vectorLength(v) - totalReach);
 	}

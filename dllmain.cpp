@@ -20,6 +20,7 @@
 #include "gameSocket.h"
 #include "editCamera.h"
 #include "performanceProfiling.h"
+#include "LuaDebug.h"
 
 using namespace std;
 
@@ -290,6 +291,14 @@ int __fastcall detoured_UnitXP(void* L) {
             }
 
             return 1;
+        }
+        else if (cmd == "debug") {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "breakpoint") {
+                int result = LuaDebug_breakpoint();
+                lua_pushnumber(L, result);
+                return 1;
+            }
         }
     }
     return p_original_UnitXP(L);

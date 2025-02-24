@@ -186,7 +186,6 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 	C3Vector vecLeft = {};
 	vecLeft.x = -std::sin(facing);
 	vecLeft.y = std::cos(facing);
-	vecLeft.z = 0.0f;
 
 	C3Vector vecForward = {};
 	vecForward.x = vecLeft.x * std::cos(static_cast<float>(-M_PI_2)) - vecLeft.y * std::sin(static_cast<float>(-M_PI_2));
@@ -195,7 +194,6 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 	C3Vector vecCheck = {};
 	vecCheck.x = posMe.x - posMob.x;
 	vecCheck.y = posMe.y - posMob.y;
-	vecCheck.z = 0.0f;
 
 	float angle = angleBetweenVectors(vecForward, vecCheck);
 

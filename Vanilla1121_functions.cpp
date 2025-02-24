@@ -8,22 +8,48 @@
 #include "utf8_to_utf16.h"
 #include "performanceProfiling.h"
 
+// Signatures/Prototypes
+typedef void(__fastcall* LUA_PUSHSTRING)(void* L, const char* s);
+typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, uint32_t queryFlags);
+typedef void(__fastcall* TARGET)(uint64_t* GUID);
+typedef int(__thiscall* UNITREACTION)(uint32_t self, uint32_t targetObj);
+typedef bool(__thiscall* CANATTACK)(uint32_t self, uint32_t targetObj);
+typedef int(__fastcall* GETCREATURETYPE)(uint32_t obj);
+typedef void(__fastcall* LUAL_OPENLIB)(void* L, const char* name_space, lua_func_reg func_list[], int upvalues);
+typedef void* (__fastcall* GETCONTEXT)(void);
+typedef void(__fastcall* LUA_PUSHNIL)(void* L);
+typedef void(__fastcall* LUA_PUSHBOOLEAN)(void* L, int boolean_value);
+typedef void(__fastcall* LUA_PUSHNUMBER)(void* L, double n);
+typedef double(__fastcall* LUA_TONUMBER)(void* L, int index);
+typedef int(__fastcall* LUA_ISNUMBER)(void* L, int index);
+typedef const char* (__fastcall* LUA_TOSTRING)(void* L, int index);
+typedef void(__fastcall* LUA_GETTABLE)(void* L, int index);
+typedef int(__fastcall* LUA_PCALL)(void* L, int nArgs, int nResults, int errFunction);
+typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
+typedef int(__fastcall* LUA_TYPE)(void* L, int);
+typedef void(__fastcall* LUA_SETTOP)(void*, int);
+typedef int(__fastcall* LUA_TOBOOLEAN)(void*, int);
+
+
 // To get lua_State pointer
 GETCONTEXT p_GetContext = reinterpret_cast<GETCONTEXT>(0x7040D0);
 
 // LUA language
-LUA_PUSHSTRING p_lua_pushstring = reinterpret_cast<LUA_PUSHSTRING>(0x006F3890);
-LUAL_OPENLIB p_luaL_openlib = reinterpret_cast<LUAL_OPENLIB>(0x006F4DC0);
-LUA_TOSTRING p_lua_tostring = reinterpret_cast<LUA_TOSTRING>(0x006F3690);
-LUA_CFUNCTION p_lua_gettop = reinterpret_cast<LUA_CFUNCTION>(0x006F3070);
-LUA_PUSHNIL p_lua_pushnil = reinterpret_cast<LUA_PUSHNIL>(0x006F37F0);
-LUA_PUSHBOOLEAN p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0);
-LUA_PUSHNUMBER p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
-LUA_TONUMBER p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
-LUA_ISNUMBER p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
-LUA_ISNUMBER p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
-LUA_GETTABLE p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
-LUA_PCALL p_lua_pcall = reinterpret_cast<LUA_PCALL>(0x6F41A0);
+auto p_lua_pushstring = reinterpret_cast<LUA_PUSHSTRING>(0x006F3890);
+auto p_luaL_openlib = reinterpret_cast<LUAL_OPENLIB>(0x006F4DC0);
+auto p_lua_tostring = reinterpret_cast<LUA_TOSTRING>(0x006F3690);
+auto p_lua_gettop = reinterpret_cast<LUA_CFUNCTION>(0x006F3070);
+auto p_lua_pushnil = reinterpret_cast<LUA_PUSHNIL>(0x006F37F0);
+auto p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0);
+auto p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
+auto p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
+auto p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
+auto p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
+auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
+auto p_lua_pcall = reinterpret_cast<LUA_PCALL>(0x6F41A0);
+auto p_lua_type = reinterpret_cast<LUA_TYPE>(0x6F3400);
+auto p_lua_settop = reinterpret_cast<LUA_SETTOP>(0x6F3080);
+auto p_lua_toboolean = reinterpret_cast<LUA_TOBOOLEAN>(0x6F3660);
 
 
 // WoW C function
@@ -71,8 +97,14 @@ std::string lua_tostring(void* L, int index) {
     std::string result{ ptr };
     return result;
 }
+int lua_type(void* L, int index) {
+    return p_lua_type(L, index);
+}
 int lua_gettop(void* L) {
     return p_lua_gettop(L);
+}
+void lua_settop(void* L, int index) {
+    return p_lua_settop(L, index);
 }
 void lua_pushnil(void* L) {
     p_lua_pushnil(L);
@@ -88,6 +120,9 @@ void lua_pushnumber(void* L, double n) {
 }
 double lua_tonumber(void* L, int index) {
     return p_lua_tonumber(L, index);
+}
+int lua_toboolean(void* L, int index) {
+    return p_lua_toboolean(L, index);
 }
 int lua_isnumber(void* L, int index) {
     return p_lua_isnumber(L, index);
@@ -444,9 +479,6 @@ C3Vector vanilla1121_getCameraPosition() {
     uint32_t cptr = vanilla1121_getCamera();
     if (cptr == 0) {
         C3Vector nullResult = {};
-        nullResult.x = 0;
-        nullResult.y = 0;
-        nullResult.z = 0;
         return nullResult;
     }
 
