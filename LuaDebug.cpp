@@ -346,6 +346,14 @@ int LuaDebug_breakpoint() {
 		DWORD disableNagle = 1u;
 		setsockopt(s, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&disableNagle), sizeof(disableNagle));
 
+		// Enable TCP keep-alive so that we would timeout when debugger die
+		DWORD nouse = 0;
+		tcp_keepalive keepalive = {};
+		keepalive.onoff = 1;
+		keepalive.keepalivetime = 5000;
+		keepalive.keepaliveinterval = 1000;
+		WSAIoctl(s, SIO_KEEPALIVE_VALS, &keepalive, sizeof(keepalive), NULL, 0, &nouse, NULL, NULL);
+
 		if (0 != connect(s, result->ai_addr, result->ai_addrlen)) {
 			lua_sethook(L, &LuaDebug_hook, 0, 0);
 			freeaddrinfo(result);
