@@ -80,11 +80,17 @@ void lua_pushboolean(void* L, int boolean_value);
 void lua_pushnumber(void* L, double n);
 int lua_isnumber(void* L, int index);
 int lua_isstring(void* L, int index);
-void lua_gettable(void* L, int index);
 int lua_pcall(void* L, int nArgs, int nResults, int errFunction);
 int lua_type(void* L, int index);
+std::string lua_typename(void* L, int type);
 void lua_settop(void* L, int index);
 #define lua_pop(L,n) lua_settop(L, -(n)-1)
+void lua_pushvalue(void* L, int index);
+void lua_remove(void* L, int index);
+void lua_newtable(void* L);
+void lua_gettable(void* L, int index);
+void lua_settable(void* L, int index);
+int lua_next(void* L, int index);
 
 
 

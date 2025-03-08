@@ -30,7 +30,14 @@ using namespace std;
 extern HMODULE moduleSelf = 0;
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
-LUA_CFUNCTION p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
+auto p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);
+
+typedef void(__fastcall* FUNCTION_ADDRESS_CHECK_0x42a320)(uint32_t);
+static auto p_function_address_check_0x42a320 = reinterpret_cast<FUNCTION_ADDRESS_CHECK_0x42a320>(0x42a320);
+static FUNCTION_ADDRESS_CHECK_0x42a320 p_original_function_address_check_0x42a320 = NULL;
+void __fastcall disabled_function_address_check_0x42a320(uint32_t addr) {
+    return;
+}
 
 int __fastcall detoured_UnitXP(void* L) {
     if (lua_gettop(L) >= 2) {
@@ -345,6 +352,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_function_address_check_0x42a320, &disabled_function_address_check_0x42a320, reinterpret_cast<LPVOID*>(&p_original_function_address_check_0x42a320)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to disabled function address check.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_CreateHook(p_UnitXP, &detoured_UnitXP, reinterpret_cast<LPVOID*>(&p_original_UnitXP)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for UnitXP function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -440,7 +451,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for UnitXP function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-
+            if (MH_RemoveHook(p_function_address_check_0x42a320) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for function address check. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
             if (MH_Uninitialize() != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to uninitialize MinHook. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;

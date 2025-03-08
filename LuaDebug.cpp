@@ -7,6 +7,7 @@
 #include <new>
 #include <unordered_map>
 #include <exception>
+#include <sstream>
 
 #include "Vanilla1121_functions.h"
 #include "LuaDebug.h"
@@ -235,7 +236,12 @@ void __fastcall LuaDebug_hook(void* L, lua_Debug* active_record) {
 				}
 				continue;
 			}
-			if (cmd == "get local") {
+			if (cmd == "get nil to current value") {
+				lua_pushnil(L);
+				LuaDebug_sendInteger(1);
+				continue;
+			}
+			if (cmd == "get local to current value") {
 				int i = -1;
 				LuaDebug_recvInteger(i);
 
@@ -248,29 +254,60 @@ void __fastcall LuaDebug_hook(void* L, lua_Debug* active_record) {
 				}
 				continue;
 			}
-			if (cmd == "discard local") {
+			if (cmd == "get upvalue to current value") {
+				int i = -1;
+				LuaDebug_recvInteger(i);
+
+				if (current_stack_item) {
+					if (0 != lua_getinfo(L, "f", current_stack_item)) {
+						std::string result = lua_getupvalue(L, -1, i);
+
+						// lua_getinfo("f") would push the function onto stack
+						if (result != "0NULL") {
+							lua_remove(L, -2);
+						}
+						else {
+							lua_pop(L, 1);
+						}
+
+						LuaDebug_sendString(result);
+					}
+					else {
+						// we send 0 as head because Lua identifier won't begin with a digit
+						LuaDebug_sendString("0NULL");
+					}
+				}
+				else {
+					// we send 0 as head because Lua identifier won't begin with a digit
+					LuaDebug_sendString("0NULL");
+				}
+				continue;
+			}
+			if (cmd == "discard current value") {
 				lua_pop(L, 1);
 				LuaDebug_sendInteger(1);
 				continue;
 			}
-			if (cmd == "get local type") {
+			if (cmd == "get current value type") {
 				LuaDebug_sendInteger(lua_type(L, -1));
 				continue;
 			}
-			if (cmd == "get local as double") {
-				double n = lua_tonumber(L, -1);
-				LuaDebug_sendDouble(n);
+			if (cmd == "get current value as debug string") {
+				LuaDebug_sendString(lua_todebugstring(L, -1));
 				continue;
 			}
-			if (cmd == "get local as boolean") {
-				int n = lua_toboolean(L, -1);
-				LuaDebug_sendInteger(n);
+			if (cmd == "get table key as debug string") {
+				lua_pushvalue(L, -2);
+				LuaDebug_sendString(lua_todebugstring(L, -1));
+				lua_pop(L, 1);
 				continue;
 			}
-			if (cmd == "get local as string") {
-				LuaDebug_sendString(lua_tostring(L, -1));
+			if (cmd == "get next table item") {
+				LuaDebug_sendInteger(lua_next(L, -2));
 				continue;
 			}
+
+			throw std::exception("Unknown debug command");
 		}
 	}
 	catch (std::exception&) {
@@ -364,12 +401,13 @@ std::string lua_getlocal(void* L, const lua_Debug* ar, int n) {
 	typedef const char* (__fastcall* LUA_GETLOCAL)(void*, const lua_Debug*, int);
 	auto p_lua_getlocal = reinterpret_cast<LUA_GETLOCAL>(0x6fbb20);
 
-	const char* result = p_lua_getlocal(L, ar, n);
-	if (result == NULL) {
+	const char* p_result = p_lua_getlocal(L, ar, n);
+	if (p_result == NULL) {
 		// we send 0 as head because Lua identifier won't begin with a digit
 		return "0NULL";
 	}
 
+	std::string result{ p_result };
 	return result;
 }
 
@@ -377,12 +415,13 @@ std::string lua_setlocal(void* L, const lua_Debug* ar, int n) {
 	typedef const char* (__fastcall* LUA_SETLOCAL)(void*, const lua_Debug*, int);
 	auto p_lua_setlocal = reinterpret_cast<LUA_SETLOCAL>(0x6fbbb0);
 
-	const char* result = p_lua_setlocal(L, ar, n);
-	if (result == NULL) {
+	const char* p_result = p_lua_setlocal(L, ar, n);
+	if (p_result == NULL) {
 		// we send 0 as head because Lua identifier won't begin with a digit
 		return "0NULL";
 	}
 
+	std::string result{ p_result };
 	return result;
 }
 
@@ -390,12 +429,13 @@ std::string lua_getupvalue(void* L, int funcindex, int n) {
 	typedef const char* (__fastcall* LUA_GETUPVALUE)(void*, int, int);
 	auto p_lua_getupvalue = reinterpret_cast<LUA_GETUPVALUE>(0x6f4660);
 
-	const char* result = p_lua_getupvalue(L, funcindex, n);
-	if (result == NULL) {
+	const char* p_result = p_lua_getupvalue(L, funcindex, n);
+	if (p_result == NULL) {
 		// we send 0 as head because Lua identifier won't begin with a digit
 		return "0NULL";
 	}
 
+	std::string result{ p_result };
 	return result;
 }
 
@@ -403,12 +443,13 @@ std::string lua_setupvalue(void* L, int funcindex, int n) {
 	typedef const char* (__fastcall* LUA_SETUPVALUE)(void*, int, int);
 	auto p_lua_setupvalue = reinterpret_cast<LUA_SETUPVALUE>(0x6f47b0);
 
-	const char* result = p_lua_setupvalue(L, funcindex, n);
-	if (result == NULL) {
+	const char* p_result = p_lua_setupvalue(L, funcindex, n);
+	if (p_result == NULL) {
 		// we send 0 as head because Lua identifier won't begin with a digit
 		return "0NULL";
 	}
 
+	std::string result{ p_result };
 	return result;
 }
 
@@ -419,3 +460,62 @@ int lua_sethook(void* L, lua_Hook func, int mask, int count) {
 	return p_lua_sethook(L, func, mask, count);
 }
 
+std::string lua_todebugstring(void* L, int index) {
+	typedef void* (__fastcall* LUA_TOPOINTER)(void*, int);
+	auto p_lua_topointer = reinterpret_cast<LUA_TOPOINTER>(0x6F3790);
+
+	std::stringstream ss{};
+	int type = lua_type(L, index);
+
+	std::string strType = lua_typename(L, type);
+	if (strType.length() > 0) {
+		ss << "(" << strType << ")";
+	}
+	else {
+		ss << "(" << "Invalid type" << ")";
+	}
+
+	switch (type) {
+	case LUA_TFUNCTION:
+	case LUA_TTABLE:
+	case LUA_TTHREAD:
+	case LUA_TUSERDATA:
+	case LUA_TLIGHTUSERDATA:
+	{
+		uintptr_t ptr = reinterpret_cast<uintptr_t>(p_lua_topointer(L, index));
+		ss << "0x" << std::uppercase << std::hex << ptr;
+	}
+	break;
+	case LUA_TBOOLEAN:
+	{
+		if (lua_toboolean(L, index)) {
+			ss << "True";
+		}
+		else {
+			ss << "False";
+		}
+	}
+	break;
+	case LUA_TNUMBER:
+	{
+		ss << lua_tonumber(L, index);
+	}
+	break;
+	case LUA_TSTRING:
+	{
+		ss << lua_tostring(L, index);
+	}
+	break;
+	case LUA_TNIL:
+	{
+		ss << "nil";
+	}
+	break;
+	default:
+	{
+		ss << "Invalid";
+	}
+	}
+
+	return ss.str();
+}

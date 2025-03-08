@@ -46,6 +46,9 @@ std::string lua_setlocal(void* L, const lua_Debug* ar, int n);
 std::string lua_getupvalue(void* L, int funcindex, int n);
 std::string lua_setupvalue(void* L, int funcindex, int n);
 
+// Custom function, return a string representation of a Lua value for debug purpose
+std::string lua_todebugstring(void* L, int index);
+
 int lua_sethook(void* L, lua_Hook func, int mask, int count);
 
 int LuaDebug_breakpoint();

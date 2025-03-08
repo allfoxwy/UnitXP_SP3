@@ -23,12 +23,18 @@ typedef void(__fastcall* LUA_PUSHNUMBER)(void* L, double n);
 typedef double(__fastcall* LUA_TONUMBER)(void* L, int index);
 typedef int(__fastcall* LUA_ISNUMBER)(void* L, int index);
 typedef const char* (__fastcall* LUA_TOSTRING)(void* L, int index);
-typedef void(__fastcall* LUA_GETTABLE)(void* L, int index);
 typedef int(__fastcall* LUA_PCALL)(void* L, int nArgs, int nResults, int errFunction);
 typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
 typedef int(__fastcall* LUA_TYPE)(void* L, int);
+typedef const char* (__fastcall* LUA_TYPENAME)(void*, int);
 typedef void(__fastcall* LUA_SETTOP)(void*, int);
 typedef int(__fastcall* LUA_TOBOOLEAN)(void*, int);
+typedef void(__fastcall* LUA_NEWTABLE)(void*);
+typedef void(__fastcall* LUA_GETTABLE)(void*, int);
+typedef void(__fastcall* LUA_SETTABLE)(void*, int);
+typedef int(__fastcall* LUA_NEXT)(void*, int);
+typedef void(__fastcall* LUA_PUSHVALUE)(void*, int);
+typedef void(__fastcall* LUA_REMOVE)(void*, int);
 
 
 // To get lua_State pointer
@@ -45,11 +51,17 @@ auto p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
 auto p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
 auto p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
 auto p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
-auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
 auto p_lua_pcall = reinterpret_cast<LUA_PCALL>(0x6F41A0);
 auto p_lua_type = reinterpret_cast<LUA_TYPE>(0x6F3400);
+auto p_lua_typename = reinterpret_cast<LUA_TYPENAME>(0x6F3480);
 auto p_lua_settop = reinterpret_cast<LUA_SETTOP>(0x6F3080);
 auto p_lua_toboolean = reinterpret_cast<LUA_TOBOOLEAN>(0x6F3660);
+auto p_lua_newtable = reinterpret_cast<LUA_NEWTABLE>(0x6F3C90);
+auto p_lua_settable = reinterpret_cast<LUA_SETTABLE>(0x6F3E20);
+auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
+auto p_lua_next = reinterpret_cast<LUA_NEXT>(0x6F4450);
+auto p_lua_pushvalue = reinterpret_cast<LUA_PUSHVALUE>(0x6F3350);
+auto p_lua_remove = reinterpret_cast<LUA_REMOVE>(0x6F30D0);
 
 
 // WoW C function
@@ -100,6 +112,16 @@ std::string lua_tostring(void* L, int index) {
 int lua_type(void* L, int index) {
     return p_lua_type(L, index);
 }
+std::string lua_typename(void* L, int type) {
+    const char* ptr = p_lua_typename(L, type);
+    if (ptr) {
+        std::string result{ ptr };
+        return result;
+    }
+    else {
+        return "";
+    }
+}
 int lua_gettop(void* L) {
     return p_lua_gettop(L);
 }
@@ -129,9 +151,6 @@ int lua_isnumber(void* L, int index) {
 }
 int lua_isstring(void* L, int index) {
     return p_lua_isstring(L, index);
-}
-void lua_gettable(void* L, int index) {
-    return p_lua_gettable(L, index);
 }
 int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
     return p_lua_pcall(L, nArgs, nResults, errFunction);
@@ -564,4 +583,28 @@ float angleBetweenVectors(const C3Vector& a, const C3Vector& b) {
     }
 
     return std::acos(cosValue);
+}
+
+void lua_newtable(void* L) {
+    return p_lua_newtable(L);
+}
+
+void lua_settable(void* L, int index) {
+    return p_lua_settable(L, index);
+}
+
+void lua_gettable(void* L, int index) {
+    return p_lua_gettable(L, index);
+}
+
+int lua_next(void* L, int index) {
+    return p_lua_next(L, index);
+}
+
+void lua_pushvalue(void* L, int index) {
+    return p_lua_pushvalue(L, index);
+}
+
+void lua_remove(void* L, int index) {
+    return p_lua_remove(L, index);
 }
