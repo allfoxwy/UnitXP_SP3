@@ -14,7 +14,6 @@
 
 static SOCKET debuggerSocket = INVALID_SOCKET;
 static bool continueTillBreakpoint = false;
-static bool hookEnabled = false;
 
 static int LuaDebug_sendLoop(const char* data, const int total) {
 	int sent = 0;
@@ -323,7 +322,7 @@ int LuaDebug_breakpoint() {
 	void* L = GetContext();
 
 	if (debuggerSocket == INVALID_SOCKET) {
-		struct addrinfo hints, * result = NULL;
+		struct addrinfo hints = {}, * result = NULL;
 		memset(&hints, 0, sizeof(hints));
 
 		hints.ai_family = AF_UNSPEC;
@@ -365,9 +364,8 @@ int LuaDebug_breakpoint() {
 		freeaddrinfo(result);
 	}
 
-	if (!hookEnabled) {
+	if (NULL == lua_gethook(L)) {
 		lua_sethook(L, &LuaDebug_hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE, 0);
-		hookEnabled = true;
 	}
 
 	return 1;
@@ -378,9 +376,8 @@ void LuaDebug_end(void* L) {
 		L = GetContext();
 	}
 
-	if (hookEnabled) {
-		lua_sethook(L, &LuaDebug_hook, 0, 0);
-		hookEnabled = false;
+	if (lua_gethook(L)) {
+		lua_sethook(L, NULL, 0, 0);
 	}
 
 	if (debuggerSocket != INVALID_SOCKET) {
@@ -388,8 +385,6 @@ void LuaDebug_end(void* L) {
 		debuggerSocket = INVALID_SOCKET;
 	}
 }
-
-
 
 int lua_getstack(void* L, int level, lua_Debug* ar) {
 	typedef int(__fastcall* LUA_GETSTACK)(void*, int, lua_Debug*);
@@ -466,6 +461,18 @@ int lua_sethook(void* L, lua_Hook func, int mask, int count) {
 	auto p_lua_sethook = reinterpret_cast<LUA_SETHOOK>(0x6fba40);
 
 	return p_lua_sethook(L, func, mask, count);
+}
+
+lua_Hook lua_gethook(void* L) {
+	uint32_t ptr = reinterpret_cast<uint32_t>(L);
+	return *reinterpret_cast<lua_Hook*>(ptr + 0x3c);
+}
+
+int lua_gethookmask(void* L) {
+	uint32_t ptr = reinterpret_cast<uint32_t>(L);
+
+	// Lua saves hookmask as a byte, but lua_gethookmask return an int
+	return *reinterpret_cast<uint8_t*>(ptr + 0x30);
 }
 
 std::string lua_todebugstring(void* L, int index) {

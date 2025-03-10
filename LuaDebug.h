@@ -18,13 +18,7 @@ struct lua_Debug {
 	int i_ci;  /* active function */
 };
 
-/*
-** Event masks
-*/
-#define LUA_MASKCALL    (1 << LUA_HOOKCALL)
-#define LUA_MASKRET     (1 << LUA_HOOKRET)
-#define LUA_MASKLINE    (1 << LUA_HOOKLINE)
-#define LUA_MASKCOUNT   (1 << LUA_HOOKCOUNT)
+typedef struct lua_Debug lua_Debug;  /* activation record */
 
 /*
 ** Event codes
@@ -35,9 +29,13 @@ struct lua_Debug {
 #define LUA_HOOKCOUNT   (3)
 #define LUA_HOOKTAILRET (4)
 
-typedef struct lua_Debug lua_Debug;  /* activation record */
-
-typedef void (__fastcall *lua_Hook) (void* L, lua_Debug* ar);
+/*
+** Event masks
+*/
+#define LUA_MASKCALL    (1 << LUA_HOOKCALL)
+#define LUA_MASKRET     (1 << LUA_HOOKRET)
+#define LUA_MASKLINE    (1 << LUA_HOOKLINE)
+#define LUA_MASKCOUNT   (1 << LUA_HOOKCOUNT)
 
 int lua_getstack(void* L, int level, lua_Debug* ar);
 int lua_getinfo(void* L, std::string what, lua_Debug* ar);
@@ -49,7 +47,10 @@ std::string lua_setupvalue(void* L, int funcindex, int n);
 // Custom function, return a string representation of a Lua value for debug purpose
 std::string lua_todebugstring(void* L, int index);
 
+typedef void(__fastcall* lua_Hook) (void* L, lua_Debug* ar);
 int lua_sethook(void* L, lua_Hook func, int mask, int count);
+lua_Hook lua_gethook(void* L);
+int lua_gethookmask(void* L);
 
 int LuaDebug_breakpoint();
 void __fastcall LuaDebug_hook(void* L, lua_Debug* ar);

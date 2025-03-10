@@ -46,6 +46,7 @@
 #include <unordered_map>
 #include <string>
 #include <atomic>
+#include <sstream>
 
 #include "Vanilla1121_functions.h"
 #include "utf8_to_utf16.h"
@@ -273,10 +274,9 @@ public:
 				// We do a copy here, because execution_fifo would pop_front() soon. Reference is error-prone.
 				auto i = execution_fifo.front();
 
-				lua_pushstring(L, i.second.data());
-				lua_gettable(L, LUA_GLOBALSINDEX);
-				lua_pushnumber(L, i.first);
-				lua_pcall(L, 1, 0, 0);
+				std::stringstream ss{};
+				ss << i.second << "(" << i.first << ");";
+				vanilla1121_runScript(ss.str());
 
 				already_in_fifo.erase(i.first);
 				execution_fifo.pop_front();

@@ -80,13 +80,13 @@ void lua_pushboolean(void* L, int boolean_value);
 void lua_pushnumber(void* L, double n);
 int lua_isnumber(void* L, int index);
 int lua_isstring(void* L, int index);
-int lua_pcall(void* L, int nArgs, int nResults, int errFunction);
 int lua_type(void* L, int index);
 std::string lua_typename(void* L, int type);
 void lua_settop(void* L, int index);
 #define lua_pop(L,n) lua_settop(L, -(n)-1)
 void lua_pushvalue(void* L, int index);
 void lua_remove(void* L, int index);
+void lua_insert(void* L, int index);
 void lua_newtable(void* L);
 void lua_gettable(void* L, int index);
 void lua_settable(void* L, int index);
@@ -147,6 +147,8 @@ float vanilla1121_unitBoundingRadius(uint32_t unit);
 float vanilla1121_unitCombatReach(uint32_t unit);
 // Return -1.0f for error.
 float vanilla1121_unitScaleX(uint32_t unit);
+// Run a piece of Lua script
+void vanilla1121_runScript(std::string luaScript);
 
 float vectorLength(const C3Vector& vec);
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b);

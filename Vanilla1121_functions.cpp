@@ -23,7 +23,6 @@ typedef void(__fastcall* LUA_PUSHNUMBER)(void* L, double n);
 typedef double(__fastcall* LUA_TONUMBER)(void* L, int index);
 typedef int(__fastcall* LUA_ISNUMBER)(void* L, int index);
 typedef const char* (__fastcall* LUA_TOSTRING)(void* L, int index);
-typedef int(__fastcall* LUA_PCALL)(void* L, int nArgs, int nResults, int errFunction);
 typedef uint64_t(__fastcall* UNITGUID)(const char* unitID);
 typedef int(__fastcall* LUA_TYPE)(void* L, int);
 typedef const char* (__fastcall* LUA_TYPENAME)(void*, int);
@@ -35,6 +34,7 @@ typedef void(__fastcall* LUA_SETTABLE)(void*, int);
 typedef int(__fastcall* LUA_NEXT)(void*, int);
 typedef void(__fastcall* LUA_PUSHVALUE)(void*, int);
 typedef void(__fastcall* LUA_REMOVE)(void*, int);
+typedef void(__fastcall* LUA_INSERT)(void*, int);
 
 
 // To get lua_State pointer
@@ -51,7 +51,6 @@ auto p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
 auto p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
 auto p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
 auto p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
-auto p_lua_pcall = reinterpret_cast<LUA_PCALL>(0x6F41A0);
 auto p_lua_type = reinterpret_cast<LUA_TYPE>(0x6F3400);
 auto p_lua_typename = reinterpret_cast<LUA_TYPENAME>(0x6F3480);
 auto p_lua_settop = reinterpret_cast<LUA_SETTOP>(0x6F3080);
@@ -62,6 +61,7 @@ auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
 auto p_lua_next = reinterpret_cast<LUA_NEXT>(0x6F4450);
 auto p_lua_pushvalue = reinterpret_cast<LUA_PUSHVALUE>(0x6F3350);
 auto p_lua_remove = reinterpret_cast<LUA_REMOVE>(0x6F30D0);
+auto p_lua_insert = reinterpret_cast<LUA_INSERT>(0x6F31A0);
 
 
 // WoW C function
@@ -151,9 +151,6 @@ int lua_isnumber(void* L, int index) {
 }
 int lua_isstring(void* L, int index) {
     return p_lua_isstring(L, index);
-}
-int lua_pcall(void* L, int nArgs, int nResults, int errFunction) {
-    return p_lua_pcall(L, nArgs, nResults, errFunction);
 }
 
 // Get GUID from UNIT_ID
@@ -542,6 +539,21 @@ int vanilla1121_getTargetMark(uint64_t targetGUID) {
     return -1;
 }
 
+void vanilla1121_runScript(std::string luaScript) {
+    typedef int(__fastcall* SCRIPT_RUNSCRIPT)(void*);
+    auto p_Script_RunScript = reinterpret_cast<SCRIPT_RUNSCRIPT>(0x48B980);
+
+    void* L = GetContext();
+
+    // The game's RunScript is designed to work with addons. So it would read stack item no.1 as the script (which is Lua argument no.1)
+    // However we are using it as a general purpose RunScript, there is no guarantee that the stack is clean
+    // So we try to move the script to stack item no.1
+    lua_pushstring(L, luaScript);
+    lua_insert(L, 1);
+    p_Script_RunScript(L);
+    lua_remove(L, 1);
+}
+
 float vectorLength(const C3Vector& vec) {
     return std::hypot(vec.x, vec.y, vec.z);
 }
@@ -607,4 +619,8 @@ void lua_pushvalue(void* L, int index) {
 
 void lua_remove(void* L, int index) {
     return p_lua_remove(L, index);
+}
+
+void lua_insert(void* L, int index) {
+    return p_lua_insert(L, index);
 }
