@@ -305,6 +305,29 @@ void __fastcall LuaDebug_hook(void* L, lua_Debug* active_record) {
 				LuaDebug_sendInteger(lua_next(L, -2));
 				continue;
 			}
+			if (cmd == "get next global item") {
+				LuaDebug_sendInteger(lua_next(L, LUA_GLOBALSINDEX));
+				continue;
+			}
+			if (cmd == "get function environment") {
+				if (current_stack_item) {
+					if (0 != lua_getinfo(L, "f", current_stack_item)) {
+						lua_getfenv(L, -1);
+
+						// lua_getinfo("f") would push the function onto stack
+						lua_remove(L, -2);
+
+						LuaDebug_sendInteger(1);
+					}
+					else {
+						LuaDebug_sendInteger(0);
+					}
+				}
+				else {
+					LuaDebug_sendInteger(0);
+				}
+				continue;
+			}
 
 			throw std::exception("Unknown debug command");
 		}
@@ -473,6 +496,21 @@ int lua_gethookmask(void* L) {
 
 	// Lua saves hookmask as a byte, but lua_gethookmask return an int
 	return *reinterpret_cast<uint8_t*>(ptr + 0x30);
+}
+
+void lua_getfenv(void* L, int index) {
+	typedef void(__fastcall* LUA_GETFENV)(void*, int);
+	auto p_lua_getfenv = reinterpret_cast<LUA_GETFENV>(0x6F3D50);
+
+	p_lua_getfenv(L, index);
+	return;
+}
+
+int lua_setfenv(void* L, int index) {
+	typedef int(__fastcall* LUA_SETFENV)(void*, int);
+	auto p_lua_setfenv = reinterpret_cast<LUA_SETFENV>(0x6F40D0);
+
+	return p_lua_setfenv(L, index);
 }
 
 std::string lua_todebugstring(void* L, int index) {

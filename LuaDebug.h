@@ -43,6 +43,8 @@ std::string lua_getlocal(void* L, const lua_Debug* ar, int n);
 std::string lua_setlocal(void* L, const lua_Debug* ar, int n);
 std::string lua_getupvalue(void* L, int funcindex, int n);
 std::string lua_setupvalue(void* L, int funcindex, int n);
+void lua_getfenv(void* L, int index);
+int lua_setfenv(void* L, int index);
 
 // Custom function, return a string representation of a Lua value for debug purpose
 std::string lua_todebugstring(void* L, int index);

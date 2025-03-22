@@ -1,20 +1,21 @@
 # UnitXP Service Pack 3
 
 An attempt to make Vanilla 1.12 modern...
-- Adjust camera
-- Background notifications
-- Check line of sight in Lua
-- Debug interface for in-game Lua
-- Measure distance in Lua
-- Performance tweak of disabling TCP delayed ACK
-- Proper nameplates
-- Screenshot produce JPEG file
-- Better Tab targeting functions
+
+- Adjust camera position.
+- Notifications when game is in background (minimized).
+- Proper nameplates occlusion.
+- Better Tab-key targeting functions.
+- Lua debugger interface for step by step execution and variables inspect.
+- Screenshot produce JPEG file.
+- Check line of sight in Lua.
+- Measure distance in Lua.
+- Disable TCP delayed ACK.
 
 
 Refer to [wiki](https://github.com/allfoxwy/UnitXP_SP3/wiki) for detail.
 
-I don't take ANY responsibility if this mod is originate in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
+I don't take ANY responsibility for this mod is originated in Burning Legion, or it would crash you game, or some Turtle ban your account. USE AT YOUR OWN RISK. 
 
 
 
