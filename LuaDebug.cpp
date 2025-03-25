@@ -287,6 +287,15 @@ void __fastcall LuaDebug_hook(void* L, lua_Debug* active_record) {
 				LuaDebug_sendInteger(1);
 				continue;
 			}
+			if (cmd == "discard specific value") {
+				int index = -1;
+				LuaDebug_recvInteger(index);
+
+				lua_remove(L, index);
+
+				LuaDebug_sendInteger(1);
+				continue;
+			}
 			if (cmd == "get current value type") {
 				LuaDebug_sendInteger(lua_type(L, -1));
 				continue;
