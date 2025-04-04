@@ -15,6 +15,7 @@ static LARGE_INTEGER perfEnd[perfSlotsTotal] = {};
 static LARGE_INTEGER perfSampleCount[perfSlotsTotal] = {};
 static LARGE_INTEGER perfTotalTime[perfSlotsTotal] = {};
 static LARGE_INTEGER perfWorst[perfSlotsTotal] = {};
+static LARGE_INTEGER perfLast[perfSlotsTotal] = {};
 
 static LARGE_INTEGER performanceCounterFrequency = {};
 static std::unordered_map<int, std::string> perfSlotsName{};
@@ -48,6 +49,14 @@ void perfMarkEnd(int perfPoint) {
 	perfSampleCount[perfPoint].QuadPart++;
 }
 
+void perfMarkLast(int perfPoint) {
+	if (perfPoint >= perfSlotsTotal) {
+		// Not enough perf slots
+		return;
+	}
+	QueryPerformanceCounter(&perfLast[perfPoint]);
+}
+
 void perfReset() {
 	QueryPerformanceFrequency(&performanceCounterFrequency);
 
@@ -57,6 +66,7 @@ void perfReset() {
 		perfSampleCount[i].QuadPart = 0;
 		perfTotalTime[i].QuadPart = 0;
 		perfWorst[i].QuadPart = 0;
+		perfLast[i].QuadPart = 0;
 	}
 }
 
@@ -114,6 +124,14 @@ std::string perfSummary() {
 		ss << "worst: " << timeString(perfWorst[i]) << std::endl;
 		ss << "average: " << timeString(average) << std::endl;
 		ss << "total: " << timeString(perfTotalTime[i]) << std::endl;
+
+		if (perfLast[i].QuadPart > 0) {
+			LARGE_INTEGER delta = {}, now = {};
+
+			QueryPerformanceCounter(&now);
+			delta.QuadPart = now.QuadPart - perfLast[i].QuadPart;
+			ss << "last: " << timeString(delta) << " ago" << std::endl;
+		}
 	}
 	return ss.str();
 }
