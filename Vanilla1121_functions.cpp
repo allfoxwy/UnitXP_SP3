@@ -15,6 +15,7 @@ typedef void(__fastcall* TARGET)(uint64_t* GUID);
 typedef int(__thiscall* UNITREACTION)(uint32_t self, uint32_t targetObj);
 typedef bool(__thiscall* CANATTACK)(uint32_t self, uint32_t targetObj);
 typedef int(__fastcall* GETCREATURETYPE)(uint32_t obj);
+typedef uint32_t(__fastcall* GETACTIVECAMERA)(void);
 typedef void(__fastcall* LUAL_OPENLIB)(void* L, const char* name_space, lua_func_reg func_list[], int upvalues);
 typedef void* (__fastcall* GETCONTEXT)(void);
 typedef void(__fastcall* LUA_PUSHNIL)(void* L);
@@ -38,44 +39,42 @@ typedef void(__fastcall* LUA_INSERT)(void*, int);
 
 
 // To get lua_State pointer
-GETCONTEXT p_GetContext = reinterpret_cast<GETCONTEXT>(0x7040D0);
+static auto p_GetContext = reinterpret_cast<GETCONTEXT>(0x7040D0);
 
 // LUA language
-auto p_lua_pushstring = reinterpret_cast<LUA_PUSHSTRING>(0x006F3890);
-auto p_luaL_openlib = reinterpret_cast<LUAL_OPENLIB>(0x006F4DC0);
-auto p_lua_tostring = reinterpret_cast<LUA_TOSTRING>(0x006F3690);
-auto p_lua_gettop = reinterpret_cast<LUA_CFUNCTION>(0x006F3070);
-auto p_lua_pushnil = reinterpret_cast<LUA_PUSHNIL>(0x006F37F0);
-auto p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0);
-auto p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
-auto p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
-auto p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
-auto p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
-auto p_lua_type = reinterpret_cast<LUA_TYPE>(0x6F3400);
-auto p_lua_typename = reinterpret_cast<LUA_TYPENAME>(0x6F3480);
-auto p_lua_settop = reinterpret_cast<LUA_SETTOP>(0x6F3080);
-auto p_lua_toboolean = reinterpret_cast<LUA_TOBOOLEAN>(0x6F3660);
-auto p_lua_newtable = reinterpret_cast<LUA_NEWTABLE>(0x6F3C90);
-auto p_lua_settable = reinterpret_cast<LUA_SETTABLE>(0x6F3E20);
-auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
-auto p_lua_next = reinterpret_cast<LUA_NEXT>(0x6F4450);
-auto p_lua_pushvalue = reinterpret_cast<LUA_PUSHVALUE>(0x6F3350);
-auto p_lua_remove = reinterpret_cast<LUA_REMOVE>(0x6F30D0);
-auto p_lua_insert = reinterpret_cast<LUA_INSERT>(0x6F31A0);
+static auto p_lua_pushstring = reinterpret_cast<LUA_PUSHSTRING>(0x006F3890);
+static auto p_luaL_openlib = reinterpret_cast<LUAL_OPENLIB>(0x006F4DC0);
+static auto p_lua_tostring = reinterpret_cast<LUA_TOSTRING>(0x006F3690);
+static auto p_lua_gettop = reinterpret_cast<LUA_CFUNCTION>(0x006F3070);
+static auto p_lua_pushnil = reinterpret_cast<LUA_PUSHNIL>(0x006F37F0);
+static auto p_lua_pushboolean = reinterpret_cast<LUA_PUSHBOOLEAN>(0x006F39F0);
+static auto p_lua_pushnumber = reinterpret_cast<LUA_PUSHNUMBER>(0x006F3810);
+static auto p_lua_tonumber = reinterpret_cast<LUA_TONUMBER>(0x006F3620);
+static auto p_lua_isnumber = reinterpret_cast<LUA_ISNUMBER>(0x006F34D0);
+static auto p_lua_isstring = reinterpret_cast<LUA_ISNUMBER>(0x6F3510);
+static auto p_lua_type = reinterpret_cast<LUA_TYPE>(0x6F3400);
+static auto p_lua_typename = reinterpret_cast<LUA_TYPENAME>(0x6F3480);
+static auto p_lua_settop = reinterpret_cast<LUA_SETTOP>(0x6F3080);
+static auto p_lua_toboolean = reinterpret_cast<LUA_TOBOOLEAN>(0x6F3660);
+static auto p_lua_newtable = reinterpret_cast<LUA_NEWTABLE>(0x6F3C90);
+static auto p_lua_settable = reinterpret_cast<LUA_SETTABLE>(0x6F3E20);
+static auto p_lua_gettable = reinterpret_cast<LUA_GETTABLE>(0x6F3A40);
+static auto p_lua_next = reinterpret_cast<LUA_NEXT>(0x6F4450);
+static auto p_lua_pushvalue = reinterpret_cast<LUA_PUSHVALUE>(0x6F3350);
+static auto p_lua_remove = reinterpret_cast<LUA_REMOVE>(0x6F30D0);
+static auto p_lua_insert = reinterpret_cast<LUA_INSERT>(0x6F31A0);
 
 
 // WoW C function
-UNITGUID p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
-CWORLD__INTERSECT p_CWorld_Intersect = reinterpret_cast<CWORLD__INTERSECT>(0x672170);
-TARGET p_Target = reinterpret_cast<TARGET>(0x489a40);
-UNITREACTION p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
-CANATTACK p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
-GETCREATURETYPE p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
+static auto p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
+static auto p_CWorld_Intersect = reinterpret_cast<CWORLD__INTERSECT>(0x672170);
+static auto p_Target = reinterpret_cast<TARGET>(0x489a40);
+static auto p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
+static auto p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
+static auto p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
+static auto p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
 
-typedef uint32_t(__fastcall* GETACTIVECAMERA)(void);
-GETACTIVECAMERA p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
-
-extern float guardAgainstTransportsCoordinates = 200.0f;
+float guardAgainstTransportsCoordinates = 200.0f;
 
 // To get lua_State pointer
 void* GetContext(void) {

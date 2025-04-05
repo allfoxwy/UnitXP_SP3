@@ -5,7 +5,7 @@
 
 
 
-extern CppTime::Timer gTimer{};
+CppTime::Timer gTimer{};
 
 
 

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-extern float behind_threshold = static_cast<float>(M_PI_2);
+float behind_threshold = static_cast<float>(M_PI_2);
 
 // We implement 2 cache to workaround issue #10
 // Idea is to call CWorld_Intersect less

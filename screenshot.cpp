@@ -8,8 +8,8 @@
 #include "stb_image_write.h"
 
 
-extern CTGAFILE_WRITE_0x5a4810 p_CTgaFile_Write_0x5a4810 = reinterpret_cast<CTGAFILE_WRITE_0x5a4810>(0x5a4810);
-extern CTGAFILE_WRITE_0x5a4810 p_original_CTgaFile_Write_0x5a4810 = NULL;
+CTGAFILE_WRITE_0x5a4810 p_CTgaFile_Write_0x5a4810 = reinterpret_cast<CTGAFILE_WRITE_0x5a4810>(0x5a4810);
+CTGAFILE_WRITE_0x5a4810 p_original_CTgaFile_Write_0x5a4810 = NULL;
 
 int __fastcall detoured_CTgaFile_Write_0x5a4810(uint32_t self, void* ignored, char* TGAfilename) {
 	char JPEGfilename[260];

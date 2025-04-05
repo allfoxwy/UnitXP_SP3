@@ -27,7 +27,7 @@
 
 using namespace std;
 
-extern HMODULE moduleSelf = 0;
+HMODULE moduleSelf = 0;
 
 LUA_CFUNCTION p_original_UnitXP = NULL;
 auto p_UnitXP = reinterpret_cast<LUA_CFUNCTION>(0x517350);

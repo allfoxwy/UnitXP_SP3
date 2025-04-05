@@ -6,12 +6,12 @@
 #include "inSight.h"
 #include "performanceProfiling.h"
 
-extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
-extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
+CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
+CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
 
-extern float cameraHorizontalAddend = 0.0f;
-extern float cameraVerticalAddend = 0.0f;
-extern bool cameraFollowTarget = false;
+float cameraHorizontalAddend = 0.0f;
+float cameraVerticalAddend = 0.0f;
+bool cameraFollowTarget = false;
 
 static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPosition) {
 	float* cameraPositionPtr = reinterpret_cast<float*>(camera + 0x8);

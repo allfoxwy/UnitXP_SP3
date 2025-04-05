@@ -16,7 +16,6 @@ int camera_inSight(const void * unit);
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
 bool inViewingFrustum(const C3Vector& posObject, float checkCone);
 
-
 // Check if I am behind a mob, -1 for error
 int UnitXP_behind(const void* me, const void* mob);
 int UnitXP_behind(const uint64_t guidMe, const uint64_t guidMob);

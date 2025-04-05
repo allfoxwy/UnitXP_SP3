@@ -7,15 +7,15 @@
 
 #include "gameSocket.h"
 
-extern SEND p_send = NULL;
-extern RECV p_recv = NULL;
-extern SENDTO p_sendto = NULL;
-extern RECVFROM p_recvfrom = NULL;
-extern SEND p_original_send = NULL;
-extern RECV p_original_recv = NULL;
-extern SENDTO p_original_sendto = NULL;
-extern RECVFROM p_original_recvfrom = NULL;
-extern bool TCP_quickACK = false;
+SEND p_send = NULL;
+RECV p_recv = NULL;
+SENDTO p_sendto = NULL;
+RECVFROM p_recvfrom = NULL;
+SEND p_original_send = NULL;
+RECV p_original_recv = NULL;
+SENDTO p_original_sendto = NULL;
+RECVFROM p_original_recvfrom = NULL;
+bool TCP_quickACK = false;
 
 static void TCP_QUICKACK(SOCKET s) {
 	WSAPROTOCOL_INFOW sInfo = {};

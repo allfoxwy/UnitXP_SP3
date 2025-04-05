@@ -11,8 +11,7 @@ using namespace std;
 #include "inSight.h"
 #include "targeting.h"
 
-extern float targetingRangeCone = 2.2f;
-
+float targetingRangeCone = 2.2f;
 
 
 bool targetNearestEnemy(float distanceLimit) {

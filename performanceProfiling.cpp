@@ -8,7 +8,7 @@
 #include "performanceProfiling.h"
 #include "coffTimeDateStamp.h"
 
-static const int perfSlotsTotal = 7;
+static const int perfSlotsTotal = 16;
 
 static LARGE_INTEGER perfStart[perfSlotsTotal] = {};
 static LARGE_INTEGER perfEnd[perfSlotsTotal] = {};
@@ -96,6 +96,10 @@ static std::string timeString(const LARGE_INTEGER& t) {
 		temp.QuadPart = t.QuadPart / performanceCounterFrequency.QuadPart;
 		unit = "s";
 	}
+	else if (temp.QuadPart / 1000 >= 10) {
+		temp.QuadPart = (t.QuadPart * 1000) / performanceCounterFrequency.QuadPart;
+		unit = "ms";
+	}
 
 	std::stringstream ss;
 	ss << temp.QuadPart << unit;
@@ -115,7 +119,7 @@ std::string perfSummary() {
 
 		auto ni = perfSlotsName.find(i);
 		if (ni != perfSlotsName.end()) {
-			ss << "=== Profiling point: " << ni->second << " ===" << std::endl;
+			ss << "=== Profiling: " << ni->second << " ===" << std::endl;
 		}
 		else {
 			ss << "=== Profiling point " << i << " ===" << std::endl;
