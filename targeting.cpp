@@ -12,10 +12,12 @@ using namespace std;
 #include "targeting.h"
 
 float targetingRangeCone = 2.2f;
+bool targetingInCombatFilter = true;
+float targetingFarRange = 41.0f;
 
 
 bool targetNearestEnemy(float distanceLimit) {
-    vector<struct mob_entity> mobs;
+    vector<struct mob_entity> mobs{};
 
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -46,7 +48,7 @@ bool targetNearestEnemy(float distanceLimit) {
 
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (type == OBJECT_TYPE_Unit && selfInCombat) {
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
@@ -80,7 +82,7 @@ bool targetNearestEnemy(float distanceLimit) {
 
 
 bool targetWorldBoss(float distanceLimit) {
-    vector<struct mob_entity> mobs;
+    vector<struct mob_entity> mobs{};
 
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -111,7 +113,7 @@ bool targetWorldBoss(float distanceLimit) {
             
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (type == OBJECT_TYPE_Unit && selfInCombat) {
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
@@ -272,7 +274,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
         return false;
     }
 
-    vector <struct mob_entity> list;
+    vector <struct mob_entity> list{};
 
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -284,7 +286,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
     uint64_t lastTarget = vanilla1121_unitTargetGUID(vanilla1121_getVisiableObject(UnitGUID("player")));
 
     if (lastTarget == 0) {
-        return targetNearestEnemy(41.0f);
+        return targetNearestEnemy(targetingFarRange);
     }
 
     while (i != 0 && (i & 1) == 0) {
@@ -302,7 +304,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
         bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            && distance <= 41.0f
+            && distance <= targetingFarRange
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
@@ -311,7 +313,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
             
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (type == OBJECT_TYPE_Unit && selfInCombat) {
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
@@ -343,8 +345,8 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
         return false;
     }
 
-    vector <struct mob_entity> list;
-    vector <int> priorityList;
+    vector <struct mob_entity> list{};
+    vector <int> priorityList{};
 
     for (unsigned int i = 0; i < min(8u, priority.length()); ++i) {
         if (priority[i] >= '1' && priority[i] <= '8') {
@@ -391,7 +393,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
             
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (type == OBJECT_TYPE_Unit && selfInCombat) {
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
@@ -429,9 +431,9 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
         return false;
     }
 
-    vector<struct mob_entity> meleeRange;
-    vector<struct mob_entity> chargeRange;
-    vector<struct mob_entity> farRange;
+    vector<struct mob_entity> meleeRange{};
+    vector<struct mob_entity> chargeRange{};
+    vector<struct mob_entity> farRange{};
 
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
@@ -443,7 +445,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
     uint64_t lastTarget = vanilla1121_unitTargetGUID(vanilla1121_getVisiableObject(UnitGUID("player")));
 
     if (lastTarget == 0) {
-        return targetNearestEnemy(41.0f);
+        return targetNearestEnemy(targetingFarRange);
     }
 
     while (i != 0 && (i & 1) == 0) {
@@ -461,7 +463,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
         bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
-            && distance <= 41.0f
+            && distance <= targetingFarRange
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
@@ -470,7 +472,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
-            if (type == OBJECT_TYPE_Unit && selfInCombat) {
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
                     struct mob_entity new_mob = {};
                     new_mob.GUID = currentObjectGUID;
@@ -482,7 +484,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                     else if (new_mob.distance <= 25.0f) {
                         chargeRange.push_back(new_mob);
                     }
-                    else if (new_mob.distance < 41.0f) {
+                    else if (new_mob.distance < targetingFarRange) {
                         farRange.push_back(new_mob);
                     }
                 }
@@ -497,7 +499,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                 else if (new_mob.distance < 25.0f) {
                     chargeRange.push_back(new_mob);
                 }
-                else if (new_mob.distance < 41.0f) {
+                else if (new_mob.distance < targetingFarRange) {
                     farRange.push_back(new_mob);
                 }
             }

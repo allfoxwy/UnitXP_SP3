@@ -162,6 +162,26 @@ int __fastcall detoured_UnitXP(void* L) {
                 lua_pushnumber(L, targetingRangeCone);
                 return 1;
             }
+            if (subcmd == "farRange") {
+                if (lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                    double n = lua_tonumber(L, 3);
+                    if (n > 25.0 && n < 61.0) {
+                        targetingFarRange = static_cast<float>(n);
+                    }
+                }
+                lua_pushnumber(L, targetingFarRange);
+                return 1;
+            }
+            if (subcmd == "disableInCombatFilter") {
+                targetingInCombatFilter = false;
+                lua_pushboolean(L, targetingInCombatFilter);
+                return 1;
+            }
+            if (subcmd == "enableInCombatFilter") {
+                targetingInCombatFilter = true;
+                lua_pushboolean(L, targetingInCombatFilter);
+                return 1;
+            }
             lua_pushnil(L);
             return 1;
         }
