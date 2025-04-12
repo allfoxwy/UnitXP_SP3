@@ -24,13 +24,8 @@ I don't take ANY responsibility for this mod is originated in Burning Legion, or
 1. Download  `UnitXP-SP3-with-loader.zip`  from https://github.com/allfoxwy/UnitXP_SP3/releases/latest
 2. Unzip everything into same place with `WoW.exe`
 3. Move `UnitXP_SP3_Addon` into WoWclient/Interface/AddOns/
-4. Run `Enable sideload-DLL.exe`
-5. Start game with `WoW_sideload-DLL.exe`
-
-Additional tips:
-- You could delete `Enable sideload-DLL.exe` after installation, it's a huge file because of Node.js
-- Currently Node.js needs Windows 8.1 to operate. `UnitXP_SP3.dll` itself works on elder Windows, you might try using VanillaFixes loader for it on elder Windows.
-
+4. Edit your loader's list (which might be `dlls.txt`) to include the `UnitXP_SP3.dll`.
+5. Start the game
 
 
 ### How to use it in game
