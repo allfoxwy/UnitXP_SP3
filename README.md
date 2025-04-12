@@ -23,8 +23,8 @@ I don't take ANY responsibility for this mod is originated in Burning Legion, or
 
 1. Download  `UnitXP-SP3-full.zip` from https://github.com/allfoxwy/UnitXP_SP3/releases/latest
 2. Unzip everything into same place with `WoW.exe`
-3. Move `UnitXP_SP3_Addon` into WoWclient/Interface/AddOns/
-4. Edit your loader's list (which might be `dlls.txt`) to include the `UnitXP_SP3.dll`.
+3. Move `UnitXP_SP3_Addon` into Interface/AddOns/
+4. Edit your loader's list (which might be `dlls.txt`) to include the `UnitXP_SP3.dll`
 5. Start the game
 
 
