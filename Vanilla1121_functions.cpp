@@ -74,7 +74,7 @@ static auto p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
 static auto p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
 static auto p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
 
-float guardAgainstTransportsCoordinates = 200.0f;
+const float guardAgainstTransportsCoordinates = 200.0f;
 
 // To get lua_State pointer
 void* GetContext(void) {
@@ -589,8 +589,11 @@ float angleBetweenVectors(const C3Vector& a, const C3Vector& b) {
     float dotProduct = vectorDotProduct(a, b);
 
     float cosValue = dotProduct / (lenA * lenB);
-    if (cosValue > 1.0f || cosValue < -1.0f) {
-        return static_cast<float>(4 * M_PI);
+    if (cosValue > 1.0f) {
+        cosValue = 1.0f;
+    }
+    if (cosValue < -1.0f) {
+        cosValue = -1.0f;
     }
 
     return std::acos(cosValue);

@@ -193,6 +193,31 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 	C3Vector vecForward = {};
 	vecForward.x = vecLeft.x * std::cos(static_cast<float>(-M_PI_2)) - vecLeft.y * std::sin(static_cast<float>(-M_PI_2));
 	vecForward.y = vecLeft.x * std::sin(static_cast<float>(-M_PI_2)) + vecLeft.y * std::cos(static_cast<float>(-M_PI_2));
+	if (vanilla1121_objectType(unitMob) == OBJECT_TYPE_Unit && vanilla1121_unitInCombat(unitMob)) {
+		// As https://github.com/allfoxwy/UnitXP_SP3/issues/16
+		// It seems during melee combat, server won't update NPC facing value unless certain event happens (movement/certain spells)
+		// We check the vector of NPC and its target, when they are in line of sight (else NPC should be routing around map, in such case we fallback to facing value)
+		uint64_t mobTargetGUID = vanilla1121_unitTargetGUID(unitMob);
+		if (mobTargetGUID > 0) {
+			uint32_t unitMobTarget = vanilla1121_getVisiableObject(mobTargetGUID);
+			if (unitMobTarget > 0 && (unitMobTarget & 1) == 0) {
+				if (vanilla1121_objectType(unitMobTarget) == OBJECT_TYPE_Unit ||
+					vanilla1121_objectType(unitMobTarget) == OBJECT_TYPE_Player) {
+					// When player jump onto transports (boat/zeppelin) their coordinates system would change.
+					// If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
+					// TODO: I don't have a way to find out what the current system is
+					// To workaround, we test the distance. If they are too far away, we judge that situation as error
+					C3Vector posMobTarget = vanilla1121_unitPosition(unitMobTarget);
+					if (UnitXP_distanceBetween(posMobTarget, posMob) <= guardAgainstTransportsCoordinates) {
+						if (UnitXP_inSight(reinterpret_cast<void*>(unitMob), reinterpret_cast<void*>(unitMobTarget)) > 0) {
+							vecForward.x = posMobTarget.x - posMob.x;
+							vecForward.y = posMobTarget.y - posMob.y;
+						}
+					}
+				}
+			}
+		}
+	}
 
 	C3Vector vecCheck = {};
 	vecCheck.x = posMe.x - posMob.x;
@@ -352,7 +377,7 @@ int UnitXP_inSight(const void* unit0void, const void* unit1void) {
 
 	uint32_t unit0 = reinterpret_cast<uint32_t>(unit0void);
 	uint32_t unit1 = reinterpret_cast<uint32_t>(unit1void);
-	
+
 	if ((unit0 & 1) != 0 || (unit1 & 1) != 0) {
 		return -1;
 	}

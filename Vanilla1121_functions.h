@@ -47,7 +47,7 @@ enum InGameClassification {
 // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 // TODO: I don't have a way to find out what the current system is
 // To workaround, we test the distance. If they are too far away, we judge that situation as error
-extern float guardAgainstTransportsCoordinates;
+extern const float guardAgainstTransportsCoordinates;
 
 // LUA language
 // basic types
