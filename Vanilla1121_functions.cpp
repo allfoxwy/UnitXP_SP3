@@ -236,6 +236,14 @@ float vanilla1121_unitFacing(uint32_t unit) {
     return *reinterpret_cast<float*>(unit + 0x9c4);
 }
 
+uint32_t vanilla1121_unitMovementFlags(uint32_t unit) {
+    return *reinterpret_cast<uint32_t*>(unit + 0x9b8 + (0x40 - 0x10));
+}
+
+bool vanilla1121_unitIsMoving(uint32_t unit) {
+    return (vanilla1121_unitMovementFlags(unit) & MOVEFLAG_MASK_MOVING_OR_TURN) > 0;
+}
+
 bool vanilla1121_unitInCombat(uint32_t unit) {
     if (unit == 0) {
         return false;

@@ -193,10 +193,11 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 	C3Vector vecForward = {};
 	vecForward.x = vecLeft.x * std::cos(static_cast<float>(-M_PI_2)) - vecLeft.y * std::sin(static_cast<float>(-M_PI_2));
 	vecForward.y = vecLeft.x * std::sin(static_cast<float>(-M_PI_2)) + vecLeft.y * std::cos(static_cast<float>(-M_PI_2));
-	if (vanilla1121_objectType(unitMob) == OBJECT_TYPE_Unit && vanilla1121_unitInCombat(unitMob)) {
-		// As https://github.com/allfoxwy/UnitXP_SP3/issues/16
-		// It seems during melee combat, server won't update NPC facing value unless certain event happens (movement/certain spells)
-		// We check the vector of NPC and its target, when they are in line of sight (else NPC should be routing around map, in such case we fallback to facing value)
+
+	// As https://github.com/allfoxwy/UnitXP_SP3/issues/16
+	// It seems during melee combat, server won't update NPC facing value unless certain event happens (movement/certain spells)
+	// We check the vector of NPC and its target, when they are in line of sight (else NPC should be routing around map, in such case we fallback to facing value)
+	if (vanilla1121_objectType(unitMob) == OBJECT_TYPE_Unit && vanilla1121_unitInCombat(unitMob) && vanilla1121_unitIsMoving(unitMob) == false) {
 		uint64_t mobTargetGUID = vanilla1121_unitTargetGUID(unitMob);
 		if (mobTargetGUID > 0) {
 			uint32_t unitMobTarget = vanilla1121_getVisiableObject(mobTargetGUID);

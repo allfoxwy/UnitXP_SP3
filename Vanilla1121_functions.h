@@ -43,6 +43,55 @@ enum InGameClassification {
     CLASSIFICATION_RARE,
 };
 
+// This struct is from https://github.com/vmangos/core/blob/2dae0ef85799fc34c2f9b62a1df3008cc069ebd0/src/game/Objects/MovementInfo.h#L27
+enum MovementFlags
+{
+    MOVEFLAG_NONE = 0x00000000, // 0
+    MOVEFLAG_FORWARD = 0x00000001, // 1
+    MOVEFLAG_BACKWARD = 0x00000002, // 2
+    MOVEFLAG_STRAFE_LEFT = 0x00000004, // 3
+    MOVEFLAG_STRAFE_RIGHT = 0x00000008, // 4
+    MOVEFLAG_TURN_LEFT = 0x00000010, // 5
+    MOVEFLAG_TURN_RIGHT = 0x00000020, // 6
+    MOVEFLAG_PITCH_UP = 0x00000040, // 7
+    MOVEFLAG_PITCH_DOWN = 0x00000080, // 8
+    MOVEFLAG_WALK_MODE = 0x00000100, // 9 Walking
+    MOVEFLAG_UNUSED10 = 0x00000200, // 10 ??
+    MOVEFLAG_LEVITATING = 0x00000400, // 11 ?? Seems not to work
+    MOVEFLAG_FIXED_Z = 0x00000800, // 12 Fixed height. Jump => Glide across the entire map
+    MOVEFLAG_ROOT = 0x00001000, // 13
+    MOVEFLAG_JUMPING = 0x00002000, // 14
+    MOVEFLAG_FALLINGFAR = 0x00004000, // 15
+    MOVEFLAG_PENDING_STOP = 0x00008000, // 16 Only used in older client versions
+    MOVEFLAG_PENDING_UNSTRAFE = 0x00010000, // 17 Only used in older client versions
+    MOVEFLAG_PENDING_FORWARD = 0x00020000, // 18 Only used in older client versions
+    MOVEFLAG_PENDING_BACKWARD = 0x00040000, // 19 Only used in older client versions
+    MOVEFLAG_PENDING_STR_LEFT = 0x00080000, // 20 Only used in older client versions
+    MOVEFLAG_PENDING_STR_RGHT = 0x00100000, // 21 Only used in older client versions
+    MOVEFLAG_SWIMMING = 0x00200000, // 22 Ok
+    MOVEFLAG_SPLINE_ENABLED = 0x00400000, // 23 Ok
+    MOVEFLAG_MOVED = 0x00800000, // 24 Only used in older client versions
+    MOVEFLAG_FLYING = 0x01000000, // 25 [-ZERO] is it really need and correct value
+    MOVEFLAG_ONTRANSPORT = 0x02000000, // 26 Used for flying on some creatures
+    MOVEFLAG_SPLINE_ELEVATION = 0x04000000, // 27 Used for flight paths
+    MOVEFLAG_UNUSED28 = 0x08000000, // 28
+    MOVEFLAG_WATERWALKING = 0x10000000, // 29 Prevent unit from falling through water
+    MOVEFLAG_SAFE_FALL = 0x20000000, // 30 Active rogue safe fall spell (passive)
+    MOVEFLAG_HOVER = 0x40000000, // 31
+    MOVEFLAG_UNUSED32 = 0x80000000, // 32
+
+    // Can not be present with MOVEFLAG_ROOT (otherwise client freeze)
+    MOVEFLAG_MASK_MOVING =
+    MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
+    MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR |
+    MOVEFLAG_SPLINE_ELEVATION,
+    MOVEFLAG_MASK_MOVING_OR_TURN = MOVEFLAG_MASK_MOVING | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT,
+
+    // MovementFlags mask that only contains flags for x/z translations
+    // this is to avoid that a jumping character that stands still triggers melee-leeway
+    MOVEFLAG_MASK_XZ = MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT
+};
+
 // When player jump onto transports (boat/zeppelin) their coordinates system would change.
 // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
 // TODO: I don't have a way to find out what the current system is
@@ -118,6 +167,8 @@ uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID);
 C3Vector vanilla1121_unitPosition(uint32_t unit);
 // This function only work for Unit and Player type objects, or game would crash
 float vanilla1121_unitFacing(uint32_t unit);
+uint32_t vanilla1121_unitMovementFlags(uint32_t unit);
+bool vanilla1121_unitIsMoving(uint32_t unit);
 // Return true for "in sight"; false for "not in sight";
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1);
 // Return true for in-combat; false for not-in-combat or unchecked
