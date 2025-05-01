@@ -24,6 +24,7 @@
 #include "editCamera.h"
 #include "performanceProfiling.h"
 #include "LuaDebug.h"
+#include "FPScap.h"
 
 using namespace std;
 
@@ -345,6 +346,20 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
+        else if (cmd == "FPScap") {
+            if (lua_isnumber(L, 2)) {
+                double v = lua_tonumber(L, 2);
+                if (v < 1) {
+                    v = 0;
+                }
+                if (v > 500) {
+                    v = 500;
+                }
+                FPScap = static_cast<int>(v);
+            }
+            lua_pushnumber(L, FPScap);
+            return 1;
+        }
     }
     return p_original_UnitXP(L);
 }
@@ -367,6 +382,11 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         moduleSelf = hModule;
 
         perfReset();
+
+        if (loadNtDelayExecution() != 1) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to load NtDelayExecution function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
 
         if (MH_Initialize() != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
@@ -416,6 +436,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for camera updateCallback function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_GxScenePresent_0x58a960, &detoured_GxScenePresent_0x58a960, reinterpret_cast<LPVOID*>(&p_original_GxScenePresent_0x58a960)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for GxScenePresent function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -429,6 +453,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_GxScenePresent_0x58a960) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for GxScenePresent function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_CGCamera_updateCallback_0x511bc0) != MH_OK) {
