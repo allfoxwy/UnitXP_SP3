@@ -350,14 +350,21 @@ int __fastcall detoured_UnitXP(void* L) {
             if (lua_isnumber(L, 2)) {
                 double v = lua_tonumber(L, 2);
                 if (v < 1) {
-                    v = 0;
+                    targetFrameInterval.QuadPart = 0;
                 }
-                if (v > 500) {
-                    v = 500;
+                else if (v > 500) {
+                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / 500;
                 }
-                FPScap = static_cast<int>(v);
+                else {
+                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / static_cast<LONGLONG>(v);
+                }
             }
-            lua_pushnumber(L, FPScap);
+            if (targetFrameInterval.QuadPart > 0) {
+                lua_pushnumber(L, static_cast<double>(getPerformanceCounterFrequency().QuadPart / targetFrameInterval.QuadPart));
+            }
+            else {
+                lua_pushnumber(L, 0);
+            }
             return 1;
         }
     }
@@ -383,7 +390,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
         perfReset();
 
-        if (loadNtDelayExecution() != 1) {
+        if (initFPScap() != 1) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to load NtDelayExecution function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }

@@ -7,11 +7,10 @@ extern GXSCENEPRESENT_0x58a960 p_GxScenePresent_0x58a960;
 extern GXSCENEPRESENT_0x58a960 p_original_GxScenePresent_0x58a960;
 void __fastcall detoured_GxScenePresent_0x58a960(uint32_t unknown);
 
-
 typedef UINT(WINAPI* NTDELAYEXECUTION)(BOOL, LARGE_INTEGER*);
 extern NTDELAYEXECUTION NtDelayExecution;
-int loadNtDelayExecution();
+int initFPScap();
 
-extern int FPScap;
+extern LARGE_INTEGER targetFrameInterval;
 
 

@@ -7,30 +7,18 @@
 
 GXSCENEPRESENT_0x58a960 p_GxScenePresent_0x58a960 = reinterpret_cast<GXSCENEPRESENT_0x58a960>(0x58a960);
 GXSCENEPRESENT_0x58a960 p_original_GxScenePresent_0x58a960 = NULL;
-extern NTDELAYEXECUTION NtDelayExecution = NULL;
-int FPScap = 0;
+NTDELAYEXECUTION NtDelayExecution = NULL;
+LARGE_INTEGER targetFrameInterval = {};
 
 static LARGE_INTEGER nextFrameTime = {};
 
 void __fastcall detoured_GxScenePresent_0x58a960(uint32_t unknown) {
-	if (FPScap < 1) {
+	if (targetFrameInterval.QuadPart < 1) {
 		p_original_GxScenePresent_0x58a960(unknown);
 		return;
 	}
 
 	// From https://github.com/doitsujin/dxvk/blob/4799558d322f67d1ff8f2c3958ff03e776b65bc6/src/util/util_fps_limiter.cpp#L51
-
-	LARGE_INTEGER targetFrameInteval = {};
-	targetFrameInteval.QuadPart = getPerformanceCounterFrequency().QuadPart / FPScap;
-
-	if (nextFrameTime.QuadPart == 0) {
-		// No need to sleep for first frame
-		QueryPerformanceCounter(&nextFrameTime);
-		nextFrameTime.QuadPart += targetFrameInteval.QuadPart;
-
-		p_original_GxScenePresent_0x58a960(unknown);
-		return;
-	}
 
 	LARGE_INTEGER now = {};
 	QueryPerformanceCounter(&now);
@@ -48,12 +36,15 @@ void __fastcall detoured_GxScenePresent_0x58a960(uint32_t unknown) {
 
 	p_original_GxScenePresent_0x58a960(unknown);
 
-	nextFrameTime.QuadPart = (now.QuadPart < nextFrameTime.QuadPart + targetFrameInteval.QuadPart)
-		? nextFrameTime.QuadPart + targetFrameInteval.QuadPart
-		: now.QuadPart + targetFrameInteval.QuadPart;
+	nextFrameTime.QuadPart = (now.QuadPart < nextFrameTime.QuadPart + targetFrameInterval.QuadPart)
+		? nextFrameTime.QuadPart + targetFrameInterval.QuadPart
+		: now.QuadPart + targetFrameInterval.QuadPart;
 }
 
-int loadNtDelayExecution() {
+int initFPScap() {
+	targetFrameInterval.QuadPart = 0;
+	nextFrameTime.QuadPart = 0;
+
 	// from https://github.com/doitsujin/dxvk/blob/4799558d322f67d1ff8f2c3958ff03e776b65bc6/src/util/util_sleep.cpp#L38
 	HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
 	if (ntdll) {
