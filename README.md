@@ -11,6 +11,7 @@ An attempt to make Vanilla 1.12 modern...
 - Check line of sight in Lua.
 - Measure distance in Lua.
 - Disable TCP delayed ACK.
+- FPS limiter(cap).
 
 
 Refer to [wiki](https://github.com/allfoxwy/UnitXP_SP3/wiki) for detail.
