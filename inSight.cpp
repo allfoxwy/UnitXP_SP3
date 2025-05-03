@@ -62,10 +62,13 @@ static void cameraCacheHousekeeping() {
 	LARGE_INTEGER delta = {};
 	QueryPerformanceCounter(&now);
 
-	for (auto it = cameraSightCache.begin(); it != cameraSightCache.end(); ++it) {
+	for (auto it = cameraSightCache.begin(); it != cameraSightCache.end();) {
 		delta.QuadPart = now.QuadPart - it->second.first.QuadPart;
 		if (delta.QuadPart > cacheTTL.QuadPart) {
-			cameraSightCache.erase(it);
+			it = cameraSightCache.erase(it);
+		}
+		else {
+			it++;
 		}
 	}
 }
@@ -90,10 +93,13 @@ static void unitCacheHousekeeping() {
 	LARGE_INTEGER delta = {};
 	QueryPerformanceCounter(&now);
 
-	for (auto it = unitSightCache.begin(); it != unitSightCache.end(); ++it) {
+	for (auto it = unitSightCache.begin(); it != unitSightCache.end();) {
 		delta.QuadPart = now.QuadPart - it->second.first.QuadPart;
 		if (delta.QuadPart > cacheTTL.QuadPart) {
-			unitSightCache.erase(it);
+			it = unitSightCache.erase(it);
+		}
+		else {
+			it++;
 		}
 	}
 }
