@@ -9,9 +9,9 @@ FUNCTION_GAMEQUIT_0x41f9b0 p_original_gameQuit_0x41f9b0 = NULL;
 
 
 void __fastcall detoured_gameQuit_0x41f9b0(uint32_t unknown) {
-	gTimer.end();
+    gTimer.end();
 
-	LuaDebug_end();
+    LuaDebug_end();
 
-	return p_original_gameQuit_0x41f9b0(unknown);
+    return p_original_gameQuit_0x41f9b0(unknown);
 }

@@ -197,7 +197,7 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
 uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
     uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
     uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
-    
+
     while (i != 0 && (i & 1) == 0) {
         uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
 
@@ -486,14 +486,14 @@ uint64_t vanilla1121_unitTargetGUID(uint32_t unit) {
     }
 
     uint64_t data = *reinterpret_cast<uint64_t*>(attr + 0x28);
-    
+
     return data;
 }
 
 int vanilla1121_unitClassification(uint32_t unit) {
     if (unit == 0) {
         return -1;
-   }
+    }
 
     // Unit descriptor (right after the Object descriptor).
     // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
@@ -623,7 +623,7 @@ void vectorNormalize(C3Vector& vec) {
 float angleBetweenVectors(const C3Vector& a, const C3Vector& b) {
     float lenA = vectorLength(a);
     float lenB = vectorLength(b);
-    
+
     if (lenA == 0.0f || lenB == 0.0f) {
         return static_cast<float>(4 * M_PI);
     }

@@ -110,7 +110,7 @@ bool targetWorldBoss(float distanceLimit) {
             && vanilla1121_unitClassification(i) == CLASSIFICATION_WORLDBOSS
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
-            
+
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -310,7 +310,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
-            
+
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -390,7 +390,7 @@ bool targetMarkedEnemyInCycle(MOB_SELECTFUNCTION_WITH_MARK selectFunction, strin
             && vanilla1121_unitIsDead(i) == 0
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
-            
+
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -469,7 +469,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
             && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
             && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
-            
+
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
 
             if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
@@ -508,9 +508,9 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
     }
 
     if (meleeRange.size() > 0) {
-        
+
         uint64_t choice = selectFunction(lastTarget, meleeRange);
-        
+
         lastTarget = choice;
         vanilla1121_target(choice);
         return true;
@@ -524,9 +524,9 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             sort(chargeRange.begin(), chargeRange.end(), compareFunction);
             chargeRange.erase(chargeRange.begin() + limit, chargeRange.end());
         }
-        
+
         uint64_t choice = selectFunction(lastTarget, chargeRange);
-        
+
         lastTarget = choice;
         vanilla1121_target(choice);
         return true;
@@ -541,9 +541,9 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             farRange.erase(farRange.begin() + limit, farRange.end());
         }
 
-        
+
         uint64_t choice = selectFunction(lastTarget, farRange);
-        
+
         lastTarget = choice;
         vanilla1121_target(choice);
         return true;
