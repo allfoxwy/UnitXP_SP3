@@ -14,11 +14,10 @@ extern RENDERWORLD p_original_renderWorld;
 typedef void(__thiscall* REMOVENAMEPLATE)(uint32_t);
 extern REMOVENAMEPLATE p_removeNameplate;
 
-
 extern bool modernNameplateDistance;
 extern bool prioritizeTargetNameplate;
 extern bool prioritizeMarkedNameplate;
-
+extern bool nameplateCombatFilter;
 
 int __fastcall detoured_renderWorld(void* self, void* ignored);
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2);

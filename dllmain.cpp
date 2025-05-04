@@ -219,6 +219,17 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, prioritizeMarkedNameplate);
             return 1;
         }
+        else if (cmd == "nameplateCombatFilter") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                nameplateCombatFilter = true;
+            }
+            else if (subcmd == "disable") {
+                nameplateCombatFilter = false;
+            }
+            lua_pushboolean(L, nameplateCombatFilter);
+            return 1;
+        }
         else if (cmd == "timer") {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {

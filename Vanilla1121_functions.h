@@ -173,6 +173,10 @@ bool vanilla1121_unitIsMoving(uint32_t unit);
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1);
 // Return true for in-combat; false for not-in-combat or unchecked
 bool vanilla1121_unitInCombat(uint32_t unit);
+// Return -1 for error
+double vanilla1121_unitCurrentHP(uint32_t unit);
+// Return -1 for error
+double vanilla1121_unitMaximumHP(uint32_t unit);
 // Get in-game object type
 int vanilla1121_objectType(uint32_t targetObject);
 // Get unit's target. This function has a delay when switching target. I suspect its data reqires network commnication to server.

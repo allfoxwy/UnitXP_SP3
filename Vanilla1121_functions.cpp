@@ -267,6 +267,40 @@ bool vanilla1121_unitInCombat(uint32_t unit) {
     }
 }
 
+double vanilla1121_unitCurrentHP(uint32_t unit) {
+    if (unit == 0) {
+        return -1;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    return *reinterpret_cast<uint32_t*>(attr + 0x40);
+}
+
+double vanilla1121_unitMaximumHP(uint32_t unit) {
+    if (unit == 0) {
+        return -1;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return -1;
+    }
+
+    return *reinterpret_cast<uint32_t*>(attr + 0x58);
+}
+
 float vanilla1121_unitBoundingRadius(uint32_t unit) {
     if (unit == 0) {
         return -1.0f;
