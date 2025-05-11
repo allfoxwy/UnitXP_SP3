@@ -13,6 +13,7 @@
 #include "inSight.h"
 #include "distanceBetween.h"
 #include "performanceProfiling.h"
+#include "editCamera.h"
 
 using namespace std;
 
@@ -120,8 +121,18 @@ bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
         return false;
     }
 
+    // Player position is taking height into consideration, because if we zoom in player, it would eventually point at head, not feet
     C3Vector posPlayer = vanilla1121_unitPosition(player);
-    C3Vector posCamera = vanilla1121_getCameraPosition();
+    posPlayer.z += vanilla1121_unitHeight(player);
+
+    C3Vector posCamera = editCamera_translatedPosition();
+
+    // As we might edit camera position, so we need to edit viewing frustum either.
+    // We move player position by the same vector so that the viewing frstum would be moved.
+    C3Vector posOriginal = editCamera_originalPosition();
+    posPlayer.x += posCamera.x - posOriginal.x;
+    posPlayer.y += posCamera.y - posOriginal.y;
+    posPlayer.z += posCamera.z - posOriginal.z;
 
     // When player jump onto transports (boat/zeppelin) their coordinates system would change.
     // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
@@ -294,15 +305,16 @@ int UnitXP_behind(const string unit0, const string unit1) {
 
 
 static int test_camera_inSight(const uint32_t unit) {
-    C3Vector pos0 = vanilla1121_getCameraPosition();
+    C3Vector pos0 = editCamera_translatedPosition();
     C3Vector pos1 = vanilla1121_unitPosition(unit);
 
     if (inViewingFrustum(pos1, 2.0f) == false) {
         return 0;
     }
 
-    //TODO: I can't find height of object
-    pos1.z += 2.4f;
+    // AFTER viewing frustum test, we use unit height for inSight test
+    // Because if we add height before, frustum would become shorter on top side, we prefer it's shorter at bottom.
+    pos1.z += vanilla1121_unitHeight(unit);
 
     C3Vector intersectPoint = {};
     float distance = 1.0f;

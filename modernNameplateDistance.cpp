@@ -6,6 +6,7 @@
 #include "distanceBetween.h"
 #include "timer.h"
 #include "performanceProfiling.h"
+#include "editCamera.h"
 
 
 // The technique of hooking __thiscall function is from: https://tresp4sser.wordpress.com/2012/10/06/how-to-hook-thiscall-functions/
@@ -79,7 +80,7 @@ static int shouldHaveNameplate(void* voidUnit) {
 
     bool inSight = (camera_inSight(voidUnit) > 0);
 
-    C3Vector pos0 = vanilla1121_getCameraPosition();
+    C3Vector pos0 = editCamera_translatedPosition();
     C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(voidUnit));
     float distance = UnitXP_distanceBetween(pos0, pos1);
 

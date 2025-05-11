@@ -204,6 +204,16 @@ float vanilla1121_unitCombatReach(uint32_t unit);
 float vanilla1121_unitScaleX(uint32_t unit);
 // Run a piece of Lua script
 void vanilla1121_runScript(std::string luaScript);
+// Get CMovement struct address from unit
+uint32_t vanilla1121_unitCMovement(uint32_t unit);
+// Seems to be a time value
+uint32_t vanilla1121_gameTick();
+// The collision box is not exactly same size as on-display.
+float vanilla1121_unitCollisionBoxHeight(uint32_t unit);
+// The factor defines a scaling onto the unit's original size.
+float vanilla1121_unitSizeScaleingFactor(uint32_t unit);
+// The on-display unit height. It is a product of collision box height and the scaling factor.
+float vanilla1121_unitHeight(uint32_t unit);
 
 float vectorLength(const C3Vector& vec);
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b);

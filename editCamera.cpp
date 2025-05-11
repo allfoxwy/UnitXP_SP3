@@ -13,6 +13,24 @@ float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
 bool cameraFollowTarget = false;
 
+
+static C3Vector cameraOriginalPosition = {};
+static C3Vector cameraTranslatedPosition = {};
+
+C3Vector editCamera_originalPosition() {
+    if (cameraOriginalPosition.x == 0.0f && cameraOriginalPosition.y == 0.0f && cameraOriginalPosition.z == 0.0f) {
+        return vanilla1121_getCameraPosition();
+    }
+    return cameraOriginalPosition;
+}
+
+C3Vector editCamera_translatedPosition() {
+    if (cameraTranslatedPosition.x == 0.0f && cameraTranslatedPosition.y == 0.0f && cameraTranslatedPosition.z == 0.0f) {
+        return vanilla1121_getCameraPosition();
+    }
+    return cameraTranslatedPosition;
+}
+
 static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPosition) {
     float* cameraPositionPtr = reinterpret_cast<float*>(camera + 0x8);
     C3Vector cameraPosition = {};
@@ -140,20 +158,20 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
     if (camera > 0 && (camera & 1) == 0) {
         float* editPtr = reinterpret_cast<float*>(camera + 0x8);
 
-        C3Vector cameraPosition = {};
-        cameraPosition.x = editPtr[0];
-        cameraPosition.y = editPtr[1];
-        cameraPosition.z = editPtr[2];
+        cameraOriginalPosition.x = editPtr[0];
+        cameraOriginalPosition.y = editPtr[1];
+        cameraOriginalPosition.z = editPtr[2];
 
         uint32_t u = vanilla1121_getVisiableObject(*reinterpret_cast<uint64_t*>(camera + 0x88));
         if (u > 0 &&
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
             C3Vector playerPosition = vanilla1121_unitPosition(u);
 
-            C3Vector translated = cameraTranslate(cameraPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
-            editPtr[0] = translated.x;
-            editPtr[1] = translated.y;
-            editPtr[2] = translated.z;
+            cameraTranslatedPosition = cameraTranslate(cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
+
+            editPtr[0] = cameraTranslatedPosition.x;
+            editPtr[1] = cameraTranslatedPosition.y;
+            editPtr[2] = cameraTranslatedPosition.z;
 
             if (cameraFollowTarget) {
                 uint64_t targetGUID = UnitGUID("target");
@@ -162,9 +180,7 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
                     if (t > 0 &&
                         ((vanilla1121_objectType(t) == OBJECT_TYPE_Player && vanilla1121_unitCanBeAttacked(t) == 0) || (vanilla1121_objectType(t) == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(t) == 0))) {
                         C3Vector targetPosition = vanilla1121_unitPosition(t);
-
-                        //TODO: I can't find height of object
-                        targetPosition.z += 2.4f;
+                        targetPosition.z += vanilla1121_unitHeight(t);
 
                         if (UnitXP_distanceBetween("player", "target", METER_RANGED) < 50.0f
                             && UnitXP_inSight("player", "target")) {

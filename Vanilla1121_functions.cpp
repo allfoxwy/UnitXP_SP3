@@ -222,9 +222,9 @@ uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
 }
 
 C3Vector vanilla1121_unitPosition(uint32_t unit) {
-    float* positionPtr = reinterpret_cast<float*>(unit + 0x9b8);
-    C3Vector result = {};
+    float* positionPtr = reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0x10);
 
+    C3Vector result = {};
     result.x = positionPtr[0];
     result.y = positionPtr[1];
     result.z = positionPtr[2];
@@ -233,11 +233,11 @@ C3Vector vanilla1121_unitPosition(uint32_t unit) {
 }
 
 float vanilla1121_unitFacing(uint32_t unit) {
-    return *reinterpret_cast<float*>(unit + 0x9c4);
+    return *reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0x1c);
 }
 
 uint32_t vanilla1121_unitMovementFlags(uint32_t unit) {
-    return *reinterpret_cast<uint32_t*>(unit + 0x9b8 + (0x40 - 0x10));
+    return *reinterpret_cast<uint32_t*>(vanilla1121_unitCMovement(unit) + 0x40);
 }
 
 bool vanilla1121_unitIsMoving(uint32_t unit) {
@@ -360,9 +360,8 @@ bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
     C3Vector intersectPoint = {};
     float distance = 1.0f;
 
-    //TODO: I can't find height of object
-    pos0.z += 2.4f;
-    pos1.z += 2.4f;
+    pos0.z += vanilla1121_unitHeight(unit0);
+    pos1.z += vanilla1121_unitHeight(unit1);
 
     bool result = CWorld_Intersect(&pos0, &pos1, &intersectPoint, &distance);
 
@@ -667,4 +666,24 @@ void lua_remove(void* L, int index) {
 
 void lua_insert(void* L, int index) {
     return p_lua_insert(L, index);
+}
+
+uint32_t vanilla1121_unitCMovement(uint32_t unit) {
+    return *reinterpret_cast<uint32_t*>(unit + 0x118);
+}
+
+uint32_t vanilla1121_gameTick() {
+    return *reinterpret_cast<uint32_t*>(0xcf0bc8);
+}
+
+float vanilla1121_unitCollisionBoxHeight(uint32_t unit) {
+    return *reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0xb4);
+}
+
+float vanilla1121_unitSizeScaleingFactor(uint32_t unit) {
+    return *reinterpret_cast<float*>(unit + 0x90);
+}
+
+float vanilla1121_unitHeight(uint32_t unit) {
+    return vanilla1121_unitCollisionBoxHeight(unit) * vanilla1121_unitSizeScaleingFactor(unit);
 }
