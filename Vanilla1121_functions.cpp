@@ -685,5 +685,7 @@ float vanilla1121_unitSizeScaleingFactor(uint32_t unit) {
 }
 
 float vanilla1121_unitHeight(uint32_t unit) {
-    return vanilla1121_unitCollisionBoxHeight(unit) * vanilla1121_unitSizeScaleingFactor(unit);
+    float result = vanilla1121_unitCollisionBoxHeight(unit) * vanilla1121_unitSizeScaleingFactor(unit);
+    // I'm not sure if these data are always valid. So here is a default value.
+    return result > 0.0f ? result : 2.1f;
 }
