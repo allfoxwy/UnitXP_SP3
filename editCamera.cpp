@@ -106,23 +106,23 @@ static C3Vector cameraTranslate(uint32_t camera, const C3Vector& a, const C3Vect
 
     if (cameraFixedPosition) {
         C3Vector playerEyePosition = {};
+        // x = 0x174 and y = 0x178 are the same as the unit position
         playerEyePosition.x = b.x;
         playerEyePosition.y = b.y;
         // Will crash if done in first person
         playerEyePosition.z = *reinterpret_cast<float*>(camera + 0x17C);
 
-        // Get the difference in vectors to get the angle the camera is pointed at
+        // Get the vector to the camera from the players current eye position
         C3Vector difference = {};
-        difference.x = playerEyePosition.x - cameraOriginalPosition.x;
-        difference.y = playerEyePosition.y - cameraOriginalPosition.y;
-        difference.z = playerEyePosition.z - cameraOriginalPosition.z;
+        difference.x = a.x - playerEyePosition.x;
+        difference.y = a.y - playerEyePosition.y;
+        difference.z = a.z - playerEyePosition.z;
 
-        float radius = vectorLength(difference);
-        float yaw = atan2(difference.y, difference.x);
-        float pitch = atan(difference.z / sqrt(difference.x * difference.x + difference.y * difference.y));
-        cameraTranslatedPosition.x = playerEyePosition.x - cos(pitch) * cos(yaw) * radius;
-        cameraTranslatedPosition.y = playerEyePosition.y - cos(pitch) * sin(yaw) * radius;
-        cameraTranslatedPosition.z = b.z + 2.25f + cameraVerticalAddend - sin(pitch) * radius;
+        // Add vector from a fixed eye position to get our fixed camera position
+        float height = 2.151306f;
+        result.x = playerEyePosition.x + difference.x;
+        result.y = playerEyePosition.y + difference.y;
+        result.z = b.z + height + cameraVerticalAddend + difference.z;
     }
 
     // When player jump onto transports (boat/zeppelin) their coordinates system would change.
@@ -194,21 +194,6 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
             float height = vanilla1121_unitHeight(u);
 
             cameraTranslatedPosition = cameraTranslate(camera, cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
-
-            //ofstream myfile;
-            //myfile.open("output.txt");
-            //char str[1024];
-            //sprintf_s(str, "yaw: %f, pitch: %f, radius: %f\nx: %f, y: %f, z: %f", yaw, pitch, radius, cos(pitch) * cos(yaw), cos(pitch) * sin(yaw), sin(pitch));
-            //sprintf_s(str, "%f, %f, %f", vanilla1121_unitHeight(u), vanilla1121_unitCollisionBoxHeight(u), vanilla1121_unitSizeScaleingFactor(u));
-            //int base = 0x160;
-            //sprintf_s(str, "%f %f\n%f %f %f\n%f %f %f\n%f %f %f\n%f %f %f\n%f %f %f\n", *reinterpret_cast<float*>(camera + base), *reinterpret_cast<float*>(camera + base + 0x4), 
-            //    *reinterpret_cast<float*>(camera + base + 0x8), *reinterpret_cast<float*>(camera + base + 0xC), *reinterpret_cast<float*>(camera + base + 0x10), 
-            //    *reinterpret_cast<float*>(camera + base + 0x14), *reinterpret_cast<float*>(camera + base + 0x18), *reinterpret_cast<float*>(camera + base + 0x1C),
-            //    *reinterpret_cast<float*>(camera + base + 0x20), *reinterpret_cast<float*>(camera + base + 0x24), *reinterpret_cast<float*>(camera + base + 0x28),
-            //    *reinterpret_cast<float*>(camera + base + 0x2C), *reinterpret_cast<float*>(camera + base + 0x30), *reinterpret_cast<float*>(camera + base + 0x34),
-            //    *reinterpret_cast<float*>(camera + base + 0x38), *reinterpret_cast<float*>(camera + base + 0x3C), *reinterpret_cast<float*>(camera + base + 0x40));
-            //myfile << str;
-            //myfile.close();
 
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
