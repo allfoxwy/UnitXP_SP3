@@ -15,6 +15,7 @@ CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = N
 float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
 bool cameraFollowTarget = false;
+bool cameraFixedPosition = false;
 
 
 static C3Vector cameraOriginalPosition = {};
@@ -85,7 +86,7 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
     matCamera[8] = vecUp.z;
 }
 
-static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float horizontalDelta, float verticalDelta) {
+static C3Vector cameraTranslate(uint32_t camera, const C3Vector& a, const C3Vector& b, float horizontalDelta, float verticalDelta) {
     C3Vector result = {};
     result.x = a.x;
     result.y = a.y;
@@ -101,6 +102,27 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
     if (temp < 0.5f) {
         // Don't translate for first person camera
         return result;
+    }
+
+    if (cameraFixedPosition) {
+        C3Vector playerEyePosition = {};
+        playerEyePosition.x = b.x;
+        playerEyePosition.y = b.y;
+        // Will crash if done in first person
+        playerEyePosition.z = *reinterpret_cast<float*>(camera + 0x17C);
+
+        // Get the difference in vectors to get the angle the camera is pointed at
+        C3Vector difference = {};
+        difference.x = playerEyePosition.x - cameraOriginalPosition.x;
+        difference.y = playerEyePosition.y - cameraOriginalPosition.y;
+        difference.z = playerEyePosition.z - cameraOriginalPosition.z;
+
+        float radius = vectorLength(difference);
+        float yaw = atan2(difference.y, difference.x);
+        float pitch = atan(difference.z / sqrt(difference.x * difference.x + difference.y * difference.y));
+        cameraTranslatedPosition.x = playerEyePosition.x - cos(pitch) * cos(yaw) * radius;
+        cameraTranslatedPosition.y = playerEyePosition.y - cos(pitch) * sin(yaw) * radius;
+        cameraTranslatedPosition.z = b.z + 2.25f + cameraVerticalAddend - sin(pitch) * radius;
     }
 
     // When player jump onto transports (boat/zeppelin) their coordinates system would change.
@@ -171,33 +193,7 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
             C3Vector playerPosition = vanilla1121_unitPosition(u);
             float height = vanilla1121_unitHeight(u);
 
-            cameraTranslatedPosition = cameraTranslate(cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
-
-            C3Vector checkFP = {};
-            checkFP.x = cameraOriginalPosition.x - playerPosition.x;
-            checkFP.y = cameraOriginalPosition.y - playerPosition.y;
-            checkFP.z = 0;
-
-            // Only do this if we are not in first person
-            if (vectorLength(checkFP) >= 0.5f) {
-                C3Vector playerEyePosition = {};
-                playerEyePosition.x = playerPosition.x;
-                playerEyePosition.y = playerPosition.y;
-                playerEyePosition.z = *reinterpret_cast<float*>(camera + 0x17C);
-
-                // Get the difference in vectors to get the angle the camera is pointed at
-                C3Vector difference = {};
-                difference.x = playerEyePosition.x - cameraOriginalPosition.x;
-                difference.y = playerEyePosition.y - cameraOriginalPosition.y;
-                difference.z = playerEyePosition.z - cameraOriginalPosition.z;
-
-                float radius = vectorLength(difference);
-                float yaw = atan2(difference.y, difference.x);
-                float pitch = atan(difference.z / sqrt(difference.x * difference.x + difference.y * difference.y));
-                cameraTranslatedPosition.x = playerEyePosition.x - cos(pitch) * cos(yaw) * radius;
-                cameraTranslatedPosition.y = playerEyePosition.y - cos(pitch) * sin(yaw) * radius;
-                cameraTranslatedPosition.z = playerPosition.z + 2.25f - sin(pitch) * radius;
-            }
+            cameraTranslatedPosition = cameraTranslate(camera, cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
 
             //ofstream myfile;
             //myfile.open("output.txt");

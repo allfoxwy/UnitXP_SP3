@@ -303,6 +303,17 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, cameraFollowTarget);
             return 1;
         }
+        else if (cmd == "cameraFixedPosition") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                cameraFixedPosition = true;
+            }
+            if (subcmd == "disable") {
+                cameraFixedPosition = false;
+            }
+            lua_pushboolean(L, cameraFixedPosition);
+            return 1;
+        }
         else if (cmd == "notify") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "taskbarIcon") {
