@@ -6,9 +6,6 @@
 #include "inSight.h"
 #include "performanceProfiling.h"
 
-#include <iostream>
-#include <fstream>
-
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
 
