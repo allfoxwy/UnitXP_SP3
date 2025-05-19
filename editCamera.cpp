@@ -200,7 +200,6 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
         if (u > 0 &&
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
             C3Vector playerPosition = vanilla1121_unitPosition(u);
-            float height = vanilla1121_unitHeight(u);
 
             cameraTranslatedPosition = cameraTranslate(camera, cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
 
