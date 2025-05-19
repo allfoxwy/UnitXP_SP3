@@ -1,0 +1,16 @@
+*.lib
+*.obj
+*.recipe
+*.iobj
+*.ipdb
+*.log
+*.pch
+*.tlog
+*.pdb
+*.user
+*.filters
+*.vcxproj
+*.sln
+*.ipch
+*.vsidx
+/.vs

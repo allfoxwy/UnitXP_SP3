@@ -6,6 +6,9 @@
 #include "inSight.h"
 #include "performanceProfiling.h"
 
+#include <iostream>
+#include <fstream>
+
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
 
@@ -166,8 +169,50 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
         if (u > 0 &&
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
             C3Vector playerPosition = vanilla1121_unitPosition(u);
+            float height = vanilla1121_unitHeight(u);
 
             cameraTranslatedPosition = cameraTranslate(cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
+
+            C3Vector checkFP = {};
+            checkFP.x = cameraOriginalPosition.x - playerPosition.x;
+            checkFP.y = cameraOriginalPosition.y - playerPosition.y;
+            checkFP.z = 0;
+
+            // Only do this if we are not in first person
+            if (vectorLength(checkFP) >= 0.5f) {
+                C3Vector playerEyePosition = {};
+                playerEyePosition.x = playerPosition.x;
+                playerEyePosition.y = playerPosition.y;
+                playerEyePosition.z = *reinterpret_cast<float*>(camera + 0x17C);
+
+                // Get the difference in vectors to get the angle the camera is pointed at
+                C3Vector difference = {};
+                difference.x = playerEyePosition.x - cameraOriginalPosition.x;
+                difference.y = playerEyePosition.y - cameraOriginalPosition.y;
+                difference.z = playerEyePosition.z - cameraOriginalPosition.z;
+
+                float radius = vectorLength(difference);
+                float yaw = atan2(difference.y, difference.x);
+                float pitch = atan(difference.z / sqrt(difference.x * difference.x + difference.y * difference.y));
+                cameraTranslatedPosition.x = playerEyePosition.x - cos(pitch) * cos(yaw) * radius;
+                cameraTranslatedPosition.y = playerEyePosition.y - cos(pitch) * sin(yaw) * radius;
+                cameraTranslatedPosition.z = playerPosition.z + 2.25f - sin(pitch) * radius;
+            }
+
+            //ofstream myfile;
+            //myfile.open("output.txt");
+            //char str[1024];
+            //sprintf_s(str, "yaw: %f, pitch: %f, radius: %f\nx: %f, y: %f, z: %f", yaw, pitch, radius, cos(pitch) * cos(yaw), cos(pitch) * sin(yaw), sin(pitch));
+            //sprintf_s(str, "%f, %f, %f", vanilla1121_unitHeight(u), vanilla1121_unitCollisionBoxHeight(u), vanilla1121_unitSizeScaleingFactor(u));
+            //int base = 0x160;
+            //sprintf_s(str, "%f %f\n%f %f %f\n%f %f %f\n%f %f %f\n%f %f %f\n%f %f %f\n", *reinterpret_cast<float*>(camera + base), *reinterpret_cast<float*>(camera + base + 0x4), 
+            //    *reinterpret_cast<float*>(camera + base + 0x8), *reinterpret_cast<float*>(camera + base + 0xC), *reinterpret_cast<float*>(camera + base + 0x10), 
+            //    *reinterpret_cast<float*>(camera + base + 0x14), *reinterpret_cast<float*>(camera + base + 0x18), *reinterpret_cast<float*>(camera + base + 0x1C),
+            //    *reinterpret_cast<float*>(camera + base + 0x20), *reinterpret_cast<float*>(camera + base + 0x24), *reinterpret_cast<float*>(camera + base + 0x28),
+            //    *reinterpret_cast<float*>(camera + base + 0x2C), *reinterpret_cast<float*>(camera + base + 0x30), *reinterpret_cast<float*>(camera + base + 0x34),
+            //    *reinterpret_cast<float*>(camera + base + 0x38), *reinterpret_cast<float*>(camera + base + 0x3C), *reinterpret_cast<float*>(camera + base + 0x40));
+            //myfile << str;
+            //myfile.close();
 
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
