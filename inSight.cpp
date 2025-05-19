@@ -123,7 +123,7 @@ bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
 
     // Player position is taking height into consideration, because if we zoom in player, it would eventually point at head, not feet
     C3Vector posPlayer = vanilla1121_unitPosition(player);
-    posPlayer.z += vanilla1121_unitHeight(player);
+    posPlayer.z += vanilla1121_unitCollisionBoxHeight(player);
 
     C3Vector posCamera = editCamera_translatedPosition();
 
@@ -311,10 +311,12 @@ static int test_camera_inSight(const uint32_t unit) {
     if (inViewingFrustum(pos1, 2.0f) == false) {
         return 0;
     }
-
-    // AFTER viewing frustum test, we use unit height for inSight test
-    // Because if we add height before, frustum would become shorter on top side, we prefer it's shorter at bottom.
-    pos1.z += vanilla1121_unitHeight(unit);
+    
+    // While we have vanilla1121_unitCollisionBoxHeight(), camera sight should not use real height,
+    // because some mobs in the game is so tall that they are bigger than camera sight.
+    // Their top (higher than head) are almost always out of camera sight.
+    // Example could be ogres in LBRS.
+    pos1.z += 2.4f;
 
     C3Vector intersectPoint = {};
     float distance = 1.0f;

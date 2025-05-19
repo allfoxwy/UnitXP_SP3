@@ -6,13 +6,18 @@
 
 typedef int(__fastcall* CGCAMERA_UPDATECALLBACK_0x511bc0)(void*, uint32_t);
 int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_t camera);
-
 extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0;
 extern CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0;
+
+typedef double(__fastcall* ORGANICSMOOTH_0x5b7bb0)(float, float, float);
+double __fastcall detoured_OrganicSmooth(float start, float end, float step);
+extern ORGANICSMOOTH_0x5b7bb0 p_OrganicSmooth;
+extern ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth;
 
 extern float cameraHorizontalAddend;
 extern float cameraVerticalAddend;
 extern bool cameraFollowTarget;
+extern bool cameraOrganicSmooth;
 
 // Get camera position after editing.
 C3Vector editCamera_translatedPosition();

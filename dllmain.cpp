@@ -303,6 +303,17 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, cameraFollowTarget);
             return 1;
         }
+        else if (cmd == "cameraOrganicSmooth") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                cameraOrganicSmooth = true;
+            }
+            if (subcmd == "disable") {
+                cameraOrganicSmooth = false;
+            }
+            lua_pushboolean(L, cameraOrganicSmooth);
+            return 1;
+        }
         else if (cmd == "notify") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "taskbarIcon") {
@@ -458,6 +469,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for GxScenePresent function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_OrganicSmooth, &detoured_OrganicSmooth, reinterpret_cast<LPVOID*>(&p_original_OrganicSmooth)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for OrganicSmooth function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -471,6 +486,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_OrganicSmooth) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for OrganicSmooth function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_GxScenePresent_0x58a960) != MH_OK) {

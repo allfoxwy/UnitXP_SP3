@@ -9,10 +9,13 @@
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_CGCamera_updateCallback_0x511bc0 = reinterpret_cast<CGCAMERA_UPDATECALLBACK_0x511bc0>(0x511bc0);
 CGCAMERA_UPDATECALLBACK_0x511bc0 p_original_CGCamera_updateCallback_0x511bc0 = NULL;
 
+ORGANICSMOOTH_0x5b7bb0 p_OrganicSmooth = reinterpret_cast<ORGANICSMOOTH_0x5b7bb0>(0x5b7bb0);
+ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth = NULL;
+
 float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
 bool cameraFollowTarget = false;
-
+bool cameraOrganicSmooth = true;
 
 static C3Vector cameraOriginalPosition = {};
 static C3Vector cameraTranslatedPosition = {};
@@ -29,6 +32,15 @@ C3Vector editCamera_translatedPosition() {
         return vanilla1121_getCameraPosition();
     }
     return cameraTranslatedPosition;
+}
+
+double __fastcall detoured_OrganicSmooth(float start, float end, float step) {
+    if (cameraOrganicSmooth) {
+        return p_original_OrganicSmooth(start, end, step);
+    }
+    else {
+        return end;
+    }
 }
 
 static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPosition) {
@@ -179,11 +191,10 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
                     uint32_t t = vanilla1121_getVisiableObject(targetGUID);
                     if (t > 0 &&
                         ((vanilla1121_objectType(t) == OBJECT_TYPE_Player && vanilla1121_unitCanBeAttacked(t) == 0) || (vanilla1121_objectType(t) == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(t) == 0))) {
-                        C3Vector targetPosition = vanilla1121_unitPosition(t);
-                        targetPosition.z += vanilla1121_unitHeight(t);
-
                         if (UnitXP_distanceBetween("player", "target", METER_RANGED) < 50.0f
                             && UnitXP_inSight("player", "target")) {
+                            C3Vector targetPosition = vanilla1121_unitPosition(t);
+                            targetPosition.z += vanilla1121_unitCollisionBoxHeight(t);
                             cameraFollowPosition(camera, targetPosition);
                         }
                     }

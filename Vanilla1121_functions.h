@@ -191,6 +191,10 @@ C3Vector vanilla1121_getCameraPosition();
 float vanilla1121_getCameraFoV();
 // Get the GUID whom the camera is looking at
 uint64_t vanilla1121_getCameraLookingAtGUID();
+// This distance value could contain animation process, it could be not the final value.
+float vanilla1121_getCameraCurrentDistance();
+// This should be the final distance value after animation.
+float vanilla1121_getCameraDesiredDistance();
 // Get Raid/Party target mark.
 // Return icon index as https://wowwiki-archive.fandom.com/wiki/API_GetRaidTargetIndex
 // Return -1 for error
@@ -210,11 +214,6 @@ uint32_t vanilla1121_unitCMovement(uint32_t unit);
 uint32_t vanilla1121_gameTick();
 // The collision box is not exactly same size as on-display.
 float vanilla1121_unitCollisionBoxHeight(uint32_t unit);
-// The factor defines a scaling onto the unit's original size.
-float vanilla1121_unitSizeScaleingFactor(uint32_t unit);
-// The on-display unit height. It is a product of collision box height and the scaling factor.
-float vanilla1121_unitHeight(uint32_t unit);
-
 float vectorLength(const C3Vector& vec);
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b);
 float vectorDotProduct(const C3Vector& a, const C3Vector& b);

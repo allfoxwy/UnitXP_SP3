@@ -354,29 +354,64 @@ float vanilla1121_unitScaleX(uint32_t unit) {
 }
 
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
+    if (vanilla1121_unitCollisionBoxHeight(unit0) > vanilla1121_unitCollisionBoxHeight(unit1)) {
+        // We keep unit 1 is taller
+        uint32_t temp = unit0;
+        unit0 = unit1;
+        unit1 = temp;
+    }
+
     C3Vector pos0 = vanilla1121_unitPosition(unit0);
     C3Vector pos1 = vanilla1121_unitPosition(unit1);
 
     C3Vector intersectPoint = {};
     float distance = 1.0f;
 
-    pos0.z += vanilla1121_unitHeight(unit0);
-    pos1.z += vanilla1121_unitHeight(unit1);
+    // First test: unit 0 try to look at unit 1 at the same height
+    // Not a typo
+    pos0.z += vanilla1121_unitCollisionBoxHeight(unit0);
+    pos1.z += vanilla1121_unitCollisionBoxHeight(unit0);
 
     bool result = CWorld_Intersect(&pos0, &pos1, &intersectPoint, &distance);
 
     if (result) {
         if (distance <= 1 && distance >= 0) {
-            // intersect between points, loss sight
-            return false;
+            // 1st test: intersect between points, loss sight
+            if (vanilla1121_unitCollisionBoxHeight(unit0) == vanilla1121_unitCollisionBoxHeight(unit1)) {
+                return false;
+            }
+            
+            // Second test: unit 0 try to look up at unit 1
+            intersectPoint = {};
+            distance = 1.0f;
+            pos0 = vanilla1121_unitPosition(unit0);
+            pos1 = vanilla1121_unitPosition(unit1);
+            pos0.z += vanilla1121_unitCollisionBoxHeight(unit0);
+            pos1.z += vanilla1121_unitCollisionBoxHeight(unit1);
+
+            result = CWorld_Intersect(&pos0, &pos1, &intersectPoint, &distance);
+            if (result) {
+                if (distance <= 1 && distance >= 0) {
+                    // 2nd test: intersect between points, loss sight
+                    return false;
+                }
+                else {
+                    // 2nd test: intersect after points, still in sight
+                    return true;
+                }
+            }
+            else {
+                // 2nd test: no intersect, in sight
+                return true;
+            }
         }
         else {
-            // intersect after points, still in sight
+            // 1st test: intersect after points, still in sight
             return true;
         }
     }
     else {
-        // no intersect, in sight
+        // 1st test: no intersect, in sight
         return true;
     }
 }
@@ -565,6 +600,24 @@ uint64_t vanilla1121_getCameraLookingAtGUID() {
     return *reinterpret_cast<uint64_t*>(cptr + 0x88);
 }
 
+float vanilla1121_getCameraCurrentDistance() {
+    uint32_t cptr = vanilla1121_getCamera();
+    if (cptr == 0) {
+        return -1.0f;
+    }
+
+    return *reinterpret_cast<float*>(cptr + 0xec);
+}
+
+float vanilla1121_getCameraDesiredDistance() {
+    uint32_t cptr = vanilla1121_getCamera();
+    if (cptr == 0) {
+        return -1.0f;
+    }
+
+    return *reinterpret_cast<float*>(cptr + 0x198);
+}
+
 int vanilla1121_getTargetMark(uint64_t targetGUID) {
     if (targetGUID == 0) {
         return -1;
@@ -678,14 +731,4 @@ uint32_t vanilla1121_gameTick() {
 
 float vanilla1121_unitCollisionBoxHeight(uint32_t unit) {
     return *reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0xb4);
-}
-
-float vanilla1121_unitSizeScaleingFactor(uint32_t unit) {
-    return *reinterpret_cast<float*>(unit + 0x90);
-}
-
-float vanilla1121_unitHeight(uint32_t unit) {
-    float result = vanilla1121_unitCollisionBoxHeight(unit) * vanilla1121_unitSizeScaleingFactor(unit);
-    // I'm not sure if these data are always valid. So here is a default value.
-    return result > 0.0f ? result : 2.1f;
 }
