@@ -316,7 +316,7 @@ static int test_camera_inSight(const uint32_t unit) {
     // because some mobs in the game is so tall that they are bigger than camera sight.
     // Their top (higher than head) are almost always out of camera sight.
     // Example could be ogres in LBRS.
-    pos1.z += 2.4f;
+    pos1.z += 2.1f;
 
     C3Vector intersectPoint = {};
     float distance = 1.0f;

@@ -221,6 +221,11 @@ uint32_t vanilla1121_getVisiableObject(const uint64_t targetGUID) {
     return getObject_byGUID(targetGUID);
 }
 
+
+/*
+* This implementation is based on direct memory reading. (Which is common knowledge)
+* However when player jump onto transport, it does not take the trasport coordinates into consideration.
+
 C3Vector vanilla1121_unitPosition(uint32_t unit) {
     float* positionPtr = reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0x10);
 
@@ -228,6 +233,33 @@ C3Vector vanilla1121_unitPosition(uint32_t unit) {
     result.x = positionPtr[0];
     result.y = positionPtr[1];
     result.z = positionPtr[2];
+
+    return result;
+}
+*/
+
+// This implementation is from 0x50e9ce
+// It would lead to float * __thiscall CGUnit_GetPosition_0x5f1f10(void *this,float *returnC3Vector)
+C3Vector vanilla1121_unitPosition(uint32_t unit) {
+    C3Vector result = {};
+
+    if (unit == 0 || (unit & 1) != 0) {
+        return result;
+    }
+
+    uint32_t memberFunctions = *reinterpret_cast<uint32_t*>(unit);
+    if (memberFunctions == 0 || (memberFunctions & 1) != 0) {
+        return result;
+    }
+
+    uint32_t getPositionPtr = *reinterpret_cast<uint32_t*>(memberFunctions + 0x14);
+    if (getPositionPtr == 0 || (getPositionPtr & 1) != 0) {
+        return result;
+    }
+
+    typedef C3Vector* (__thiscall* UNIT_GETPOSITION)(uint32_t, C3Vector*);
+    UNIT_GETPOSITION p_getPosition = reinterpret_cast<UNIT_GETPOSITION>(getPositionPtr);
+    p_getPosition(unit, &result);
 
     return result;
 }
