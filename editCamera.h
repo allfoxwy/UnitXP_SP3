@@ -17,7 +17,6 @@ extern ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth;
 extern float cameraHorizontalAddend;
 extern float cameraVerticalAddend;
 extern bool cameraFollowTarget;
-extern bool cameraFixedPosition;
 extern bool cameraOrganicSmooth;
 
 // Get camera position after editing.
