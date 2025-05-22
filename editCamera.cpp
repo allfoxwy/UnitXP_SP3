@@ -15,6 +15,7 @@ ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth = NULL;
 float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
 bool cameraFollowTarget = false;
+bool cameraFixedPosition = false;
 bool cameraOrganicSmooth = true;
 
 static C3Vector cameraOriginalPosition = {};
@@ -94,7 +95,7 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
     matCamera[8] = vecUp.z;
 }
 
-static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float horizontalDelta, float verticalDelta) {
+static C3Vector cameraTranslate(uint32_t camera, const C3Vector& a, const C3Vector& b, float horizontalDelta, float verticalDelta) {
     C3Vector result = {};
     result.x = a.x;
     result.y = a.y;
@@ -110,6 +111,27 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
     if (temp < 0.5f) {
         // Don't translate for first person camera
         return result;
+    }
+
+    if (cameraFixedPosition) {
+        C3Vector playerEyePosition = {};
+        // x = 0x174 and y = 0x178 are the same as the unit position
+        playerEyePosition.x = b.x;
+        playerEyePosition.y = b.y;
+        // Will crash if done in first person
+        playerEyePosition.z = *reinterpret_cast<float*>(camera + 0x17C);
+
+        // Get the vector to the camera from the players current eye position
+        C3Vector difference = {};
+        difference.x = a.x - playerEyePosition.x;
+        difference.y = a.y - playerEyePosition.y;
+        difference.z = a.z - playerEyePosition.z;
+
+        // Add vector from a fixed eye position to get our fixed camera position
+        float height = 2.151306f;
+        result.x = playerEyePosition.x + difference.x;
+        result.y = playerEyePosition.y + difference.y;
+        result.z = b.z + height + cameraVerticalAddend + difference.z;
     }
 
     // When player jump onto transports (boat/zeppelin) their coordinates system would change.
@@ -179,7 +201,7 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
             C3Vector playerPosition = vanilla1121_unitPosition(u);
 
-            cameraTranslatedPosition = cameraTranslate(cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
+            cameraTranslatedPosition = cameraTranslate(camera, cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
 
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
