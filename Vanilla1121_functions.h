@@ -183,18 +183,20 @@ int vanilla1121_objectType(uint32_t targetObject);
 uint64_t vanilla1121_unitTargetGUID(uint32_t unit);
 // Get unit's creature type. Returns -1 when unit is 0 or return original function's result.
 int vanilla1121_unitCreatureType(uint32_t unit);
-// Get camera pointer
+uint32_t vanilla1121_unitMountDisplayID(uint32_t unit);
+bool vanilla1121_unitIsMounted(uint32_t unit);
+// Get active camera pointer
 uint32_t vanilla1121_getCamera();
-// Get active camera position
-C3Vector vanilla1121_getCameraPosition();
+// Get camera position
+C3Vector vanilla1121_getCameraPosition(uint32_t camera);
 // Get Field of View value
-float vanilla1121_getCameraFoV();
+float vanilla1121_getCameraFoV(uint32_t camera);
 // Get the GUID whom the camera is looking at
-uint64_t vanilla1121_getCameraLookingAtGUID();
+uint64_t vanilla1121_getCameraLookingAtGUID(uint32_t camera);
 // This distance value could contain animation process, it could be not the final value.
-float vanilla1121_getCameraCurrentDistance();
+float vanilla1121_getCameraCurrentDistance(uint32_t camera);
 // This should be the final distance value after animation.
-float vanilla1121_getCameraDesiredDistance();
+float vanilla1121_getCameraDesiredDistance(uint32_t camera);
 // Get Raid/Party target mark.
 // Return icon index as https://wowwiki-archive.fandom.com/wiki/API_GetRaidTargetIndex
 // Return -1 for error

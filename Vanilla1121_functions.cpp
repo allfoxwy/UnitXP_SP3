@@ -598,14 +598,8 @@ uint32_t vanilla1121_getCamera() {
     return p_getCamera();
 }
 
-C3Vector vanilla1121_getCameraPosition() {
-    uint32_t cptr = vanilla1121_getCamera();
-    if (cptr == 0) {
-        C3Vector nullResult = {};
-        return nullResult;
-    }
-
-    float* positionPtr = reinterpret_cast<float*>(cptr + 0x8);
+C3Vector vanilla1121_getCameraPosition(uint32_t camera) {
+    float* positionPtr = reinterpret_cast<float*>(camera + 0x8);
     C3Vector result = {};
     result.x = positionPtr[0];
     result.y = positionPtr[1];
@@ -614,40 +608,20 @@ C3Vector vanilla1121_getCameraPosition() {
     return result;
 }
 
-float vanilla1121_getCameraFoV() {
-    uint32_t cptr = vanilla1121_getCamera();
-    if (cptr == 0) {
-        return -1.0f;
-    }
-
-    return *reinterpret_cast<float*>(cptr + 0x40);
+float vanilla1121_getCameraFoV(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0x40);
 }
 
-uint64_t vanilla1121_getCameraLookingAtGUID() {
-    uint32_t cptr = vanilla1121_getCamera();
-    if (cptr == 0) {
-        return 0;
-    }
-
-    return *reinterpret_cast<uint64_t*>(cptr + 0x88);
+uint64_t vanilla1121_getCameraLookingAtGUID(uint32_t camera) {
+    return *reinterpret_cast<uint64_t*>(camera + 0x88);
 }
 
-float vanilla1121_getCameraCurrentDistance() {
-    uint32_t cptr = vanilla1121_getCamera();
-    if (cptr == 0) {
-        return -1.0f;
-    }
-
-    return *reinterpret_cast<float*>(cptr + 0xec);
+float vanilla1121_getCameraCurrentDistance(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0xec);
 }
 
-float vanilla1121_getCameraDesiredDistance() {
-    uint32_t cptr = vanilla1121_getCamera();
-    if (cptr == 0) {
-        return -1.0f;
-    }
-
-    return *reinterpret_cast<float*>(cptr + 0x198);
+float vanilla1121_getCameraDesiredDistance(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0x198);
 }
 
 int vanilla1121_getTargetMark(uint64_t targetGUID) {
@@ -763,4 +737,25 @@ uint32_t vanilla1121_gameTick() {
 
 float vanilla1121_unitCollisionBoxHeight(uint32_t unit) {
     return *reinterpret_cast<float*>(vanilla1121_unitCMovement(unit) + 0xb4);
+}
+
+uint32_t vanilla1121_unitMountDisplayID(uint32_t unit) {
+    if (unit == 0) {
+        return 0;
+    }
+
+    // Unit descriptor (right after the Object descriptor).
+    // The 0x110 is what I read from the game, but the common knowleadge of object + 0x8 = object descriptor is also fit.
+    // I guess it's a compiler decision to make up this 0x110 magic number.
+    uint32_t attr = *reinterpret_cast<uint32_t*>(unit + 0x110);
+    if (attr == 0 || (attr & 1) != 0) {
+        // we don't have attribute info.
+        return 0;
+    }
+
+    return *reinterpret_cast<uint32_t*>(attr + 0x1fc);
+}
+
+bool vanilla1121_unitIsMounted(uint32_t unit) {
+    return vanilla1121_unitMountDisplayID(unit) != 0;
 }

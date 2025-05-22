@@ -22,14 +22,14 @@ static C3Vector cameraTranslatedPosition = {};
 
 C3Vector editCamera_originalPosition() {
     if (cameraOriginalPosition.x == 0.0f && cameraOriginalPosition.y == 0.0f && cameraOriginalPosition.z == 0.0f) {
-        return vanilla1121_getCameraPosition();
+        return vanilla1121_getCameraPosition(vanilla1121_getCamera());
     }
     return cameraOriginalPosition;
 }
 
 C3Vector editCamera_translatedPosition() {
     if (cameraTranslatedPosition.x == 0.0f && cameraTranslatedPosition.y == 0.0f && cameraTranslatedPosition.z == 0.0f) {
-        return vanilla1121_getCameraPosition();
+        return vanilla1121_getCameraPosition(vanilla1121_getCamera());
     }
     return cameraTranslatedPosition;
 }
@@ -43,12 +43,37 @@ double __fastcall detoured_OrganicSmooth(float start, float end, float step) {
     }
 }
 
+// Vanilla camera point at player's eye. But this height could change as druids shapeshift
+// As https://github.com/allfoxwy/UnitXP_SP3/pull/19
+// KinTheInfinite found a way to know this eye height
+// So that we could pin camera position at a fixed height
+// Return -1.0f for error
+static float cameraUnitEyeHeight(const uint32_t camera) {
+    float cameraTargetZ = *reinterpret_cast<float*>(camera + 0x17c);
+    if (cameraTargetZ < 0) {
+        return -1.0f;
+    }
+
+    uint32_t lookingAtUnit = vanilla1121_getVisiableObject(vanilla1121_getCameraLookingAtGUID(camera));
+    if (lookingAtUnit == 0) {
+        return -1.0f;
+    }
+    if (vanilla1121_objectType(lookingAtUnit) != OBJECT_TYPE_Player && vanilla1121_objectType(lookingAtUnit) != OBJECT_TYPE_Unit) {
+        return -1.0f;
+    }
+
+    C3Vector unitPos = vanilla1121_unitPosition(lookingAtUnit);
+
+    float result = cameraTargetZ - unitPos.z;
+    if (result < 0) {
+        return -1.0f;
+    }
+
+    return result;
+}
+
 static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPosition) {
-    float* cameraPositionPtr = reinterpret_cast<float*>(camera + 0x8);
-    C3Vector cameraPosition = {};
-    cameraPosition.x = cameraPositionPtr[0];
-    cameraPosition.y = cameraPositionPtr[1];
-    cameraPosition.z = cameraPositionPtr[2];
+    C3Vector cameraPosition = vanilla1121_getCameraPosition(camera);
 
     // When player jump onto transports (boat/zeppelin) their coordinates system would change.
     // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
@@ -94,11 +119,18 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
     matCamera[8] = vecUp.z;
 }
 
-static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float horizontalDelta, float verticalDelta) {
+static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, float verticalDelta) {
+    C3Vector a = vanilla1121_getCameraPosition(camera);
     C3Vector result = {};
     result.x = a.x;
     result.y = a.y;
     result.z = a.z;
+
+    uint32_t lookingAtUnit = vanilla1121_getVisiableObject(vanilla1121_getCameraLookingAtGUID(camera));
+    if (lookingAtUnit == 0) {
+        return result;
+    }
+    C3Vector b = vanilla1121_unitPosition(lookingAtUnit);
 
     C3Vector vecTemp = {};
     vecTemp.x = b.x - a.x;
@@ -118,6 +150,14 @@ static C3Vector cameraTranslate(const C3Vector& a, const C3Vector& b, float hori
     // To workaround, we test the distance. If they are too far away, we judge that situation as error
     if (UnitXP_distanceBetween(a, b) > guardAgainstTransportsCoordinates) {
         return result;
+    }
+
+    // Pin camera at a fixed height instead of player's eye height
+    // so that camera does not change when druids shapeshift
+    float eyeHeight = cameraUnitEyeHeight(camera);
+    if (false == vanilla1121_unitIsMounted(lookingAtUnit) && eyeHeight >= 0) {
+        result.z -= eyeHeight;
+        result.z += vanilla1121_unitCollisionBoxHeight(lookingAtUnit);
     }
 
     bool needCollisionCheck = false;
@@ -174,12 +214,11 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
         cameraOriginalPosition.y = editPtr[1];
         cameraOriginalPosition.z = editPtr[2];
 
-        uint32_t u = vanilla1121_getVisiableObject(*reinterpret_cast<uint64_t*>(camera + 0x88));
+        uint32_t u = vanilla1121_getVisiableObject(vanilla1121_getCameraLookingAtGUID(camera));
         if (u > 0 &&
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
-            C3Vector playerPosition = vanilla1121_unitPosition(u);
 
-            cameraTranslatedPosition = cameraTranslate(cameraOriginalPosition, playerPosition, cameraHorizontalAddend, cameraVerticalAddend);
+            cameraTranslatedPosition = cameraTranslate(camera, cameraHorizontalAddend, cameraVerticalAddend);
 
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
