@@ -134,16 +134,6 @@ bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
     posPlayer.y += posCamera.y - posOriginal.y;
     posPlayer.z += posCamera.z - posOriginal.z;
 
-    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-    // TODO: I don't have a way to find out what the current system is
-    // To workaround, we test the distance. If they are too far away, we judge that situation as error
-    float testDistance0 = UnitXP_distanceBetween(posCamera, posPlayer);
-    float testDistance1 = UnitXP_distanceBetween(posCamera, posObject);
-    if (testDistance0 > guardAgainstTransportsCoordinates || testDistance1 > guardAgainstTransportsCoordinates) {
-        return false;
-    }
-
     C3Vector vecObject = {};
     vecObject.x = posObject.x - posCamera.x;
     vecObject.y = posObject.y - posCamera.y;
@@ -193,14 +183,6 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
     C3Vector posMe = vanilla1121_unitPosition(unitMe);
     C3Vector posMob = vanilla1121_unitPosition(unitMob);
 
-    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-    // TODO: I don't have a way to find out what the current system is
-    // To workaround, we test the distance. If they are too far away, we judge that situation as error
-    if (UnitXP_distanceBetween(posMe, posMob) > guardAgainstTransportsCoordinates) {
-        return -1;
-    }
-
     float facing = vanilla1121_unitFacing(unitMob);
 
     C3Vector vecLeft = {};
@@ -221,16 +203,10 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
             if (unitMobTarget > 0 && (unitMobTarget & 1) == 0) {
                 if (vanilla1121_objectType(unitMobTarget) == OBJECT_TYPE_Unit ||
                     vanilla1121_objectType(unitMobTarget) == OBJECT_TYPE_Player) {
-                    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-                    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-                    // TODO: I don't have a way to find out what the current system is
-                    // To workaround, we test the distance. If they are too far away, we judge that situation as error
                     C3Vector posMobTarget = vanilla1121_unitPosition(unitMobTarget);
-                    if (UnitXP_distanceBetween(posMobTarget, posMob) <= guardAgainstTransportsCoordinates) {
-                        if (UnitXP_inSight(reinterpret_cast<void*>(unitMob), reinterpret_cast<void*>(unitMobTarget)) > 0) {
-                            vecForward.x = posMobTarget.x - posMob.x;
-                            vecForward.y = posMobTarget.y - posMob.y;
-                        }
+                    if (UnitXP_inSight(reinterpret_cast<void*>(unitMob), reinterpret_cast<void*>(unitMobTarget)) > 0) {
+                        vecForward.x = posMobTarget.x - posMob.x;
+                        vecForward.y = posMobTarget.y - posMob.y;
                     }
                 }
             }
@@ -409,17 +385,6 @@ int UnitXP_inSight(const void* unit0void, const void* unit1void) {
     }
     if (vanilla1121_objectType(unit1) != OBJECT_TYPE_Unit &&
         vanilla1121_objectType(unit1) != OBJECT_TYPE_Player) {
-        return -1;
-    }
-
-    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-    // TODO: I don't have a way to find out what the current system is
-    // To workaround, we test the distance. If they are too far away, we judge that situation as error
-    C3Vector posUnit0 = vanilla1121_unitPosition(unit0);
-    C3Vector posUnit1 = vanilla1121_unitPosition(unit1);
-    float distance = UnitXP_distanceBetween(posUnit0, posUnit1);
-    if (distance > guardAgainstTransportsCoordinates) {
         return -1;
     }
 

@@ -94,9 +94,12 @@ enum MovementFlags
 
 // When player jump onto transports (boat/zeppelin) their coordinates system would change.
 // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-// TODO: I don't have a way to find out what the current system is
 // To workaround, we test the distance. If they are too far away, we judge that situation as error
-extern const float guardAgainstTransportsCoordinates;
+// 
+// As of https://github.com/allfoxwy/UnitXP_SP3/commit/3d742e756d5d0e24d70248300b44f9bfa94cac3a
+// The new implementation of unitPosition should play well with transport coordinates.
+// We no longer need this workaround
+//extern const float guardAgainstTransportsCoordinates;
 
 // LUA language
 // basic types

@@ -75,14 +75,6 @@ static float cameraUnitEyeHeight(const uint32_t camera) {
 static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPosition) {
     C3Vector cameraPosition = vanilla1121_getCameraPosition(camera);
 
-    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-    // TODO: I don't have a way to find out what the current system is
-    // To workaround, we test the distance. If they are too far away, we judge that situation as error
-    if (UnitXP_distanceBetween(cameraPosition, targetPosition) > guardAgainstTransportsCoordinates) {
-        return;
-    }
-
     // Fundamental method of calculating look-at matrix is from https://medium.com/@carmencincotti/lets-look-at-magic-lookat-matrices-c77e53ebdf78
     // However the WoW internal data structures are not the same.
 
@@ -141,14 +133,6 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
 
     if (temp < 0.5f) {
         // Don't translate for first person camera
-        return result;
-    }
-
-    // When player jump onto transports (boat/zeppelin) their coordinates system would change.
-    // If we pass coordinates from different system into vanilla1121_unitInLineOfSight(), game crashes
-    // TODO: I don't have a way to find out what the current system is
-    // To workaround, we test the distance. If they are too far away, we judge that situation as error
-    if (UnitXP_distanceBetween(a, b) > guardAgainstTransportsCoordinates) {
         return result;
     }
 
