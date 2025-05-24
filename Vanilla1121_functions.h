@@ -98,7 +98,8 @@ enum MovementFlags
 // 
 // As of https://github.com/allfoxwy/UnitXP_SP3/commit/3d742e756d5d0e24d70248300b44f9bfa94cac3a
 // The new implementation of unitPosition should play well with transport coordinates.
-// We no longer need this workaround
+// We no longer need this workaround for transports.
+// However I withnessed 1 crash without any distance guard. So there still be a guard in CWorld_Intersect
 //extern const float guardAgainstTransportsCoordinates;
 
 // LUA language

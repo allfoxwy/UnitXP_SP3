@@ -7,6 +7,7 @@
 #include "Vanilla1121_functions.h"
 #include "utf8_to_utf16.h"
 #include "performanceProfiling.h"
+#include "distanceBetween.h"
 
 // Signatures/Prototypes
 typedef void(__fastcall* LUA_PUSHSTRING)(void* L, const char* s);
@@ -160,6 +161,16 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
     // Internet says distance needed to be initialized to 1.0f
     *distance = 1.0f;
     *intersectPoint = {};
+
+    // I witnessed 1 crash without distance guard.
+    const float distanceGuard = 150.0f;
+    if (UnitXP_distanceBetween(*p1, *p2) > distanceGuard) {
+        *distance = 0.5f;
+        intersectPoint->x = (p2->x - p1->x) / 2;
+        intersectPoint->y = (p2->y - p1->y) / 2;
+        intersectPoint->z = (p2->z - p1->z) / 2;
+        return false;
+    }
 
     // The common knowledge of flag is 0x100171 or 0x100111:
     // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
