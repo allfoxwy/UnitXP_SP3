@@ -166,9 +166,9 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
     const float distanceGuard = 150.0f;
     if (UnitXP_distanceBetween(*p1, *p2) > distanceGuard) {
         *distance = 0.5f;
-        intersectPoint->x = (p2->x - p1->x) / 2;
-        intersectPoint->y = (p2->y - p1->y) / 2;
-        intersectPoint->z = (p2->z - p1->z) / 2;
+        intersectPoint->x = (p2->x + p1->x) / 2;
+        intersectPoint->y = (p2->y + p1->y) / 2;
+        intersectPoint->z = (p2->z + p1->z) / 2;
         return true;
     }
 
