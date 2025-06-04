@@ -18,6 +18,7 @@ extern bool modernNameplateDistance;
 extern bool prioritizeTargetNameplate;
 extern bool prioritizeMarkedNameplate;
 extern bool nameplateCombatFilter;
+extern bool showInCombatNameplatesNearPlayer;
 
 int __fastcall detoured_renderWorld(void* self, void* ignored);
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2);

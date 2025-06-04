@@ -5,13 +5,13 @@
 #include <cmath>
 
 #include "Vanilla1121_functions.h"
+#include "edit_CWorld_Intersect.h"
 #include "utf8_to_utf16.h"
 #include "performanceProfiling.h"
 #include "distanceBetween.h"
 
 // Signatures/Prototypes
 typedef void(__fastcall* LUA_PUSHSTRING)(void* L, const char* s);
-typedef bool(__fastcall* CWORLD__INTERSECT)(const C3Vector* p1, const C3Vector* p2, int ignored, C3Vector* intersectPoint, float* distance, uint32_t queryFlags);
 typedef void(__fastcall* TARGET)(uint64_t* GUID);
 typedef int(__thiscall* UNITREACTION)(uint32_t self, uint32_t targetObj);
 typedef bool(__thiscall* CANATTACK)(uint32_t self, uint32_t targetObj);
@@ -68,7 +68,6 @@ static auto p_lua_insert = reinterpret_cast<LUA_INSERT>(0x6F31A0);
 
 // WoW C function
 static auto p_UnitGUID = reinterpret_cast<UNITGUID>(0x00515970);
-static auto p_CWorld_Intersect = reinterpret_cast<CWORLD__INTERSECT>(0x672170);
 static auto p_Target = reinterpret_cast<TARGET>(0x489a40);
 static auto p_UnitReaction = reinterpret_cast<UNITREACTION>(0x6061e0);
 static auto p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);

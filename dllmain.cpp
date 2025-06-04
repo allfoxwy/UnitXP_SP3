@@ -25,6 +25,7 @@
 #include "performanceProfiling.h"
 #include "LuaDebug.h"
 #include "FPScap.h"
+#include "edit_CWorld_Intersect.h"
 
 using namespace std;
 
@@ -230,6 +231,17 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, nameplateCombatFilter);
             return 1;
         }
+        else if (cmd == "showInCombatNameplatesNearPlayer") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                showInCombatNameplatesNearPlayer = true;
+            }
+            else if (subcmd == "disable") {
+                showInCombatNameplatesNearPlayer = false;
+            }
+            lua_pushboolean(L, showInCombatNameplatesNearPlayer);
+            return 1;
+        }
         else if (cmd == "timer") {
             string subcmd{ lua_tostring(L,2) };
             if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {
@@ -403,13 +415,20 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+    {
         // We should not disable Thread Library Calls even we are not using it.
         // Because static version of C run-time library needs it: https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
         //DisableThreadLibraryCalls(hModule);
 
+        if (MH_Initialize() != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+
         // Store module handle
         moduleSelf = hModule;
 
+        // Initialize performance profiling
         perfReset();
 
         if (initFPScap() != 1) {
@@ -417,10 +436,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             return FALSE;
         }
 
-        if (MH_Initialize() != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to initialize MinHook library.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+        if (edit_CWorld_Intersect_init() == false) {
             return FALSE;
         }
+
         if (MH_CreateHook(p_function_address_check_0x42a320, &disabled_function_address_check_0x42a320, reinterpret_cast<LPVOID*>(&p_original_function_address_check_0x42a320)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to disabled function address check.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -478,8 +497,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             return FALSE;
         }
         break;
-
+    }
     case DLL_PROCESS_DETACH:
+    {
         // According to https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
         // We should only free resources when lpReserved == NULL
         // Otherwise we should wait for OS to reclaim the memory
@@ -540,12 +560,16 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for function address check. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
+            if (edit_CWorld_Intersect_end() == false) {
+                return FALSE;
+            }
             if (MH_Uninitialize() != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to uninitialize MinHook. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
         }
         break;
+    }
     }
     return TRUE;
 }

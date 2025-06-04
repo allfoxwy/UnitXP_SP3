@@ -24,6 +24,7 @@ bool modernNameplateDistance = true;
 bool prioritizeTargetNameplate = false;
 bool prioritizeMarkedNameplate = false;
 bool nameplateCombatFilter = false;
+bool showInCombatNameplatesNearPlayer = false;
 
 static bool nameplatesHasMarkOnThem = false;
 
@@ -78,17 +79,24 @@ static int shouldHaveNameplate(void* voidUnit) {
         }
     }
 
+    const float nearPlayerDistance = 8.0f;
+    if (showInCombatNameplatesNearPlayer && vanilla1121_unitInCombat(reinterpret_cast<uint32_t>(voidUnit))) {
+        float distance = UnitXP_distanceBetween(guidUnderNameplate, UnitGUID("player"), METER_RANGED);
+        if (distance >= 0.0f && distance < nearPlayerDistance) {
+            return 1;
+        }
+    }
+
     bool inSight = (camera_inSight(voidUnit) > 0);
 
     C3Vector pos0 = editCamera_translatedPosition();
     C3Vector pos1 = vanilla1121_unitPosition(reinterpret_cast<uint32_t>(voidUnit));
     float distance = UnitXP_distanceBetween(pos0, pos1);
 
-
-    const float seeThroughWallDistance = 10.0f;
+    const float cameraSeeThroughWallDistance = 10.0f;
 
     // We are not adding nameplate to loss sight unit
-    if (distance > seeThroughWallDistance && inSight == false) {
+    if (distance > cameraSeeThroughWallDistance && inSight == false) {
         return 0;
     }
     else {

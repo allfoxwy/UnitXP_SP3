@@ -300,7 +300,7 @@ bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction) {
             continue;
         }
 
-        float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i), METER_RANGED);
         bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
@@ -459,7 +459,7 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             continue;
         }
 
-        float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i), METER_RANGED);
         bool targetInCombat = vanilla1121_unitInCombat(i);
 
         if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
@@ -467,10 +467,11 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
             && vanilla1121_unitCanBeAttacked(i) == 1
             && vanilla1121_unitIsDead(i) == 0
             && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
-            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
-            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
+            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)) {
 
             bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
+            int inSightTest = UnitXP_inSight(player, reinterpret_cast<void*>(i));
+            float meleeDistance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i), METER_MELEE_AUTOATTACK);
 
             if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
                 if (targetInCombat) {
@@ -479,12 +480,14 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                     new_mob.distance = distance;
 
                     if (new_mob.distance <= 8.0f) {
-                        meleeRange.push_back(new_mob);
+                        if(inSightTest == 1 || meleeDistance < 5.0f) {
+                            meleeRange.push_back(new_mob);
+                        }
                     }
-                    else if (new_mob.distance <= 25.0f) {
+                    else if (new_mob.distance <= 25.0f && inSightTest == 1) {
                         chargeRange.push_back(new_mob);
                     }
-                    else if (new_mob.distance < targetingFarRange) {
+                    else if (new_mob.distance < targetingFarRange && inSightTest == 1) {
                         farRange.push_back(new_mob);
                     }
                 }
@@ -494,12 +497,14 @@ bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction) {
                 new_mob.GUID = currentObjectGUID;
                 new_mob.distance = distance;
                 if (new_mob.distance < 8.0f) {
-                    meleeRange.push_back(new_mob);
+                    if (inSightTest == 1 || meleeDistance < 5.0f) {
+                        meleeRange.push_back(new_mob);
+                    }
                 }
-                else if (new_mob.distance < 25.0f) {
+                else if (new_mob.distance < 25.0f && inSightTest == 1) {
                     chargeRange.push_back(new_mob);
                 }
-                else if (new_mob.distance < targetingFarRange) {
+                else if (new_mob.distance < targetingFarRange && inSightTest == 1) {
                     farRange.push_back(new_mob);
                 }
             }
