@@ -74,6 +74,7 @@ static auto p_CanAttack = reinterpret_cast<CANATTACK>(0x606980);
 static auto p_getCreatureType = reinterpret_cast<GETCREATURETYPE>(0x605570);
 static auto p_getCamera = reinterpret_cast<GETACTIVECAMERA>(0x4818F0);
 
+const float cameraIntersectBlur = 0.01f;
 
 // To get lua_State pointer
 void* GetContext(void) {
@@ -156,7 +157,11 @@ uint64_t UnitGUID(const char* unitID) {
     return p_UnitGUID(unitID);
 }
 
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance) {
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance, uint32_t intersectFlag) {
+    // The common knowledge of flag is 0x100171 or 0x100111:
+    // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
+    // *- 0x100111 works well.
+
     // Internet says distance needed to be initialized to 1.0f
     *distance = 1.0f;
     *intersectPoint = {};
@@ -171,27 +176,7 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
         return true;
     }
 
-    // The common knowledge of flag is 0x100171 or 0x100111:
-    // *- 0x100171 would cause game crash in Turtle WoW Hateforge Quarry.
-    // *- 0x100111 works well.
-    uint32_t intersectFlag = 0x100111;
-    std::string perfName = "CWorld_Intersect with flag 0x100111";
-
-    // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
-    // There is a switch to determine what flag to use. The switch is the game option of Water Collision.
-    /*
-    uint32_t intersectFlag = 0;
-    std::string perfName = "";
-    if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
-        intersectFlag = 0x1F0171;
-        perfName = "CWorld_Intersect with flag 0x1F0171";
-    }
-    else {
-        intersectFlag = 0x100171;
-        perfName = "CWorld_Intersect with flag 0x100171";
-    }
-    */
-
+    std::string perfName = "CWorld_Intersect";
     perfSetSlotName(0, perfName);
     perfMarkStart(0);
     bool result = p_CWorld_Intersect(p1, p2, 0, intersectPoint, distance, intersectFlag);

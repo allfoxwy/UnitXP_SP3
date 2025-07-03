@@ -136,15 +136,16 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
         return result;
     }
 
+    bool needCollisionCheck = false;
+
     // Pin camera at a fixed height instead of player's eye height
     // so that camera does not change when druids shapeshift
     float eyeHeight = cameraUnitEyeHeight(camera);
     if (false == vanilla1121_unitIsMounted(lookingAtUnit) && eyeHeight >= 0) {
         result.z -= eyeHeight;
         result.z += vanilla1121_unitCollisionBoxHeight(lookingAtUnit);
+        needCollisionCheck = true;
     }
-
-    bool needCollisionCheck = false;
 
     if (std::abs(horizontalDelta) > 0.1f) {
         needCollisionCheck = true;
@@ -169,19 +170,22 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
         C3Vector intersectPoint = {};
         float distance = 1.0f;
 
-        bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance);
+        // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
+        // There is a switch to determine what flag to use. The switch is the game option of Water Collision.
+        uint32_t intersectFlag = 0;
+        if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
+            intersectFlag = 0x1F0171;
+        }
+        else {
+            intersectFlag = 0x100171;
+        }
 
-        if (collide) {
-            if (distance <= 1 && distance >= 0) {
-                // intersect between points, collide
+        bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance, intersectFlag);
 
-                // 0.7f is a small fix to make collide distance less accurate,
-                // so that camera would not flash when collide on walls
-                result.x = 0.7f * (intersectPoint.x - a.x) + a.x;
-                result.y = 0.7f * (intersectPoint.y - a.y) + a.y;
-                result.z = 0.7f * (intersectPoint.z - a.z) + a.z;
-
-            }
+        if (collide && distance <= 1 && distance >= 0) {
+            result.x = distance * (result.x - a.x) + a.x;
+            result.y = distance * (result.y - a.y) + a.y;
+            result.z = distance * (result.z - a.z) + a.z;
         }
     }
 

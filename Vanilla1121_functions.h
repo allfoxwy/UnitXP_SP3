@@ -102,6 +102,8 @@ enum MovementFlags
 // However I withnessed 1 crash without any distance guard. So there still be a guard in CWorld_Intersect
 //extern const float guardAgainstTransportsCoordinates;
 
+extern const float cameraIntersectBlur;
+
 // LUA language
 // basic types
 #define LUA_TNONE (-1)
@@ -152,7 +154,7 @@ int lua_next(void* L, int index);
 // Get GUID from UnitID
 uint64_t UnitGUID(const char* unitID);
 // Test intersect in world, p1 and p2 for input, intersectPoint and distance for output.
-bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance);
+bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersectPoint, float* distance, uint32_t intersectFlag = 0x100111);
 // Target the unit with GUID
 void vanilla1121_target(uint64_t targetGUID);
 // Get in-game unit reaction, return -1 for error
