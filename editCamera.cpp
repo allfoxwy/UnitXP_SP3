@@ -16,6 +16,7 @@ float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
 bool cameraFollowTarget = false;
 bool cameraOrganicSmooth = true;
+bool cameraPinHeight = false;
 
 static C3Vector cameraOriginalPosition = {};
 static C3Vector cameraTranslatedPosition = {};
@@ -140,11 +141,13 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
 
     // Pin camera at a fixed height instead of player's eye height
     // so that camera does not change when druids shapeshift
-    float eyeHeight = cameraUnitEyeHeight(camera);
-    if (false == vanilla1121_unitIsMounted(lookingAtUnit) && eyeHeight >= 0) {
-        result.z -= eyeHeight;
-        result.z += vanilla1121_unitCollisionBoxHeight(lookingAtUnit);
-        needCollisionCheck = true;
+    if (cameraPinHeight) {
+        float eyeHeight = cameraUnitEyeHeight(camera);
+        if (false == vanilla1121_unitIsMounted(lookingAtUnit) && eyeHeight >= 0) {
+            result.z -= eyeHeight;
+            result.z += vanilla1121_unitCollisionBoxHeight(lookingAtUnit);
+            needCollisionCheck = true;
+        }
     }
 
     if (std::abs(horizontalDelta) > 0.1f) {

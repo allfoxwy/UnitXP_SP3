@@ -102,6 +102,8 @@ enum MovementFlags
 // However I withnessed 1 crash without any distance guard. So there still be a guard in CWorld_Intersect
 //extern const float guardAgainstTransportsCoordinates;
 
+// We blur the intersect position a little bit,
+// so that when camera hits ceiling, it doesn't cancel nameplates
 extern const float cameraIntersectBlur;
 
 // LUA language

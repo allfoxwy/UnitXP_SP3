@@ -16,8 +16,6 @@ bool __fastcall detoured_CWorld_Intersect(const C3Vector* p1, const C3Vector* p2
     if (queryFlags == 0x1F0171 || queryFlags == 0x100171) {
         if (intersect) {
             if (*distance >= 0 && *distance <= 1) {
-                // We blur the intersect position a little bit,
-                // so that when camera hits ceiling, it doesn't cancel nameplates
                 if (*distance > cameraIntersectBlur) {
                     *distance -= cameraIntersectBlur;
 

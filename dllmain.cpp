@@ -326,6 +326,17 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, cameraOrganicSmooth);
             return 1;
         }
+        else if (cmd == "cameraPinHeight") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                cameraPinHeight = true;
+            }
+            if (subcmd == "disable") {
+                cameraPinHeight = false;
+            }
+            lua_pushboolean(L, cameraPinHeight);
+            return 1;
+        }
         else if (cmd == "notify") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "taskbarIcon") {

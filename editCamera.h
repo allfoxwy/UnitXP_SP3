@@ -18,6 +18,7 @@ extern float cameraHorizontalAddend;
 extern float cameraVerticalAddend;
 extern bool cameraFollowTarget;
 extern bool cameraOrganicSmooth;
+extern bool cameraPinHeight;
 
 // Get camera position after editing.
 C3Vector editCamera_translatedPosition();
