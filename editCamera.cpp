@@ -99,17 +99,9 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
     C3Vector vecUp = vectorCrossProduct(vecForward, vecRight);
     vectorNormalize(vecUp);
 
-    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
-
-    matCamera[0] = vecForward.x;
-    matCamera[1] = vecForward.y;
-    matCamera[2] = vecForward.z;
-    matCamera[3] = vecRight.x;
-    matCamera[4] = vecRight.y;
-    matCamera[5] = vecRight.z;
-    matCamera[6] = vecUp.x;
-    matCamera[7] = vecUp.y;
-    matCamera[8] = vecUp.z;
+    vanilla1121_setCameraForwardVector(camera, vecForward);
+    vanilla1121_setCameraRightVector(camera, vecRight);
+    vanilla1121_setCameraUpVector(camera, vecUp);
 }
 
 static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, float verticalDelta) {

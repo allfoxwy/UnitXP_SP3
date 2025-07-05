@@ -618,6 +618,62 @@ float vanilla1121_getCameraDesiredDistance(uint32_t camera) {
     return *reinterpret_cast<float*>(camera + 0x198);
 }
 
+float vanilla1121_getCameraNearClip(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0x38);
+}
+
+float vanilla1121_getCameraFarClip(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0x3c);
+}
+
+C3Vector vanilla1121_getCameraForwardVector(uint32_t camera) {
+    C3Vector result = {};
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    result.x = matCamera[0];
+    result.y = matCamera[1];
+    result.z = matCamera[2];
+    return result;
+}
+
+C3Vector vanilla1121_getCameraRightVector(uint32_t camera) {
+    C3Vector result = {};
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    result.x = matCamera[3];
+    result.y = matCamera[4];
+    result.z = matCamera[5];
+    return result;
+}
+
+C3Vector vanilla1121_getCameraUpVector(uint32_t camera) {
+    C3Vector result = {};
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    result.x = matCamera[6];
+    result.y = matCamera[7];
+    result.z = matCamera[8];
+    return result;
+}
+
+void vanilla1121_setCameraForwardVector(uint32_t camera, const C3Vector& v) {
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    matCamera[0] = v.x;
+    matCamera[1] = v.y;
+    matCamera[2] = v.z;
+}
+
+void vanilla1121_setCameraRightVector(uint32_t camera, const C3Vector& v) {
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    matCamera[3] = v.x;
+    matCamera[4] = v.y;
+    matCamera[5] = v.z;
+}
+
+void vanilla1121_setCameraUpVector(uint32_t camera, const C3Vector& v) {
+    float* matCamera = reinterpret_cast<float*>(camera + 0x14);
+    matCamera[6] = v.x;
+    matCamera[7] = v.y;
+    matCamera[8] = v.z;
+}
+
 int vanilla1121_getTargetMark(uint64_t targetGUID) {
     if (targetGUID == 0) {
         return -1;

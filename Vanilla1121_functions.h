@@ -205,6 +205,14 @@ uint64_t vanilla1121_getCameraLookingAtGUID(uint32_t camera);
 float vanilla1121_getCameraCurrentDistance(uint32_t camera);
 // This should be the final distance value after animation.
 float vanilla1121_getCameraDesiredDistance(uint32_t camera);
+float vanilla1121_getCameraNearClip(uint32_t camera);
+float vanilla1121_getCameraFarClip(uint32_t camera);
+C3Vector vanilla1121_getCameraForwardVector(uint32_t camera);
+C3Vector vanilla1121_getCameraRightVector(uint32_t camera);
+C3Vector vanilla1121_getCameraUpVector(uint32_t camera);
+void vanilla1121_setCameraForwardVector(uint32_t camera, const C3Vector& v);
+void vanilla1121_setCameraRightVector(uint32_t camera, const C3Vector& v);
+void vanilla1121_setCameraUpVector(uint32_t camera, const C3Vector& v);
 // Get Raid/Party target mark.
 // Return icon index as https://wowwiki-archive.fandom.com/wiki/API_GetRaidTargetIndex
 // Return -1 for error
