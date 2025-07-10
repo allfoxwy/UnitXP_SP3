@@ -207,6 +207,8 @@ float vanilla1121_getCameraCurrentDistance(uint32_t camera);
 float vanilla1121_getCameraDesiredDistance(uint32_t camera);
 float vanilla1121_getCameraNearClip(uint32_t camera);
 float vanilla1121_getCameraFarClip(uint32_t camera);
+float vanilla1121_getCameraAspectRatio(uint32_t camera);
+uint32_t vanilla1121_getCameraIntersectFlag();
 C3Vector vanilla1121_getCameraForwardVector(uint32_t camera);
 C3Vector vanilla1121_getCameraRightVector(uint32_t camera);
 C3Vector vanilla1121_getCameraUpVector(uint32_t camera);

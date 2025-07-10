@@ -626,6 +626,10 @@ float vanilla1121_getCameraFarClip(uint32_t camera) {
     return *reinterpret_cast<float*>(camera + 0x3c);
 }
 
+float vanilla1121_getCameraAspectRatio(uint32_t camera) {
+    return *reinterpret_cast<float*>(camera + 0x44);
+}
+
 C3Vector vanilla1121_getCameraForwardVector(uint32_t camera) {
     C3Vector result = {};
     float* matCamera = reinterpret_cast<float*>(camera + 0x14);
@@ -672,6 +676,19 @@ void vanilla1121_setCameraUpVector(uint32_t camera, const C3Vector& v) {
     matCamera[6] = v.x;
     matCamera[7] = v.y;
     matCamera[8] = v.z;
+}
+
+uint32_t vanilla1121_getCameraIntersectFlag() {
+    // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
+    // There is a switch to determine what flag to use. The switch is the game option of Water Collision.
+    uint32_t intersectFlag = 0;
+    if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
+        intersectFlag = 0x1F0171;
+    }
+    else {
+        intersectFlag = 0x100171;
+    }
+    return intersectFlag;
 }
 
 int vanilla1121_getTargetMark(uint64_t targetGUID) {

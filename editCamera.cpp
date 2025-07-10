@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "editCamera.h"
 #include "Vanilla1121_functions.h"
 #include "distanceBetween.h"
@@ -18,6 +21,7 @@ bool cameraFollowTarget = false;
 bool cameraOrganicSmooth = true;
 bool cameraPinHeight = false;
 
+static const float keepDistanceFromWall = 0.2f;
 static C3Vector cameraOriginalPosition = {};
 static C3Vector cameraTranslatedPosition = {};
 
@@ -106,10 +110,7 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
 
 static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, float verticalDelta) {
     C3Vector a = vanilla1121_getCameraPosition(camera);
-    C3Vector result = {};
-    result.x = a.x;
-    result.y = a.y;
-    result.z = a.z;
+    C3Vector result = a;
 
     uint32_t lookingAtUnit = vanilla1121_getVisiableObject(vanilla1121_getCameraLookingAtGUID(camera));
     if (lookingAtUnit == 0) {
@@ -117,19 +118,17 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
     }
     C3Vector b = vanilla1121_unitPosition(lookingAtUnit);
 
-    C3Vector vecTemp = {};
-    vecTemp.x = b.x - a.x;
-    vecTemp.y = b.y - a.y;
-    vecTemp.z = 0.0f;
+    C3Vector vecCameraToTarget = {};
+    vecCameraToTarget.x = b.x - a.x;
+    vecCameraToTarget.y = b.y - a.y;
+    vecCameraToTarget.z = 0.0f;
 
-    float temp = vectorLength(vecTemp);
+    float distanceCameraToTarget = vectorLength(vecCameraToTarget);
 
-    if (temp < 0.5f) {
+    if (distanceCameraToTarget < 0.5f) {
         // Don't translate for first person camera
         return result;
     }
-
-    bool needCollisionCheck = false;
 
     // Pin camera at a fixed height instead of player's eye height
     // so that camera does not change when druids shapeshift
@@ -138,49 +137,183 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
         if (false == vanilla1121_unitIsMounted(lookingAtUnit) && eyeHeight >= 0) {
             result.z -= eyeHeight;
             result.z += vanilla1121_unitCollisionBoxHeight(lookingAtUnit);
-            needCollisionCheck = true;
         }
     }
 
     if (std::abs(horizontalDelta) > 0.1f) {
-        needCollisionCheck = true;
         if (horizontalDelta > 0.0f) {
-            // Translate toward right
-            result.x = std::abs(horizontalDelta) * (b.y - a.y) / temp + a.x;
-            result.y = std::abs(horizontalDelta) * (a.x - b.x) / temp + a.y;
+            // Translating towards right
+            result.x = std::abs(horizontalDelta) * (b.y - a.y) / distanceCameraToTarget + a.x;
+            result.y = std::abs(horizontalDelta) * (a.x - b.x) / distanceCameraToTarget + a.y;
         }
         else {
-            // Translate toward left
-            result.x = std::abs(horizontalDelta) * (a.y - b.y) / temp + a.x;
-            result.y = std::abs(horizontalDelta) * (b.x - a.x) / temp + a.y;
+            // Translating towards left
+            result.x = std::abs(horizontalDelta) * (a.y - b.y) / distanceCameraToTarget + a.x;
+            result.y = std::abs(horizontalDelta) * (b.x - a.x) / distanceCameraToTarget + a.y;
         }
     }
 
     if (std::abs(verticalDelta) > 0.1f) {
-        needCollisionCheck = true;
         result.z += verticalDelta;
     }
 
-    if (needCollisionCheck) {
-        C3Vector intersectPoint = {};
-        float distance = 1.0f;
+    return result;
+}
 
-        // According to game's camera collision detect logic (position 0x50e61a in CGCamera_CollideCameraWithWorld_50E570),
-        // There is a switch to determine what flag to use. The switch is the game option of Water Collision.
-        uint32_t intersectFlag = 0;
-        if (*reinterpret_cast<uint32_t*>(*reinterpret_cast<uint32_t*>(0xBE1088) + 0x28) != 0) {
-            intersectFlag = 0x1F0171;
+static C3Vector nearClipCollisionCheckForHorizontalTranslation(const uint32_t camera, const float horizontalDelta, const C3Vector& noCollisionCameraPosition, const C3Vector& couldCollideCameraPosition) {
+    float nearClip = vanilla1121_getCameraNearClip(camera);
+    C3Vector vecCameraRight = vanilla1121_getCameraRightVector(camera);
+    C3Vector vecCameraForward = vanilla1121_getCameraForwardVector(camera);
+    vectorNormalize(vecCameraRight);
+    vectorNormalize(vecCameraForward);
+    const float fov = vanilla1121_getCameraFoV(camera);
+    const float frontPlaneHalfLength = std::tan(fov / 2.0f) * nearClip;
+
+    bool translatedRightward = true;
+    if (horizontalDelta > 0.0f) {
+        translatedRightward = true;
+    }
+    else {
+        translatedRightward = false;
+    }
+
+    C3Vector vecCheckPosition = couldCollideCameraPosition;
+    vecCheckPosition.x += vecCameraForward.x * nearClip;
+    vecCheckPosition.y += vecCameraForward.y * nearClip;
+    vecCheckPosition.z += vecCameraForward.z * nearClip;
+
+    C3Vector vecOriginalPosition = noCollisionCameraPosition;
+    vecOriginalPosition.x += vecCameraForward.x * nearClip;
+    vecOriginalPosition.y += vecCameraForward.y * nearClip;
+    vecOriginalPosition.z += vecCameraForward.z * nearClip;
+
+    if (translatedRightward) {
+        vecCheckPosition.x += vecCameraRight.x * frontPlaneHalfLength;
+        vecCheckPosition.y += vecCameraRight.y * frontPlaneHalfLength;
+        vecCheckPosition.z += vecCameraRight.z * frontPlaneHalfLength;
+
+        vecOriginalPosition.x += vecCameraRight.x * frontPlaneHalfLength;
+        vecOriginalPosition.y += vecCameraRight.y * frontPlaneHalfLength;
+        vecOriginalPosition.z += vecCameraRight.z * frontPlaneHalfLength;
+    }
+    else {
+        vecCheckPosition.x -= vecCameraRight.x * frontPlaneHalfLength;
+        vecCheckPosition.y -= vecCameraRight.y * frontPlaneHalfLength;
+        vecCheckPosition.z -= vecCameraRight.z * frontPlaneHalfLength;
+
+        vecOriginalPosition.x -= vecCameraRight.x * frontPlaneHalfLength;
+        vecOriginalPosition.y -= vecCameraRight.y * frontPlaneHalfLength;
+        vecOriginalPosition.z -= vecCameraRight.z * frontPlaneHalfLength;
+    }
+
+    // Test the front/near clip plane
+    C3Vector result = {};
+    float correction_nearClip = 0.0f;
+    C3Vector intersectPosition = {};
+    float intersectDistance = 1.0f;
+    if (CWorld_Intersect(&vecOriginalPosition, &vecCheckPosition, &intersectPosition, &intersectDistance, vanilla1121_getCameraIntersectFlag())
+        && intersectDistance <= 1.0f && intersectDistance >= 0.0f) {
+        result.x = -((vecCheckPosition.x - vecOriginalPosition.x) * (1.0f - intersectDistance));
+        result.y = -((vecCheckPosition.y - vecOriginalPosition.y) * (1.0f - intersectDistance));
+        result.z = 0.0f;
+
+        // Try to keep distance from the wall, else revert the translation
+        C3Vector vecIntersectDelta = {};
+        vecIntersectDelta.x = (vecCheckPosition.x - vecOriginalPosition.x) * intersectDistance;
+        vecIntersectDelta.y = (vecCheckPosition.y - vecOriginalPosition.y) * intersectDistance;
+        vecIntersectDelta.z = 0.0f;
+        if (vectorLength(vecIntersectDelta) >= keepDistanceFromWall) {
+            C3Vector vecResultUnit = result;
+            vectorNormalize(vecResultUnit);
+
+            result.x += vecResultUnit.x * keepDistanceFromWall;
+            result.y += vecResultUnit.y * keepDistanceFromWall;
+            result.z += vecResultUnit.z * keepDistanceFromWall;
         }
         else {
-            intersectFlag = 0x100171;
+            result.x = noCollisionCameraPosition.x - couldCollideCameraPosition.x;
+            result.y = noCollisionCameraPosition.y - couldCollideCameraPosition.y;
+            result.z = 0.0f;
         }
+    }
 
-        bool collide = CWorld_Intersect(&a, &result, &intersectPoint, &distance, intersectFlag);
+    return result;
+}
 
-        if (collide && distance <= 1 && distance >= 0) {
-            result.x = distance * (result.x - a.x) + a.x;
-            result.y = distance * (result.y - a.y) + a.y;
-            result.z = distance * (result.z - a.z) + a.z;
+static C3Vector nearClipCollisionCheckForVerticalTranslation(const uint32_t camera, const C3Vector& noCollisionCameraPosition, const C3Vector& couldCollideCameraPosition) {
+    float nearClip = vanilla1121_getCameraNearClip(camera);
+    C3Vector vecCameraUp = vanilla1121_getCameraUpVector(camera);
+    C3Vector vecCameraForward = vanilla1121_getCameraForwardVector(camera);
+    vectorNormalize(vecCameraUp);
+    vectorNormalize(vecCameraForward);
+    const float fov = vanilla1121_getCameraFoV(camera) / vanilla1121_getCameraAspectRatio(camera);
+    const float frontPlaneHalfLength = std::tan(fov / 2.0f) * nearClip;
+
+    bool translatedUpward = true;
+    if (couldCollideCameraPosition.z > noCollisionCameraPosition.z) {
+        translatedUpward = true;
+    }
+    else {
+        translatedUpward = false;
+    }
+
+    C3Vector vecCheckPosition = couldCollideCameraPosition;
+    vecCheckPosition.x += vecCameraForward.x * nearClip;
+    vecCheckPosition.y += vecCameraForward.y * nearClip;
+    vecCheckPosition.z += vecCameraForward.z * nearClip;
+
+    C3Vector vecOriginalPosition = noCollisionCameraPosition;
+    vecOriginalPosition.x += vecCameraForward.x * nearClip;
+    vecOriginalPosition.y += vecCameraForward.y * nearClip;
+    vecOriginalPosition.z += vecCameraForward.z * nearClip;
+
+    if (translatedUpward) {
+        vecCheckPosition.x += vecCameraUp.x * frontPlaneHalfLength;
+        vecCheckPosition.y += vecCameraUp.y * frontPlaneHalfLength;
+        vecCheckPosition.z += vecCameraUp.z * frontPlaneHalfLength;
+
+        vecOriginalPosition.x += vecCameraUp.x * frontPlaneHalfLength;
+        vecOriginalPosition.y += vecCameraUp.y * frontPlaneHalfLength;
+        vecOriginalPosition.z += vecCameraUp.z * frontPlaneHalfLength;
+    }
+    else {
+        vecCheckPosition.x -= vecCameraUp.x * frontPlaneHalfLength;
+        vecCheckPosition.y -= vecCameraUp.y * frontPlaneHalfLength;
+        vecCheckPosition.z -= vecCameraUp.z * frontPlaneHalfLength;
+
+        vecOriginalPosition.x -= vecCameraUp.x * frontPlaneHalfLength;
+        vecOriginalPosition.y -= vecCameraUp.y * frontPlaneHalfLength;
+        vecOriginalPosition.z -= vecCameraUp.z * frontPlaneHalfLength;
+    }
+
+    // Test the front/near clip plane
+    C3Vector result = {};
+    float correction_nearClip = 0.0f;
+    C3Vector intersectPosition = {};
+    float intersectDistance = 1.0f;
+    if (CWorld_Intersect(&vecOriginalPosition, &vecCheckPosition, &intersectPosition, &intersectDistance, vanilla1121_getCameraIntersectFlag())
+        && intersectDistance <= 1.0f && intersectDistance >= 0.0f) {
+        result.x = 0.0f;
+        result.y = 0.0f;
+        result.z = -((vecCheckPosition.z - vecOriginalPosition.z) * (1.0f - intersectDistance));
+
+        // Try to keep distance from the wall, else revert the translation
+        C3Vector vecIntersectDelta = {};
+        vecIntersectDelta.x = 0.0f;
+        vecIntersectDelta.y = 0.0f;
+        vecIntersectDelta.z = (vecCheckPosition.z - vecOriginalPosition.z) * intersectDistance;
+        if (vectorLength(vecIntersectDelta) >= keepDistanceFromWall) {
+            C3Vector vecResultUnit = result;
+            vectorNormalize(vecResultUnit);
+
+            result.x += vecResultUnit.x * keepDistanceFromWall;
+            result.y += vecResultUnit.y * keepDistanceFromWall;
+            result.z += vecResultUnit.z * keepDistanceFromWall;
+        }
+        else {
+            result.x = 0.0f;
+            result.y = 0.0f;
+            result.z = noCollisionCameraPosition.z - couldCollideCameraPosition.z;
         }
     }
 
@@ -202,6 +335,46 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
             (vanilla1121_objectType(u) == OBJECT_TYPE_Player || vanilla1121_objectType(u) == OBJECT_TYPE_Unit)) {
 
             cameraTranslatedPosition = cameraTranslate(camera, cameraHorizontalAddend, cameraVerticalAddend);
+
+            C3Vector verticalNearClipCorrection = {};
+            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.1f) {
+                verticalNearClipCorrection = nearClipCollisionCheckForVerticalTranslation(camera, cameraOriginalPosition, cameraTranslatedPosition);
+            }
+
+            C3Vector horizontalNearClipCorrection = {};
+            if (std::abs(cameraHorizontalAddend) > 0.1f) {
+                horizontalNearClipCorrection = nearClipCollisionCheckForHorizontalTranslation(camera, cameraHorizontalAddend, cameraOriginalPosition, cameraTranslatedPosition);
+            }
+
+            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.1f || std::abs(cameraHorizontalAddend) > 0.1f) {
+                // Check if camera hits a wall
+                float cameraIntersectDistance = 1.0f;
+                C3Vector cameraIntersectPoint = {};
+                C3Vector verticalCameraCollisionCorrection = {};
+                C3Vector horizontalCameraCollisionCorrection = {};
+                if (CWorld_Intersect(&cameraOriginalPosition, &cameraTranslatedPosition, &cameraIntersectPoint, &cameraIntersectDistance, vanilla1121_getCameraIntersectFlag())
+                    && cameraIntersectDistance >= 0.0f && cameraIntersectDistance <= 1.0f) {
+                    horizontalCameraCollisionCorrection.x = -((cameraTranslatedPosition.x - cameraOriginalPosition.x) * (1.0f - cameraIntersectDistance));
+                    horizontalCameraCollisionCorrection.y = -((cameraTranslatedPosition.y - cameraOriginalPosition.y) * (1.0f - cameraIntersectDistance));
+                    verticalCameraCollisionCorrection.z = -((cameraTranslatedPosition.z - cameraOriginalPosition.z) * (1.0f - cameraIntersectDistance));
+                }
+
+                // Final result of collision check
+                if (vectorLength(verticalCameraCollisionCorrection) > vectorLength(verticalNearClipCorrection)) {
+                    cameraTranslatedPosition.z += verticalCameraCollisionCorrection.z;
+                }
+                else {
+                    cameraTranslatedPosition.z += verticalNearClipCorrection.z;
+                }
+                if (vectorLength(horizontalCameraCollisionCorrection) > vectorLength(horizontalNearClipCorrection)) {
+                    cameraTranslatedPosition.x += horizontalCameraCollisionCorrection.x;
+                    cameraTranslatedPosition.y += horizontalCameraCollisionCorrection.y;
+                }
+                else {
+                    cameraTranslatedPosition.x += horizontalNearClipCorrection.x;
+                    cameraTranslatedPosition.y += horizontalNearClipCorrection.y;
+                }
+            }
 
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
