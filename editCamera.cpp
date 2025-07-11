@@ -17,6 +17,7 @@ ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth = NULL;
 
 float cameraHorizontalAddend = 0.0f;
 float cameraVerticalAddend = 0.0f;
+float cameraPitchAddend = 0.0f;
 bool cameraFollowTarget = false;
 bool cameraOrganicSmooth = true;
 bool cameraPinHeight = false;
@@ -108,6 +109,31 @@ static void cameraFollowPosition(const uint32_t camera, const C3Vector& targetPo
     vanilla1121_setCameraUpVector(camera, vecUp);
 }
 
+static void cameraAddPitch(uint32_t camera, float delta) {
+    C3Vector vecForward = vanilla1121_getCameraForwardVector(camera);
+    vecForward.z += delta;
+
+    vectorNormalize(vecForward);
+    if (std::abs(vecForward.x) < 0.01f && std::abs(vecForward.y) < 0.01f) {
+        return;
+    }
+
+    C3Vector vecTemp = {};
+    vecTemp.x = 0.0f;
+    vecTemp.y = 0.0f;
+    vecTemp.z = 1.0f;
+
+    C3Vector vecRight = vectorCrossProduct(vecTemp, vecForward);
+    vectorNormalize(vecRight);
+
+    C3Vector vecUp = vectorCrossProduct(vecForward, vecRight);
+    vectorNormalize(vecUp);
+
+    vanilla1121_setCameraForwardVector(camera, vecForward);
+    vanilla1121_setCameraRightVector(camera, vecRight);
+    vanilla1121_setCameraUpVector(camera, vecUp);
+}
+
 static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, float verticalDelta) {
     C3Vector a = vanilla1121_getCameraPosition(camera);
     C3Vector result = a;
@@ -140,7 +166,7 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
         }
     }
 
-    if (std::abs(horizontalDelta) > 0.1f) {
+    if (std::abs(horizontalDelta) > 0.01f) {
         if (horizontalDelta > 0.0f) {
             // Translating towards right
             result.x = std::abs(horizontalDelta) * (b.y - a.y) / distanceCameraToTarget + a.x;
@@ -153,7 +179,7 @@ static C3Vector cameraTranslate(const uint32_t camera, float horizontalDelta, fl
         }
     }
 
-    if (std::abs(verticalDelta) > 0.1f) {
+    if (std::abs(verticalDelta) > 0.01f) {
         result.z += verticalDelta;
     }
 
@@ -336,17 +362,21 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
 
             cameraTranslatedPosition = cameraTranslate(camera, cameraHorizontalAddend, cameraVerticalAddend);
 
+            if (std::abs(cameraPitchAddend) > 0.01f) {
+                cameraAddPitch(camera, cameraPitchAddend);
+            }
+
             C3Vector verticalNearClipCorrection = {};
-            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.1f) {
+            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.01f || std::abs(cameraPitchAddend) > 0.01f) {
                 verticalNearClipCorrection = nearClipCollisionCheckForVerticalTranslation(camera, cameraOriginalPosition, cameraTranslatedPosition);
             }
 
             C3Vector horizontalNearClipCorrection = {};
-            if (std::abs(cameraHorizontalAddend) > 0.1f) {
+            if (std::abs(cameraHorizontalAddend) > 0.01f) {
                 horizontalNearClipCorrection = nearClipCollisionCheckForHorizontalTranslation(camera, cameraHorizontalAddend, cameraOriginalPosition, cameraTranslatedPosition);
             }
 
-            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.1f || std::abs(cameraHorizontalAddend) > 0.1f) {
+            if (cameraPinHeight || std::abs(cameraVerticalAddend) > 0.01f || std::abs(cameraHorizontalAddend) > 0.01f || std::abs(cameraPitchAddend) > 0.01f) {
                 // Check if camera hits a wall
                 float cameraIntersectDistance = 1.0f;
                 C3Vector cameraIntersectPoint = {};

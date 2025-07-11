@@ -304,6 +304,21 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushnumber(L, cameraHorizontalAddend);
             return 1;
         }
+        else if (cmd == "cameraPitch") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "set" && lua_isnumber(L, 3)) {
+                float userValue = static_cast<float>(lua_tonumber(L, 3));
+                if (userValue < 0.0f) {
+                    userValue = 0.0f;
+                }
+                if (userValue > 0.2f) {
+                    userValue = 0.2f;
+                }
+                cameraPitchAddend = userValue;
+            }
+            lua_pushnumber(L, cameraPitchAddend);
+            return 1;
+        }
         else if (cmd == "cameraFollowTarget") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "enable") {

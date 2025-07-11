@@ -16,6 +16,7 @@ extern ORGANICSMOOTH_0x5b7bb0 p_original_OrganicSmooth;
 
 extern float cameraHorizontalAddend;
 extern float cameraVerticalAddend;
+extern float cameraPitchAddend;
 extern bool cameraFollowTarget;
 extern bool cameraOrganicSmooth;
 extern bool cameraPinHeight;
