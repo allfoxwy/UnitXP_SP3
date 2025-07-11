@@ -52,7 +52,7 @@ static void cameraCacheHousekeeping() {
     }
 
     static int delayCounter = 0;
-    if (++delayCounter < 100) {
+    if (++delayCounter < 2000) {
         return;
     }
     else {
@@ -83,7 +83,7 @@ static void unitCacheHousekeeping() {
     }
 
     static int delayCounter = 0;
-    if (++delayCounter < 100) {
+    if (++delayCounter < 2000) {
         return;
     }
     else {
