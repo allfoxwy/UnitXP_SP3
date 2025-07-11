@@ -80,6 +80,71 @@ bool targetNearestEnemy(float distanceLimit) {
     return false;
 }
 
+bool targetEnemyWithMostHP(float distanceLimit) {
+    vector<struct mob_entity> mobs{};
+
+    uint32_t objects = *reinterpret_cast<uint32_t*>(0xb41414);
+    uint32_t i = *reinterpret_cast<uint32_t*>(objects + 0xac);
+
+    void* player = reinterpret_cast<void*>(vanilla1121_getVisiableObject(UnitGUID(u8"player")));
+
+    while (i != 0 && (i & 1) == 0) {
+        uint64_t currentObjectGUID = *reinterpret_cast<uint64_t*>(i + 0x30);
+        int type = vanilla1121_objectType(i);
+
+        // As of https://github.com/allfoxwy/UnitXP_SP3/issues/5
+        // I suspect some in-game object on battleground can not get position as Unit, so I add this line and it does stop crashing
+        if (type != OBJECT_TYPE_Player && type != OBJECT_TYPE_Unit) {
+            i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+            continue;
+        }
+
+        float distance = UnitXP_distanceBetween(player, reinterpret_cast<void*>(i));
+        double currentHP = vanilla1121_unitCurrentHP(i);
+        bool targetInCombat = vanilla1121_unitInCombat(i);
+
+        if (((type == OBJECT_TYPE_Unit && vanilla1121_unitIsControlledByPlayer(i) == 0) || type == OBJECT_TYPE_Player)
+            && distance <= distanceLimit
+            && vanilla1121_unitCanBeAttacked(i) == 1
+            && vanilla1121_unitIsDead(i) == 0
+            && (targetInCombat == true || vanilla1121_unitCreatureType(i) != 8)
+            && inViewingFrustum(vanilla1121_unitPosition(i), targetingRangeCone)
+            && UnitXP_inSight(player, reinterpret_cast<void*>(i)) == 1) {
+
+            bool selfInCombat = vanilla1121_unitInCombat(vanilla1121_getVisiableObject(UnitGUID("player")));
+
+            if (targetingInCombatFilter && type == OBJECT_TYPE_Unit && selfInCombat) {
+                if (targetInCombat) {
+                    struct mob_entity new_mob = {};
+                    new_mob.GUID = currentObjectGUID;
+                    new_mob.currentHP = currentHP;
+                    mobs.push_back(new_mob);
+                }
+            }
+            else {
+                struct mob_entity new_mob = {};
+                new_mob.GUID = currentObjectGUID;
+                new_mob.currentHP = currentHP;
+                mobs.push_back(new_mob);
+            }
+
+        }
+        i = *reinterpret_cast<uint32_t*>(*reinterpret_cast<int32_t*>(objects + 0xa4) + i + 4);
+    }
+
+    if (mobs.size() > 0) {
+        auto compareFunction = [](struct mob_entity& a, struct mob_entity& b) {
+            return a.currentHP > b.currentHP;
+            };
+        sort(mobs.begin(), mobs.end(), compareFunction);
+
+        vanilla1121_target(mobs.front().GUID);
+        return true;
+    }
+
+    return false;
+}
+
 
 bool targetWorldBoss(float distanceLimit) {
     vector<struct mob_entity> mobs{};

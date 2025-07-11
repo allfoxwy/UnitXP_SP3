@@ -4,9 +4,10 @@
 
 
 struct mob_entity {
-    uint64_t GUID;
-    float distance;
-    int targetMark;
+    uint64_t GUID = 0;
+    float distance = -1.0f;
+    double currentHP = -1.0f;
+    int targetMark = -1;
 };
 
 typedef uint64_t(*MOB_SELECTFUNCTION)(uint64_t current, std::vector<mob_entity>& list);
@@ -23,6 +24,7 @@ extern float targetingFarRange;
 
 // Return true when found a target
 bool targetNearestEnemy(float distanceLimit);
+bool targetEnemyWithMostHP(float distanceLimit);
 bool targetWorldBoss(float distanceLimit);
 bool targetEnemyConsideringDistance(MOB_SELECTFUNCTION selectFunction);
 bool targetEnemyInCycle(MOB_SELECTFUNCTION selectFunction);
