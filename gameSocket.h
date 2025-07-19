@@ -6,23 +6,14 @@
 // - https://en.wikipedia.org/wiki/TCP_delayed_acknowledgment
 // Vanilla is linked with Winsock 1. But WSAIoctl() is in Winsock 2.
 
-typedef int(WSAAPI* SEND)(SOCKET, const char FAR*, int, int);
-typedef int(WSAAPI* RECV)(SOCKET, char FAR*, int, int);
-typedef int(WSAAPI* SENDTO)(SOCKET, const char FAR*, int, int, const struct sockaddr FAR*, int);
-typedef int(WSAAPI* RECVFROM)(SOCKET, char FAR*, int, int, struct sockaddr FAR*, int FAR*);
+// Attempt to set underlying interface MTU to a smaller value
+// so that the connection could pass a stricter path
 
-extern SEND p_send;
-extern RECV p_recv;
-extern SENDTO p_sendto;
-extern RECVFROM p_recvfrom;
+typedef int(WSAAPI* CONNECT)(SOCKET, const struct sockaddr FAR*, int);
+extern CONNECT p_connect;
+extern CONNECT p_original_connect;
 
-extern SEND p_original_send;
-extern RECV p_original_recv;
-extern SENDTO p_original_sendto;
-extern RECVFROM p_original_recvfrom;
-extern bool TCP_quickACK;
+int WSAAPI detoured_connect(SOCKET s, const struct sockaddr FAR* addr, int len);
 
-int WSAAPI detoured_send(SOCKET s, const char FAR* buf, int len, int flags);
-int WSAAPI detoured_recv(SOCKET s, char FAR* buf, int len, int flags);
-int WSAAPI detoured_sendto(SOCKET s, const char FAR* buf, int len, int flags, const struct sockaddr FAR* to, int tolen);
-int WSAAPI detoured_recvfrom(SOCKET s, char FAR* buf, int len, int flags, struct sockaddr FAR* from, int FAR* fromlen);
+bool gameSocket_isQuickACK();
+bool gameSocket_hasSmallerMTU();

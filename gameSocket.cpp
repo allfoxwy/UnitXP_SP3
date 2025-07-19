@@ -3,23 +3,44 @@
 #include <cstdint>
 
 #include <winsock2.h>
+#include <Ws2tcpip.h>
 #include <mstcpip.h>
 
 #include "gameSocket.h"
 
-SEND p_send = NULL;
-RECV p_recv = NULL;
-SENDTO p_sendto = NULL;
-RECVFROM p_recvfrom = NULL;
-SEND p_original_send = NULL;
-RECV p_original_recv = NULL;
-SENDTO p_original_sendto = NULL;
-RECVFROM p_original_recvfrom = NULL;
-bool TCP_quickACK = false;
+CONNECT p_connect = NULL;
+CONNECT p_original_connect = NULL;
 
-static void TCP_QUICKACK(SOCKET s) {
+static bool quickACK_failed = false;
+static bool smallerMTU_failed = false;
+
+static void enableQuickACK(SOCKET s) {
+    // From https://cygwin.com/git/?p=newlib-cygwin.git;a=commitdiff;h=ee2292413792f0360d357bc200c5e947eae516e6
+    int quickAck = 1;
+    DWORD dummy = 0;
+
+    // SIO_TCP_SET_ACK_FREQUENCY is not supported in Linux WINE.
+    if (0 != WSAIoctl(s, SIO_TCP_SET_ACK_FREQUENCY, &quickAck, sizeof(quickAck), NULL, 0, &dummy, NULL, NULL)) {
+        quickACK_failed = true;
+    }
+}
+
+static void setSmallerMTU(SOCKET s) {
+    // According to https://www.cisco.com/c/en/us/support/docs/ip/generic-routing-encapsulation-gre/25885-pmtud-ipfrag.html
+    // The MTU value of 1400 is recommended because it covers the most common GRE + IPv4sec mode combinations.
+    // Also, there is no discernible downside to allowing for an extra 20 or 40 bytes overhead.
+    // It is easier to remember and set one value and this value covers almost all scenarios.
+    DWORD mtu = 1400;
+
+    // IP_USER_MTU is not supported in Linux WINE.
+    if (0 != setsockopt(s, IPPROTO_IP, IP_USER_MTU, reinterpret_cast<char*>(&mtu), sizeof mtu)) {
+        smallerMTU_failed = true;
+    }
+}
+
+int WSAAPI detoured_connect(SOCKET s, const struct sockaddr FAR* addr, int len) {
     WSAPROTOCOL_INFOW sInfo = {};
-    int bufLen = sizeof(sInfo);
+    int bufLen = sizeof sInfo;
     int r = getsockopt(s, SOL_SOCKET, SO_PROTOCOL_INFOW, reinterpret_cast<char*>(&sInfo), &bufLen);
 
     if (r == 0) {
@@ -27,38 +48,18 @@ static void TCP_QUICKACK(SOCKET s) {
             sInfo.iSocketType == SOCK_STREAM &&
             sInfo.iProtocol == IPPROTO_TCP) {
 
-            // From https://cygwin.com/git/?p=newlib-cygwin.git;a=commitdiff;h=ee2292413792f0360d357bc200c5e947eae516e6
-            int quickAck = 1;
-            DWORD dummy = 0;
-            int ioctlResult = WSAIoctl(s, SIO_TCP_SET_ACK_FREQUENCY, &quickAck, sizeof(quickAck), NULL, 0, &dummy, NULL, NULL);
-            // SIO_TCP_SET_ACK_FREQUENCY is not supported in Linux WINE.
-
-            if (ioctlResult == 0) {
-                TCP_quickACK = true;
-            }
-            else {
-                TCP_quickACK = false;
-            }
+            setSmallerMTU(s);
+            enableQuickACK(s);
         }
     }
+
+    return p_original_connect(s, addr, len);
 }
 
-int WSAAPI detoured_send(SOCKET s, const char FAR* buf, int len, int flags) {
-    TCP_QUICKACK(s);
-    return p_original_send(s, buf, len, flags);
+bool gameSocket_isQuickACK() {
+    return quickACK_failed == false;
 }
 
-int WSAAPI detoured_recv(SOCKET s, char FAR* buf, int len, int flags) {
-    TCP_QUICKACK(s);
-    return p_original_recv(s, buf, len, flags);
-}
-
-int WSAAPI detoured_sendto(SOCKET s, const char FAR* buf, int len, int flags, const struct sockaddr FAR* to, int tolen) {
-    TCP_QUICKACK(s);
-    return p_original_sendto(s, buf, len, flags, to, tolen);
-}
-
-int WSAAPI detoured_recvfrom(SOCKET s, char FAR* buf, int len, int flags, struct sockaddr FAR* from, int FAR* fromlen) {
-    TCP_QUICKACK(s);
-    return p_original_recvfrom(s, buf, len, flags, from, fromlen);
+bool gameSocket_hasSmallerMTU() {
+    return smallerMTU_failed == false;
 }

@@ -389,7 +389,11 @@ int __fastcall detoured_UnitXP(void* L) {
             }
         }
         else if (cmd == "TCP_quickACK") {
-            lua_pushboolean(L, TCP_quickACK);
+            lua_pushboolean(L, gameSocket_isQuickACK());
+            return 1;
+        }
+        else if (cmd == "IP_smallerMTU") {
+            lua_pushboolean(L, gameSocket_hasSmallerMTU());
             return 1;
         }
         else if (cmd == "performanceProfile") {
@@ -494,20 +498,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for screenShot function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "send", &detoured_send, reinterpret_cast<LPVOID*>(&p_original_send), reinterpret_cast<LPVOID*>(&p_send)) != MH_OK) {
+        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "connect", &detoured_connect, reinterpret_cast<LPVOID*>(&p_original_connect), reinterpret_cast<LPVOID*>(&p_connect)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket send function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
-        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "recv", &detoured_recv, reinterpret_cast<LPVOID*>(&p_original_recv), reinterpret_cast<LPVOID*>(&p_recv)) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket recv function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
-        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "sendto", &detoured_sendto, reinterpret_cast<LPVOID*>(&p_original_sendto), reinterpret_cast<LPVOID*>(&p_sendto)) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket sendto function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
-        }
-        if (MH_CreateHookApiEx(L"WSOCK32.DLL", "recvfrom", &detoured_recvfrom, reinterpret_cast<LPVOID*>(&p_original_recvfrom), reinterpret_cast<LPVOID*>(&p_recvfrom)) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for gameSocket recvfrom function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
         if (MH_CreateHook(p_CGCamera_updateCallback_0x511bc0, &detoured_CGCamera_updateCallback_0x511bc0, reinterpret_cast<LPVOID*>(&p_original_CGCamera_updateCallback_0x511bc0)) != MH_OK) {
@@ -550,20 +542,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for camera updateCallback function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_recvfrom) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket recvfrom function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-                return FALSE;
-            }
-            if (MH_RemoveHook(p_sendto) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket sendto function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-                return FALSE;
-            }
-            if (MH_RemoveHook(p_recv) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket recv function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-                return FALSE;
-            }
-            if (MH_RemoveHook(p_send) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket send function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            if (MH_RemoveHook(p_connect) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for gameSocket connect function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_CTgaFile_Write_0x5a4810) != MH_OK) {
