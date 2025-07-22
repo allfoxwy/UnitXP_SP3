@@ -26,6 +26,7 @@
 #include "LuaDebug.h"
 #include "FPScap.h"
 #include "edit_CWorld_Intersect.h"
+#include "weather.h"
 
 using namespace std;
 
@@ -435,6 +436,17 @@ int __fastcall detoured_UnitXP(void* L) {
             }
             return 1;
         }
+        else if (cmd == "weatherAlwaysClear") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                weather_alwaysClear = true;
+            }
+            if (subcmd == "disable") {
+                weather_alwaysClear = false;
+            }
+            lua_pushboolean(L, weather_alwaysClear);
+            return 1;
+        }
     }
     return p_original_UnitXP(L);
 }
@@ -514,6 +526,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for OrganicSmooth function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_weather_setType, &detoured_weather_setType, reinterpret_cast<LPVOID*>(&p_original_weather_setType)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for weather_setType function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -528,6 +544,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_weather_setType) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for weather_setType function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_OrganicSmooth) != MH_OK) {

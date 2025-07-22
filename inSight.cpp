@@ -106,6 +106,8 @@ static void unitCacheHousekeeping() {
 }
 
 // Return true if position is in camera viewing frustum without checking line of sight. When checkCone is 2.0f, the cone is same as game FoV
+// This implementation is not perfectly fit the actual viewing frustum, as it does not take clip or aspect ratio into consideration.
+// However it's simple. I think it would be better not to fix things which are not broken.
 bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
     uint64_t playerGUID = UnitGUID("player");
     if (playerGUID == 0) {
