@@ -271,8 +271,8 @@ int __fastcall detoured_UnitXP(void* L) {
                 if (userValue < 0.0f) {
                     userValue = 0.0f;
                 }
-                if (userValue > 5.0f) {
-                    userValue = 5.0f;
+                if (userValue > 4.0f) {
+                    userValue = 4.0f;
                 }
                 cameraVerticalAddend = userValue;
             }
@@ -286,8 +286,8 @@ int __fastcall detoured_UnitXP(void* L) {
                 if (userValue < -1.0f) {
                     userValue = -1.0f;
                 }
-                if (userValue > 5.0f) {
-                    userValue = 5.0f;
+                if (userValue > 4.0f) {
+                    userValue = 4.0f;
                 }
                 cameraVerticalAddend = userValue;
             }
@@ -298,11 +298,11 @@ int __fastcall detoured_UnitXP(void* L) {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "set" && lua_isnumber(L, 3)) {
                 float userValue = static_cast<float>(lua_tonumber(L, 3));
-                if (userValue < -6.0f) {
-                    userValue = -6.0f;
+                if (userValue < -4.0f) {
+                    userValue = -4.0f;
                 }
-                if (userValue > 6.0f) {
-                    userValue = 6.0f;
+                if (userValue > 4.0f) {
+                    userValue = 4.0f;
                 }
                 cameraHorizontalAddend = userValue;
             }
@@ -316,8 +316,8 @@ int __fastcall detoured_UnitXP(void* L) {
                 if (userValue < 0.0f) {
                     userValue = 0.0f;
                 }
-                if (userValue > 0.2f) {
-                    userValue = 0.2f;
+                if (userValue > 0.3f) {
+                    userValue = 0.3f;
                 }
                 cameraPitchAddend = userValue;
             }
