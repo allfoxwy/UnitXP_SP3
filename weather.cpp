@@ -8,7 +8,7 @@ WEATHER_SETTYPE p_original_weather_setType = NULL;
 bool weather_alwaysClear = true;
 
 void __fastcall detoured_weather_setType(void* self, void* ignored, int type, float intensity, bool unknown) {
-    if (weather_alwaysClear) {
+    if (weather_alwaysClear && type > 0 && type <= 3) {
         p_original_weather_setType(self, 0, intensity, unknown);
     }
     else {
