@@ -720,8 +720,12 @@ void vanilla1121_runScript(std::string luaScript) {
     lua_remove(L, 1);
 }
 
-float vectorLength(const C3Vector& vec) {
-    return std::hypot(vec.x, vec.y, vec.z);
+float vectorLength(float* vec) {
+    return std::sqrt(std::pow(vec[0], 2.0f) + std::pow(vec[1], 2.0f) + std::pow(vec[2], 2.0f));
+}
+
+float vectorLength(C3Vector& vec) {
+    return vectorLength(&vec.x);
 }
 
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b) {
@@ -745,7 +749,7 @@ void vectorNormalize(C3Vector& vec) {
     vec.z /= len;
 }
 
-float angleBetweenVectors(const C3Vector& a, const C3Vector& b) {
+float angleBetweenVectors(C3Vector& a, C3Vector& b) {
     float lenA = vectorLength(a);
     float lenB = vectorLength(b);
 
