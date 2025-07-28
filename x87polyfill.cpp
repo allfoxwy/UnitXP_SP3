@@ -268,3 +268,11 @@ float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle
 
     return matA;
 }
+
+LUA_SQRT p_lua_sqrt = reinterpret_cast<LUA_SQRT>(0x7fb020);
+LUA_SQRT p_original_lua_sqrt = NULL;
+int __fastcall detoured_lua_sqrt(void* L) {
+    double v = luaL_checknumber(L, 1);
+    lua_pushnumber(L, std::sqrt(v));
+    return 1;
+}

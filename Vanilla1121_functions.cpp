@@ -37,6 +37,7 @@ typedef int(__fastcall* LUA_NEXT)(void*, int);
 typedef void(__fastcall* LUA_PUSHVALUE)(void*, int);
 typedef void(__fastcall* LUA_REMOVE)(void*, int);
 typedef void(__fastcall* LUA_INSERT)(void*, int);
+typedef double(__fastcall* LUAL_CHECKNUMBER)(void*, int);
 
 
 // To get lua_State pointer
@@ -64,6 +65,7 @@ static auto p_lua_next = reinterpret_cast<LUA_NEXT>(0x6F4450);
 static auto p_lua_pushvalue = reinterpret_cast<LUA_PUSHVALUE>(0x6F3350);
 static auto p_lua_remove = reinterpret_cast<LUA_REMOVE>(0x6F30D0);
 static auto p_lua_insert = reinterpret_cast<LUA_INSERT>(0x6F31A0);
+static auto p_luaL_checknumber = reinterpret_cast<LUAL_CHECKNUMBER>(0x6f4c80);
 
 
 // WoW C function
@@ -150,6 +152,9 @@ int lua_isnumber(void* L, int index) {
 }
 int lua_isstring(void* L, int index) {
     return p_lua_isstring(L, index);
+}
+double luaL_checknumber(void* L, int index) {
+    return p_luaL_checknumber(L, index);
 }
 
 // Get GUID from UNIT_ID
@@ -406,7 +411,7 @@ bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
             if (vanilla1121_unitCollisionBoxHeight(unit0) == vanilla1121_unitCollisionBoxHeight(unit1)) {
                 return false;
             }
-            
+
             // Second test: unit 0 try to look up at unit 1
             intersectPoint = {};
             distance = 1.0f;

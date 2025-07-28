@@ -54,3 +54,8 @@ typedef float* (__fastcall* MATRIX_ROTATE_1)(float*, float*, float, bool);
 extern MATRIX_ROTATE_1 p_matrix_rotate_1;
 extern MATRIX_ROTATE_1 p_original_matrix_rotate_1;
 float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipSQRT);
+
+typedef int(__fastcall* LUA_SQRT)(void*);
+extern LUA_SQRT p_lua_sqrt;
+extern LUA_SQRT p_original_lua_sqrt;
+int __fastcall detoured_lua_sqrt(void* L);

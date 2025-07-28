@@ -148,6 +148,7 @@ void lua_newtable(void* L);
 void lua_gettable(void* L, int index);
 void lua_settable(void* L, int index);
 int lua_next(void* L, int index);
+double luaL_checknumber(void* L, int index);
 
 
 
