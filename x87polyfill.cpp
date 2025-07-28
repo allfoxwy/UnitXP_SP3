@@ -57,19 +57,15 @@ static inline __m128 linearCombination_SSE(const __m128& a, const SSE_mat44& B)
 
 float* __fastcall detoured_operator_multiply_4(float* matA, float* matB, float* matC)
 {
-    auto result = reinterpret_cast<SSE_mat44*>(matA);
-    auto A = reinterpret_cast<SSE_mat44*>(matB);
-    auto B = reinterpret_cast<SSE_mat44*>(matC);
+    __m128 out0x = linearCombination_SSE(reinterpret_cast<SSE_mat44*>(matB)->row[0], *reinterpret_cast<SSE_mat44*>(matC));
+    __m128 out1x = linearCombination_SSE(reinterpret_cast<SSE_mat44*>(matB)->row[1], *reinterpret_cast<SSE_mat44*>(matC));
+    __m128 out2x = linearCombination_SSE(reinterpret_cast<SSE_mat44*>(matB)->row[2], *reinterpret_cast<SSE_mat44*>(matC));
+    __m128 out3x = linearCombination_SSE(reinterpret_cast<SSE_mat44*>(matB)->row[3], *reinterpret_cast<SSE_mat44*>(matC));
 
-    __m128 out0x = linearCombination_SSE(A->row[0], *B);
-    __m128 out1x = linearCombination_SSE(A->row[1], *B);
-    __m128 out2x = linearCombination_SSE(A->row[2], *B);
-    __m128 out3x = linearCombination_SSE(A->row[3], *B);
-
-    result->row[0] = out0x;
-    result->row[1] = out1x;
-    result->row[2] = out2x;
-    result->row[3] = out3x;
+    reinterpret_cast<SSE_mat44*>(matA)->row[0] = out0x;
+    reinterpret_cast<SSE_mat44*>(matA)->row[1] = out1x;
+    reinterpret_cast<SSE_mat44*>(matA)->row[2] = out2x;
+    reinterpret_cast<SSE_mat44*>(matA)->row[3] = out3x;
 
     return matA;
 }
