@@ -230,32 +230,28 @@ MATRIX_ROTATE_1 p_matrix_rotate_1 = reinterpret_cast<MATRIX_ROTATE_1>(0x7bdb00);
 MATRIX_ROTATE_1 p_original_matrix_rotate_1 = NULL;
 float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipSQRT)
 {
-    C3Vector vecTemp = {};
-    vecTemp.x = vecB[0];
-    vecTemp.y = vecB[1];
-    vecTemp.z = vecB[2];
     if (skipSQRT == false) {
-        float sqrtResult = 1.0f / vectorLength(vecTemp);
-        vecTemp.x *= sqrtResult;
-        vecTemp.y *= sqrtResult;
-        vecTemp.z *= sqrtResult;
+        float sqrtResult = 1.0f / vectorLength(vecB);
+        vecB[0] *= sqrtResult;
+        vecB[1] *= sqrtResult;
+        vecB[2] *= sqrtResult;
     }
 
     float cosResult = std::cos(angle);
     float sinResult = std::sin(angle);
     float rcosResult = 1.0f - cosResult;
 
-    matA[0] = std::pow(vecTemp.x, 2.0f) * rcosResult + cosResult;
-    matA[1] = rcosResult * vecTemp.y * vecTemp.x + vecTemp.z * sinResult;
-    matA[2] = rcosResult * vecTemp.z * vecTemp.x - vecTemp.y * sinResult;
+    matA[0] = std::pow(vecB[0], 2.0f) * rcosResult + cosResult;
+    matA[1] = rcosResult * vecB[1] * vecB[0] + vecB[2] * sinResult;
+    matA[2] = rcosResult * vecB[2] * vecB[0] - vecB[1] * sinResult;
     matA[3] = 0.0f;
-    matA[4] = rcosResult * vecTemp.y * vecTemp.x - vecTemp.z * sinResult;
-    matA[5] = std::pow(vecTemp.y, 2.0f) * rcosResult + cosResult;
-    matA[6] = vecTemp.x * sinResult + rcosResult * vecTemp.z * vecTemp.y;
+    matA[4] = rcosResult * vecB[1] * vecB[0] - vecB[2] * sinResult;
+    matA[5] = std::pow(vecB[1], 2.0f) * rcosResult + cosResult;
+    matA[6] = vecB[0] * sinResult + rcosResult * vecB[2] * vecB[1];
     matA[7] = 0.0f;
-    matA[8] = rcosResult * vecTemp.z * vecTemp.x + vecTemp.y * sinResult;
-    matA[9] = rcosResult * vecTemp.z * vecTemp.y - vecTemp.x * sinResult;
-    matA[0xa] = std::pow(vecTemp.z, 2.0f) * rcosResult + cosResult;
+    matA[8] = rcosResult * vecB[2] * vecB[0] + vecB[1] * sinResult;
+    matA[9] = rcosResult * vecB[2] * vecB[1] - vecB[0] * sinResult;
+    matA[0xa] = std::pow(vecB[2], 2.0f) * rcosResult + cosResult;
     matA[0xb] = 0.0f;
     matA[0xc] = 0.0f;
     matA[0xd] = 0.0f;
