@@ -48,12 +48,12 @@ void __fastcall detoured_matrix_scale_2(float* matSelf, void* ignored, float fac
 typedef float* (__fastcall* FUNTYPE_0x7be490)(float*, float*, float, bool);
 extern FUNTYPE_0x7be490 p_fun_0x7be490;
 extern FUNTYPE_0x7be490 p_original_fun_0x7be490;
-float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipSQRT);
+float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipVectorNormalization);
 
 typedef float* (__fastcall* MATRIX_ROTATE_1)(float*, float*, float, bool);
 extern MATRIX_ROTATE_1 p_matrix_rotate_1;
 extern MATRIX_ROTATE_1 p_original_matrix_rotate_1;
-float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipSQRT);
+float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipVectorNormalization);
 
 typedef int(__fastcall* LUA_SQRT)(void*);
 extern LUA_SQRT p_lua_sqrt;

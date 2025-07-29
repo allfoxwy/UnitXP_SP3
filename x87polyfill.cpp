@@ -168,10 +168,12 @@ void __fastcall detoured_matrix_scale_2(float* matSelf, void* ignored, float fac
 
 FUNTYPE_0x7be490 p_fun_0x7be490 = reinterpret_cast<FUNTYPE_0x7be490>(0x7be490);
 FUNTYPE_0x7be490 p_original_fun_0x7be490 = NULL;
-float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipSQRT)
+float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipVectorNormalization)
 {
-    if (skipSQRT == false) {
-        float sqrtResult = 1.0f / vectorLength(vecB);
+    if (skipVectorNormalization == false) {
+        float sqrtResult = 1.0f / std::sqrt(std::pow(vecB[0], 2.0f) + std::pow(vecB[1], 2.0f) + std::pow(vecB[2], 2.0f));
+        // float sqrtResult = fastInverseSquareRoot(vecB);
+        // I think a polyfill should keep accuracy
         vecB[0] *= sqrtResult;
         vecB[1] *= sqrtResult;
         vecB[2] *= sqrtResult;
@@ -228,10 +230,12 @@ float* __fastcall detoured_fun_0x7bf860(float* matSelf, void* ignored, float* ve
 
 MATRIX_ROTATE_1 p_matrix_rotate_1 = reinterpret_cast<MATRIX_ROTATE_1>(0x7bdb00);
 MATRIX_ROTATE_1 p_original_matrix_rotate_1 = NULL;
-float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipSQRT)
+float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipVectorNormalization)
 {
-    if (skipSQRT == false) {
-        float sqrtResult = 1.0f / vectorLength(vecB);
+    if (skipVectorNormalization == false) {
+        float sqrtResult = 1.0f / std::sqrt(std::pow(vecB[0], 2.0f) + std::pow(vecB[1], 2.0f) + std::pow(vecB[2], 2.0f));
+        // float sqrtResult = fastInverseSquareRoot(vecB);
+        // I think a polyfill should keep accuracy
         vecB[0] *= sqrtResult;
         vecB[1] *= sqrtResult;
         vecB[2] *= sqrtResult;

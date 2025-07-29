@@ -725,12 +725,8 @@ void vanilla1121_runScript(std::string luaScript) {
     lua_remove(L, 1);
 }
 
-float vectorLength(float* vec) {
-    return std::sqrt(std::pow(vec[0], 2.0f) + std::pow(vec[1], 2.0f) + std::pow(vec[2], 2.0f));
-}
-
 float vectorLength(C3Vector& vec) {
-    return vectorLength(&vec.x);
+    return std::sqrt(std::pow(vec.x, 2.0f) + std::pow(vec.y, 2.0f) + std::pow(vec.z, 2.0f));
 }
 
 C3Vector vectorCrossProduct(const C3Vector& a, const C3Vector& b) {
@@ -749,30 +745,32 @@ float vectorDotProduct(const C3Vector& a, const C3Vector& b) {
 
 void vectorNormalize(C3Vector& vec) {
     float len = vectorLength(vec);
-    vec.x /= len;
-    vec.y /= len;
-    vec.z /= len;
+    if (len > 0.0f) {
+        vec.x /= len;
+        vec.y /= len;
+        vec.z /= len;
+    }
 }
 
 float angleBetweenVectors(C3Vector& a, C3Vector& b) {
-    float lenA = vectorLength(a);
-    float lenB = vectorLength(b);
+    float len = vectorLength(a);
+    len *= vectorLength(b);
+    if (len > 0.0f) {
+        float dotProduct = vectorDotProduct(a, b);
 
-    if (lenA == 0.0f || lenB == 0.0f) {
+        float cosValue = dotProduct / len;
+        if (cosValue > 1.0f) {
+            cosValue = 1.0f;
+        }
+        if (cosValue < -1.0f) {
+            cosValue = -1.0f;
+        }
+
+        return std::acos(cosValue);
+    }
+    else {
         return static_cast<float>(4 * M_PI);
     }
-
-    float dotProduct = vectorDotProduct(a, b);
-
-    float cosValue = dotProduct / (lenA * lenB);
-    if (cosValue > 1.0f) {
-        cosValue = 1.0f;
-    }
-    if (cosValue < -1.0f) {
-        cosValue = -1.0f;
-    }
-
-    return std::acos(cosValue);
 }
 
 void lua_newtable(void* L) {
