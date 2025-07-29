@@ -27,7 +27,7 @@
 #include "FPScap.h"
 #include "edit_CWorld_Intersect.h"
 #include "weather.h"
-#include "x87polyfill.h"
+#include "polyfill.h"
 
 using namespace std;
 

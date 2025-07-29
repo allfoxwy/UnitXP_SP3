@@ -3,7 +3,7 @@
 #include <intrin.h>
 #include <cmath>
 
-#include "x87polyfill.h"
+#include "polyfill.h"
 #include "Vanilla1121_functions.h"
 
 OPERATOR_MULTIPLY_1 p_operator_multiply_1 = reinterpret_cast<OPERATOR_MULTIPLY_1>(0x7bca80);
