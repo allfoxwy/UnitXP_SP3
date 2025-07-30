@@ -1,10 +1,18 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <sstream>
 
-/* These are some hot spots that I think might help if recompile them in SSE.
-* But to be frank, I see no big difference than x87.
+/* These are some hot spots that I think might help if I rewrite them.
 */
+
+
+std::string getPolyfillDebug();
+
+// If CPU support ERMS
+extern bool ERMS;
+void polyfill_checkERMS();
 
 typedef float* (__fastcall* OPERATOR_MULTIPLY_1)(float*, float*, float*);
 extern OPERATOR_MULTIPLY_1 p_operator_multiply_1;
@@ -59,3 +67,8 @@ typedef int(__fastcall* LUA_SQRT)(void*);
 extern LUA_SQRT p_lua_sqrt;
 extern LUA_SQRT p_original_lua_sqrt;
 int __fastcall detoured_lua_sqrt(void* L);
+
+typedef void(__fastcall* BLIT_HUB)(int*, int, uint32_t, uint32_t, int, uint32_t, uint32_t, int);
+extern BLIT_HUB p_blit_hub;
+extern BLIT_HUB p_original_blit_hub;
+void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t srcAddr, uint32_t srcStep, int srcFormat, uint32_t dstAddr, uint32_t dstStep, int dstFormat);

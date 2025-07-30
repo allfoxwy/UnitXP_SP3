@@ -1,10 +1,29 @@
 #include "pch.h"
 
-#include <intrin.h>
 #include <cmath>
+#include <map>
+#include <tuple>
+
+#include <intrin.h>
 
 #include "polyfill.h"
 #include "Vanilla1121_functions.h"
+
+bool ERMS = false;
+void polyfill_checkERMS() {
+    // By Chat GPT
+
+    int cpuInfo[4] = { 0 };
+
+    __cpuid(cpuInfo, 0); // get max supported leaf
+    if (cpuInfo[0] < 7) {
+        ERMS = false;
+        return;
+    }
+
+    __cpuidex(cpuInfo, 0x7, 0);
+    ERMS = (cpuInfo[1] & (1 << 9)) != 0;
+}
 
 OPERATOR_MULTIPLY_1 p_operator_multiply_1 = reinterpret_cast<OPERATOR_MULTIPLY_1>(0x7bca80);
 OPERATOR_MULTIPLY_1 p_original_operator_multiply_1 = NULL;
@@ -271,4 +290,104 @@ int __fastcall detoured_lua_sqrt(void* L) {
     double v = luaL_checknumber(L, 1);
     lua_pushnumber(L, std::sqrt(v));
     return 1;
+}
+
+static void blit_noPitch_1(int w, int h, uint32_t src, uint32_t dst) {
+    if (w < 4) {
+        w = 4;
+    }
+    if (h < 4) {
+        h = 4;
+    }
+    uint32_t len = w * h;
+    std::memcpy(reinterpret_cast<void*>(dst), reinterpret_cast<void*>(src), len);
+}
+
+static void blit_noPitch_2(int w, int h, uint32_t src, uint32_t dst) {
+    if (w < 4) {
+        w = 4;
+    }
+    if (h < 4) {
+        h = 4;
+    }
+    uint32_t len = w * h * 4 / 8;
+    std::memcpy(reinterpret_cast<void*>(dst), reinterpret_cast<void*>(src), len);
+}
+
+static void blit_withPitch(int w, int h, uint32_t src, uint32_t srcPitch, uint32_t dst, uint32_t dstPitch, int pixelSize) {
+    if (srcPitch == dstPitch && w * pixelSize == srcPitch) {
+        uint32_t len = w * h * pixelSize;
+        std::memcpy(reinterpret_cast<void*>(dst), reinterpret_cast<void*>(src), len);
+    }
+    else {
+        for (int y = 0; y < h; ++y) {
+            uint32_t len = w * pixelSize;
+            std::memcpy(reinterpret_cast<void*>(dst), reinterpret_cast<void*>(src), len);
+
+            src += srcPitch;
+            dst += dstPitch;
+        }
+    }
+}
+
+
+static std::map<std::tuple<int, int, int>, uint64_t> blitCounters{};
+
+extern BLIT_HUB p_blit_hub = reinterpret_cast<BLIT_HUB>(0x5a4f60);
+extern BLIT_HUB p_original_blit_hub = NULL;
+void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t srcAddr, uint32_t srcStep, int srcFormat, uint32_t dstAddr, uint32_t dstStep, int dstFormat) {
+    int* gameBlitInitialized = reinterpret_cast<int*>(0xc0f558);
+    if (0 == *gameBlitInitialized) {
+        typedef void(__fastcall* INITBLIT)();
+        auto p_initBlit = reinterpret_cast<INITBLIT>(0x5a4fc0);
+        p_initBlit();
+
+        *gameBlitInitialized = 1;
+    }
+    if (ERMS && unknownFuncIndex == 0) {
+        if (srcFormat == 1 && dstFormat == 1) {
+            blit_withPitch(vec2size[0], vec2size[1], srcAddr, srcStep, dstAddr, dstStep, 4);
+            return;
+        }
+        if (srcFormat == 2 && dstFormat == 2) {
+            blit_withPitch(vec2size[0], vec2size[1], srcAddr, srcStep, dstAddr, dstStep, 2);
+            return;
+        }
+        if (srcFormat == 4 && dstFormat == 4) {
+            blit_withPitch(vec2size[0], vec2size[1], srcAddr, srcStep, dstAddr, dstStep, 2);
+            return;
+        }
+        if (srcFormat == 5 && dstFormat == 5) {
+            blit_noPitch_2(vec2size[0], vec2size[1], srcAddr, dstAddr);
+            return;
+        }
+        if (srcFormat == 6 && dstFormat == 6) {
+            blit_noPitch_1(vec2size[0], vec2size[1], srcAddr, dstAddr);
+            return;
+        }
+        if (srcFormat == 7 && dstFormat == 7) {
+            blit_noPitch_1(vec2size[0], vec2size[1], srcAddr, dstAddr);
+            return;
+        }
+
+        auto op = std::make_tuple(unknownFuncIndex, srcFormat, dstFormat);
+        auto i = blitCounters.find(op);
+        if (i != blitCounters.end()) {
+            i->second++;
+        }
+        else {
+            blitCounters.insert({ op, 1 });
+        }
+    }
+    p_original_blit_hub(vec2size, unknownFuncIndex, srcAddr, srcStep, srcFormat, dstAddr, dstStep, dstFormat);
+    return;
+}
+
+std::string getPolyfillDebug() {
+    std::stringstream ss{};
+    ss << "Enhanced REP MOVSB: " << ERMS << std::endl;
+    for (auto& i : blitCounters) {
+        ss << "unimplemented blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;
+    }
+    return ss.str();
 }
