@@ -6,8 +6,8 @@
 
 /* These are some hot spots that I think might help if I rewrite them.
 * 
-* Matrix/Vector calculation is a must for 3D program. The game did it using x87 instructions. Replace them with SSE should
-* result in better CPU utilization and more parallelism.
+* Matrix/Vector calculation is a must for 3D program. The game did it using x87 instructions. Replace them should result in
+* better CPU utilization and more parallelism.
 * 
 * Blit functions transfer large data from memory to memory. The game's original logic is to use a REP MOVSQ to move large data,
 * then switch to REP MOVSB to finish the tail. This was the optimal solution during 1996 - 2013.
@@ -19,9 +19,9 @@
 extern uint64_t polyfill_debugCounter;
 std::string getPolyfillDebug();
 
-// If CPU support ERMS
 extern bool ERMS;
-void polyfill_checkERMS();
+extern bool AVX;
+void polyfill_checkCPU();
 
 typedef float* (__fastcall* OPERATOR_MULTIPLY_1)(float*, float*, float*);
 extern OPERATOR_MULTIPLY_1 p_operator_multiply_1;
@@ -76,6 +76,11 @@ typedef double(__fastcall* SQUAREDMAGNITUDE)(float* vec);
 extern SQUAREDMAGNITUDE p_squaredMagnitude;
 extern SQUAREDMAGNITUDE p_original_squaredMagnitude;
 double __fastcall detoured_squaredMagnitude(float* vec);
+
+typedef void(__thiscall* CALPLANENORMAL)(float*, float*, float*, float*);
+extern CALPLANENORMAL p_calculatePlaneNormal;
+extern CALPLANENORMAL p_original_calculatePlaneNormal;
+void __fastcall detoured_calculatePlaneNormal(float* self, void* ignored, float* p1, float* p2, float* p3);
 
 typedef int(__fastcall* LUA_SQRT)(void*);
 extern LUA_SQRT p_lua_sqrt;

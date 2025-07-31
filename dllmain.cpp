@@ -449,11 +449,11 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, weather_alwaysClear);
             return 1;
         }
-        else if (cmd == "test") {
+        else if (cmd == "polyfill") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "write") {
                 std::fstream f;
-                f.open("blit.txt", std::ios::out);
+                f.open("polyfill_xp3.txt", std::ios::out);
                 if (f.is_open()) {
                     f << getPolyfillDebug();
                     f.close();
@@ -492,7 +492,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         // Initialize performance profiling
         perfReset();
 
-        polyfill_checkERMS();
+        polyfill_checkCPU();
 
         if (initFPScap() != 1) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to load NtDelayExecution function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
@@ -587,12 +587,18 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for lua_sqrt function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
-        if (MH_CreateHook(p_blit_hub, &detoured_blit_hub, reinterpret_cast<LPVOID*>(&p_original_blit_hub)) != MH_OK) {
-            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for blit_hub function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-            return FALSE;
+        if (ERMS) {
+            if (MH_CreateHook(p_blit_hub, &detoured_blit_hub, reinterpret_cast<LPVOID*>(&p_original_blit_hub)) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for blit_hub function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
         }
         if (MH_CreateHook(p_squaredMagnitude, &detoured_squaredMagnitude, reinterpret_cast<LPVOID*>(&p_original_squaredMagnitude)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for squaredMagnitude function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+        if (MH_CreateHook(p_calculatePlaneNormal, &detoured_calculatePlaneNormal, reinterpret_cast<LPVOID*>(&p_original_calculatePlaneNormal)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for calculatePlaneNormal function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
@@ -611,13 +617,19 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
+            if (MH_RemoveHook(p_calculatePlaneNormal) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for calculatePlaneNormal function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
             if (MH_RemoveHook(p_squaredMagnitude) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for squaredMagnitude function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
-            if (MH_RemoveHook(p_blit_hub) != MH_OK) {
-                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for blit_hub function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
-                return FALSE;
+            if (ERMS) {
+                if (MH_RemoveHook(p_blit_hub) != MH_OK) {
+                    MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for blit_hub function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                    return FALSE;
+                }
             }
             if (MH_RemoveHook(p_lua_sqrt) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for lua_sqrt function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
