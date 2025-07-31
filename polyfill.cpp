@@ -71,37 +71,26 @@ float* __fastcall detoured_operator_multiply_3(float* quaternionResult, float* q
 
 OPERATOR_MULTIPLY_4 p_operator_multiply_4 = reinterpret_cast<OPERATOR_MULTIPLY_4>(0x7bc6a0);
 OPERATOR_MULTIPLY_4 p_original_operator_multiply_4 = NULL;
-float* __fastcall detoured_operator_multiply_4(float* matAsrc, float* matBsrc, float* matCsrc)
+float* __fastcall detoured_operator_multiply_4(float* matA, float* matB, float* matC)
 {
-    double matB[16];
-    double matC[16];
-    for (int i = 0; i < 16; ++i) {
-        matB[i] = matBsrc[i];
-        matC[i] = matCsrc[i];
-    }
+    matA[0] = static_cast<float>(static_cast<double>(matC[12]) * static_cast<double>(matB[3]) + static_cast<double>(matC[8]) * static_cast<double>(matB[2]) + static_cast<double>(matB[1]) * static_cast<double>(matC[4]) + static_cast<double>(matB[0]) * static_cast<double>(matC[0]));
+    matA[1] = static_cast<float>(static_cast<double>(matB[3]) * static_cast<double>(matC[13]) + static_cast<double>(matB[2]) * static_cast<double>(matC[9]) + static_cast<double>(matC[5]) * static_cast<double>(matB[1]) + static_cast<double>(matC[1]) * static_cast<double>(matB[0]));
+    matA[2] = static_cast<float>(static_cast<double>(matB[3]) * static_cast<double>(matC[14]) + static_cast<double>(matB[2]) * static_cast<double>(matC[10]) + static_cast<double>(matC[6]) * static_cast<double>(matB[1]) + static_cast<double>(matC[2]) * static_cast<double>(matB[0]));
+    matA[3] = static_cast<float>(static_cast<double>(matB[2]) * static_cast<double>(matC[11]) + static_cast<double>(matB[3]) * static_cast<double>(matC[15]) + static_cast<double>(matB[0]) * static_cast<double>(matC[3]) + static_cast<double>(matC[7]) * static_cast<double>(matB[1]));
+    matA[4] = static_cast<float>(static_cast<double>(matB[7]) * static_cast<double>(matC[12]) + static_cast<double>(matB[6]) * static_cast<double>(matC[8]) + static_cast<double>(matB[4]) * static_cast<double>(matC[0]) + static_cast<double>(matC[4]) * static_cast<double>(matB[5]));
+    matA[5] = static_cast<float>(static_cast<double>(matB[7]) * static_cast<double>(matC[13]) + static_cast<double>(matB[6]) * static_cast<double>(matC[9]) + static_cast<double>(matC[5]) * static_cast<double>(matB[5]) + static_cast<double>(matC[1]) * static_cast<double>(matB[4]));
+    matA[6] = static_cast<float>(static_cast<double>(matB[7]) * static_cast<double>(matC[14]) + static_cast<double>(matB[6]) * static_cast<double>(matC[10]) + static_cast<double>(matC[6]) * static_cast<double>(matB[5]) + static_cast<double>(matC[2]) * static_cast<double>(matB[4]));
+    matA[7] = static_cast<float>(static_cast<double>(matB[6]) * static_cast<double>(matC[11]) + static_cast<double>(matB[7]) * static_cast<double>(matC[15]) + static_cast<double>(matB[4]) * static_cast<double>(matC[3]) + static_cast<double>(matB[5]) * static_cast<double>(matC[7]));
+    matA[8] = static_cast<float>(static_cast<double>(matB[11]) * static_cast<double>(matC[12]) + static_cast<double>(matB[10]) * static_cast<double>(matC[8]) + static_cast<double>(matB[8]) * static_cast<double>(matC[0]) + static_cast<double>(matC[4]) * static_cast<double>(matB[9]));
+    matA[9] = static_cast<float>(static_cast<double>(matB[11]) * static_cast<double>(matC[13]) + static_cast<double>(matB[10]) * static_cast<double>(matC[9]) + static_cast<double>(matC[5]) * static_cast<double>(matB[9]) + static_cast<double>(matC[1]) * static_cast<double>(matB[8]));
+    matA[10] = static_cast<float>(static_cast<double>(matB[11]) * static_cast<double>(matC[14]) + static_cast<double>(matB[10]) * static_cast<double>(matC[10]) + static_cast<double>(matC[6]) * static_cast<double>(matB[9]) + static_cast<double>(matC[2]) * static_cast<double>(matB[8]));
+    matA[11] = static_cast<float>(static_cast<double>(matB[10]) * static_cast<double>(matC[11]) + static_cast<double>(matB[11]) * static_cast<double>(matC[15]) + static_cast<double>(matB[8]) * static_cast<double>(matC[3]) + static_cast<double>(matB[9]) * static_cast<double>(matC[7]));
+    matA[12] = static_cast<float>(static_cast<double>(matB[14]) * static_cast<double>(matC[8]) + static_cast<double>(matB[13]) * static_cast<double>(matC[4]) + static_cast<double>(matB[15]) * static_cast<double>(matC[12]) + static_cast<double>(matB[12]) * static_cast<double>(matC[0]));
+    matA[13] = static_cast<float>(static_cast<double>(matB[14]) * static_cast<double>(matC[9]) + static_cast<double>(matB[12]) * static_cast<double>(matC[1]) + static_cast<double>(matB[13]) * static_cast<double>(matC[5]) + static_cast<double>(matB[15]) * static_cast<double>(matC[13]));
+    matA[14] = static_cast<float>(static_cast<double>(matB[14]) * static_cast<double>(matC[10]) + static_cast<double>(matB[12]) * static_cast<double>(matC[2]) + static_cast<double>(matB[13]) * static_cast<double>(matC[6]) + static_cast<double>(matB[15]) * static_cast<double>(matC[14]));
+    matA[15] = static_cast<float>(static_cast<double>(matB[14]) * static_cast<double>(matC[11]) + static_cast<double>(matB[13]) * static_cast<double>(matC[7]) + static_cast<double>(matB[12]) * static_cast<double>(matC[3]) + static_cast<double>(matC[15]) * static_cast<double>(matB[15]));
 
-    double matA[16];
-    matA[0] = matC[12] * matB[3] + matC[8] * matB[2] + matB[1] * matC[4] + matB[0] * matC[0];
-    matA[1] = matB[3] * matC[13] + matB[2] * matC[9] + matC[5] * matB[1] + matC[1] * matB[0];
-    matA[2] = matB[3] * matC[14] + matB[2] * matC[10] + matC[6] * matB[1] + matC[2] * matB[0];
-    matA[3] = matB[2] * matC[11] + matB[3] * matC[15] + matB[0] * matC[3] + matC[7] * matB[1];
-    matA[4] = matB[7] * matC[12] + matB[6] * matC[8] + matB[4] * matC[0] + matC[4] * matB[5];
-    matA[5] = matB[7] * matC[13] + matB[6] * matC[9] + matC[5] * matB[5] + matC[1] * matB[4];
-    matA[6] = matB[7] * matC[14] + matB[6] * matC[10] + matC[6] * matB[5] + matC[2] * matB[4];
-    matA[7] = matB[6] * matC[11] + matB[7] * matC[15] + matB[4] * matC[3] + matB[5] * matC[7];
-    matA[8] = matB[11] * matC[12] + matB[10] * matC[8] + matB[8] * matC[0] + matC[4] * matB[9];
-    matA[9] = matB[11] * matC[13] + matB[10] * matC[9] + matC[5] * matB[9] + matC[1] * matB[8];
-    matA[10] = matB[11] * matC[14] + matB[10] * matC[10] + matC[6] * matB[9] + matC[2] * matB[8];
-    matA[11] = matB[10] * matC[11] + matB[11] * matC[15] + matB[8] * matC[3] + matB[9] * matC[7];
-    matA[12] = matB[14] * matC[8] + matB[13] * matC[4] + matB[15] * matC[12] + matB[12] * matC[0];
-    matA[13] = matB[14] * matC[9] + matB[12] * matC[1] + matB[13] * matC[5] + matB[15] * matC[13];
-    matA[14] = matB[14] * matC[10] + matB[12] * matC[2] + matB[13] * matC[6] + matB[15] * matC[14];
-    matA[15] = matB[14] * matC[11] + matB[13] * matC[7] + matB[12] * matC[3] + matC[15] * matB[15];
-
-    for (int i = 0; i < 16; ++i) {
-        matAsrc[i] = static_cast<float>(matA[i]);
-    }
-    return matAsrc;
+    return matA;
 }
 
 /* Seems not used
@@ -175,41 +164,32 @@ void __fastcall detoured_matrix_scale_2(float* matSelf, void* ignored, float fac
 
 FUNTYPE_0x7be490 p_fun_0x7be490 = reinterpret_cast<FUNTYPE_0x7be490>(0x7be490);
 FUNTYPE_0x7be490 p_original_fun_0x7be490 = NULL;
-float* __fastcall detoured_fun_0x7be490(float* matAsrc, float* vecBsrc, float angle, bool skipVectorNormalization)
+float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipVectorNormalization)
 {
-    double vecB[3];
-    vecB[0] = vecBsrc[0];
-    vecB[1] = vecBsrc[1];
-    vecB[2] = vecBsrc[2];
-
     if (skipVectorNormalization == false) {
-        double sqrtResult = std::sqrt(std::pow(vecB[0], 2.0) + std::pow(vecB[1], 2.0) + std::pow(vecB[2], 2.0));
-        vecB[0] /= sqrtResult;
-        vecB[1] /= sqrtResult;
-        vecB[2] /= sqrtResult;
+        double sqrtResult = std::sqrt(std::pow(static_cast<double>(vecB[0]), 2.0) + std::pow(static_cast<double>(vecB[1]), 2.0) + std::pow(static_cast<double>(vecB[2]), 2.0));
+        vecB[0] = static_cast<float>(vecB[0] / sqrtResult);
+        vecB[1] = static_cast<float>(vecB[1] / sqrtResult);
+        vecB[2] = static_cast<float>(vecB[2] / sqrtResult);
     }
     double cosResult = std::cos(static_cast<double>(angle));
     double sinResult = std::sin(static_cast<double>(angle));
     double rcosResult = 1.0 - cosResult;
-    double rVecXY = rcosResult * vecB[1] * vecB[0];
-    double rVecXZ = rcosResult * vecB[2] * vecB[0];
-    double rVecYZ = rcosResult * vecB[2] * vecB[1];
+    double rVecXY = rcosResult * static_cast<double>(vecB[1]) * static_cast<double>(vecB[0]);
+    double rVecXZ = rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[0]);
+    double rVecYZ = rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[1]);
 
-    double matA[9];
-    matA[0] = std::pow(vecB[0], 2.0) * rcosResult + cosResult;
-    matA[1] = rVecXY + vecB[2] * sinResult;
-    matA[2] = rVecXZ - vecB[1] * sinResult;
-    matA[3] = rVecXY - vecB[2] * sinResult;
-    matA[4] = std::pow(vecB[1], 2.0) * rcosResult + cosResult;
-    matA[5] = rVecYZ + vecB[0] * sinResult;
-    matA[6] = rVecXZ + vecB[1] * sinResult;
-    matA[7] = rVecYZ - vecB[0] * sinResult;
-    matA[8] = std::pow(vecB[2], 2.0) * rcosResult + cosResult;
+    matA[0] = static_cast<float>(std::pow(static_cast<double>(vecB[0]), 2.0) * rcosResult + cosResult);
+    matA[1] = static_cast<float>(rVecXY + static_cast<double>(vecB[2]) * sinResult);
+    matA[2] = static_cast<float>(rVecXZ - static_cast<double>(vecB[1]) * sinResult);
+    matA[3] = static_cast<float>(rVecXY - static_cast<double>(vecB[2]) * sinResult);
+    matA[4] = static_cast<float>(std::pow(static_cast<double>(vecB[1]), 2.0) * rcosResult + cosResult);
+    matA[5] = static_cast<float>(rVecYZ + static_cast<double>(vecB[0]) * sinResult);
+    matA[6] = static_cast<float>(rVecXZ + static_cast<double>(vecB[1]) * sinResult);
+    matA[7] = static_cast<float>(rVecYZ - static_cast<double>(vecB[0]) * sinResult);
+    matA[8] = static_cast<float>(std::pow(static_cast<double>(vecB[2]), 2.0) * rcosResult + cosResult);
 
-    for (int i = 0; i < 9; ++i) {
-        matAsrc[i] = static_cast<float>(matA[i]);
-    }
-    return matAsrc;
+    return matA;
 }
 
 /* Seems not used
@@ -246,46 +226,37 @@ float* __fastcall detoured_fun_0x7bf860(float* matSelf, void* ignored, float* ve
 
 MATRIX_ROTATE_1 p_matrix_rotate_1 = reinterpret_cast<MATRIX_ROTATE_1>(0x7bdb00);
 MATRIX_ROTATE_1 p_original_matrix_rotate_1 = NULL;
-float* __fastcall detoured_matrix_rotate_1(float* matAsrc, float* vecBsrc, float angle, bool skipVectorNormalization)
+float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipVectorNormalization)
 {
-    double vecB[3];
-    vecB[0] = vecBsrc[0];
-    vecB[1] = vecBsrc[1];
-    vecB[2] = vecBsrc[2];
-
     if (skipVectorNormalization == false) {
-        double sqrtResult = std::sqrt(std::pow(vecB[0], 2.0) + std::pow(vecB[1], 2.0) + std::pow(vecB[2], 2.0));
-        vecB[0] /= sqrtResult;
-        vecB[1] /= sqrtResult;
-        vecB[2] /= sqrtResult;
+        double sqrtResult = std::sqrt(std::pow(static_cast<double>(vecB[0]), 2.0) + std::pow(static_cast<double>(vecB[1]), 2.0) + std::pow(static_cast<double>(vecB[2]), 2.0));
+        vecB[0] = static_cast<float>(vecB[0] / sqrtResult);
+        vecB[1] = static_cast<float>(vecB[1] / sqrtResult);
+        vecB[2] = static_cast<float>(vecB[2] / sqrtResult);
     }
 
     double cosResult = std::cos(static_cast<double>(angle));
     double sinResult = std::sin(static_cast<double>(angle));
     double rcosResult = 1.0 - cosResult;
 
-    double matA[16];
-    matA[0] = std::pow(vecB[0], 2.0) * rcosResult + cosResult;
-    matA[1] = rcosResult * vecB[1] * vecB[0] + vecB[2] * sinResult;
-    matA[2] = rcosResult * vecB[2] * vecB[0] - vecB[1] * sinResult;
-    matA[3] = 0.0;
-    matA[4] = rcosResult * vecB[1] * vecB[0] - vecB[2] * sinResult;
-    matA[5] = std::pow(vecB[1], 2.0) * rcosResult + cosResult;
-    matA[6] = vecB[0] * sinResult + rcosResult * vecB[2] * vecB[1];
-    matA[7] = 0.0;
-    matA[8] = rcosResult * vecB[2] * vecB[0] + vecB[1] * sinResult;
-    matA[9] = rcosResult * vecB[2] * vecB[1] - vecB[0] * sinResult;
-    matA[0xa] = std::pow(vecB[2], 2.0) * rcosResult + cosResult;
-    matA[0xb] = 0.0;
-    matA[0xc] = 0.0;
-    matA[0xd] = 0.0;
-    matA[0xe] = 0.0;
-    matA[0xf] = 1.0;
+    matA[0] = static_cast<float>(std::pow(static_cast<double>(vecB[0]), 2.0) * rcosResult + cosResult);
+    matA[1] = static_cast<float>(rcosResult * static_cast<double>(vecB[1]) * static_cast<double>(vecB[0]) + static_cast<double>(vecB[2]) * sinResult);
+    matA[2] = static_cast<float>(rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[0]) - static_cast<double>(vecB[1]) * sinResult);
+    matA[3] = 0.0f;
+    matA[4] = static_cast<float>(rcosResult * static_cast<double>(vecB[1]) * static_cast<double>(vecB[0]) - static_cast<double>(vecB[2]) * sinResult);
+    matA[5] = static_cast<float>(std::pow(static_cast<double>(vecB[1]), 2.0) * rcosResult + cosResult);
+    matA[6] = static_cast<float>(static_cast<double>(vecB[0]) * sinResult + rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[1]));
+    matA[7] = 0.0f;
+    matA[8] = static_cast<float>(rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[0]) + static_cast<double>(vecB[1]) * sinResult);
+    matA[9] = static_cast<float>(rcosResult * static_cast<double>(vecB[2]) * static_cast<double>(vecB[1]) - static_cast<double>(vecB[0]) * sinResult);
+    matA[0xa] = static_cast<float>(std::pow(static_cast<double>(vecB[2]), 2.0) * rcosResult + cosResult);
+    matA[0xb] = 0.0f;
+    matA[0xc] = 0.0f;
+    matA[0xd] = 0.0f;
+    matA[0xe] = 0.0f;
+    matA[0xf] = 1.0f;
 
-    for (int i = 0; i < 16; ++i) {
-        matAsrc[i] = static_cast<float>(matA[i]);
-    }
-    return matAsrc;
+    return matA;
 }
 
 SQUAREDMAGNITUDE p_squaredMagnitude = reinterpret_cast<SQUAREDMAGNITUDE>(0x4549f0);
@@ -298,37 +269,17 @@ double __fastcall detoured_squaredMagnitude(float* src) {
 
 CALPLANENORMAL p_calculatePlaneNormal = reinterpret_cast<CALPLANENORMAL>(0x637480);
 CALPLANENORMAL p_original_calculatePlaneNormal = NULL;
-void __fastcall detoured_calculatePlaneNormal(float* selfSrc, void* ignored, float* vec1, float* vec2, float* vec3) {
-    double p1[3];
-    p1[0] = vec1[0];
-    p1[1] = vec1[1];
-    p1[2] = vec1[2];
+void __fastcall detoured_calculatePlaneNormal(float* self, void* ignored, float* p1, float* p2, float* p3) {
+    double selfHD[4];
+    selfHD[0] = (static_cast<double>(p2[1]) - static_cast<double>(p1[1])) * (static_cast<double>(p3[2]) - static_cast<double>(p1[2])) - (static_cast<double>(p2[2]) - static_cast<double>(p1[2])) * (static_cast<double>(p3[1]) - static_cast<double>(p1[1]));
+    selfHD[1] = (static_cast<double>(p2[2]) - static_cast<double>(p1[2])) * (static_cast<double>(p3[0]) - static_cast<double>(p1[0])) - (static_cast<double>(p3[2]) - static_cast<double>(p1[2])) * (static_cast<double>(p2[0]) - static_cast<double>(p1[0]));
+    selfHD[2] = (static_cast<double>(p3[1]) - static_cast<double>(p1[1])) * (static_cast<double>(p2[0]) - static_cast<double>(p1[0])) - (static_cast<double>(p2[1]) - static_cast<double>(p1[1])) * (static_cast<double>(p3[0]) - static_cast<double>(p1[0]));
 
-    double p2[3];
-    p2[0] = vec2[0];
-    p2[1] = vec2[1];
-    p2[2] = vec2[2];
-
-    double p3[3];
-    p3[0] = vec3[0];
-    p3[1] = vec3[1];
-    p3[2] = vec3[2];
-
-    double self[4];
-    self[0] = (p2[1] - p1[1]) * (p3[2] - p1[2]) - (p2[2] - p1[2]) * (p3[1] - p1[1]);
-    self[1] = (p2[2] - p1[2]) * (p3[0] - p1[0]) - (p3[2] - p1[2]) * (p2[0] - p1[0]);
-    self[2] = (p3[1] - p1[1]) * (p2[0] - p1[0]) - (p2[1] - p1[1]) * (p3[0] - p1[0]);
-
-    double sqrtResult = std::sqrt(std::pow(self[2], 2.0) + std::pow(self[1], 2.0) + std::pow(self[0], 2.0));
-    self[0] /= sqrtResult;
-    self[1] /= sqrtResult;
-    self[2] /= sqrtResult;
-    self[3] = -(self[0] * p1[0] + self[1] * p1[1] + self[2] * p1[2]);
-
-    selfSrc[0] = static_cast<float>(self[0]);
-    selfSrc[1] = static_cast<float>(self[1]);
-    selfSrc[2] = static_cast<float>(self[2]);
-    selfSrc[3] = static_cast<float>(self[3]);
+    double sqrtResult = std::sqrt(std::pow(selfHD[2], 2.0) + std::pow(selfHD[1], 2.0) + std::pow(selfHD[0], 2.0));
+    self[0] = static_cast<float>(selfHD[0] / sqrtResult);
+    self[1] = static_cast<float>(selfHD[1] / sqrtResult);
+    self[2] = static_cast<float>(selfHD[2] / sqrtResult);
+    self[3] = static_cast<float>(-(selfHD[0] * static_cast<double>(p1[0]) + selfHD[1] * static_cast<double>(p1[1]) + selfHD[2] * static_cast<double>(p1[2])) / sqrtResult);
 }
 
 
