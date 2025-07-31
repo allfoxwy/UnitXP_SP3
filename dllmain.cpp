@@ -591,6 +591,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for blit_hub function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_squaredMagnitude, &detoured_squaredMagnitude, reinterpret_cast<LPVOID*>(&p_original_squaredMagnitude)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for squaredMagnitude function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -605,6 +609,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_squaredMagnitude) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for squaredMagnitude function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_blit_hub) != MH_OK) {

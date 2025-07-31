@@ -284,6 +284,28 @@ float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle
     return matA;
 }
 
+SQUAREDMAGNITUDE p_squaredMagnitude = reinterpret_cast<SQUAREDMAGNITUDE>(0x4549f0);
+SQUAREDMAGNITUDE p_original_squaredMagnitude = NULL;
+double __fastcall detoured_squaredMagnitude(float* vec) {
+    // By Chat GPT
+    
+    __m128 v = _mm_loadu_ps(vec);
+    __m128 squared = _mm_mul_ps(v, v);
+
+    // Use horizontal add (SSE3) would be faster,
+    // however the game use double precision to calculate lightning,
+    // replacing squaredMagnitude's result with float would result in a darker scene.
+    /*__m128 sum = _mm_hadd_ps(squared, squared);
+    sum = _mm_hadd_ps(sum, sum);
+    return _mm_cvtss_f32(sum);*/
+
+    // Hence do multiply in float vector, but addition in double.
+    // The scene looks good enough in this way.
+    float temp[4];
+    _mm_storeu_ps(temp, squared);
+    return (double)temp[0] + (double)temp[1] + (double)temp[2];
+}
+
 LUA_SQRT p_lua_sqrt = reinterpret_cast<LUA_SQRT>(0x7fb020);
 LUA_SQRT p_original_lua_sqrt = NULL;
 int __fastcall detoured_lua_sqrt(void* L) {
@@ -344,6 +366,7 @@ void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t 
 
         *gameBlitInitialized = 1;
     }
+
     if (ERMS && unknownFuncIndex == 0) {
         if (srcFormat == 1 && dstFormat == 1) {
             blit_withPitch(vec2size[0], vec2size[1], srcAddr, srcStep, dstAddr, dstStep, 4);
@@ -369,7 +392,9 @@ void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t 
             blit_noPitch_1(vec2size[0], vec2size[1], srcAddr, dstAddr);
             return;
         }
+    }
 
+    if (ERMS) {
         auto op = std::make_tuple(unknownFuncIndex, srcFormat, dstFormat);
         auto i = blitCounters.find(op);
         if (i != blitCounters.end()) {
@@ -379,15 +404,19 @@ void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t 
             blitCounters.insert({ op, 1 });
         }
     }
+
     p_original_blit_hub(vec2size, unknownFuncIndex, srcAddr, srcStep, srcFormat, dstAddr, dstStep, dstFormat);
     return;
 }
 
+uint64_t polyfill_debugCounter = 0;
 std::string getPolyfillDebug() {
     std::stringstream ss{};
     ss << "Enhanced REP MOVSB: " << ERMS << std::endl;
+    ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
+    ss << "Unimplemented Blit history: " << ERMS << std::endl;
     for (auto& i : blitCounters) {
-        ss << "unimplemented blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;
+        ss << "blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;
     }
     return ss.str();
 }

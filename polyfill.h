@@ -5,9 +5,18 @@
 #include <sstream>
 
 /* These are some hot spots that I think might help if I rewrite them.
+* 
+* Matrix/Vector calculation is a must for 3D program. The game did it using x87 instructions. Replace them with SSE should
+* result in better CPU utilization and more parallelism.
+* 
+* Blit functions transfer large data from memory to memory. The game's original logic is to use a REP MOVSQ to move large data,
+* then switch to REP MOVSB to finish the tail. This was the optimal solution during 1996 - 2013.
+* However in 2013, Intel deployed Enhanced REP MOVSB. Now REP MOVSB is faster, and it now requires a fixed heating up
+* when it starts. So the original design is flipped. Replace them with std::memcpy and compile the mod with a modern compiler
+* should fix it.
 */
 
-
+extern uint64_t polyfill_debugCounter;
 std::string getPolyfillDebug();
 
 // If CPU support ERMS
@@ -62,6 +71,11 @@ typedef float* (__fastcall* MATRIX_ROTATE_1)(float*, float*, float, bool);
 extern MATRIX_ROTATE_1 p_matrix_rotate_1;
 extern MATRIX_ROTATE_1 p_original_matrix_rotate_1;
 float* __fastcall detoured_matrix_rotate_1(float* matA, float* vecB, float angle, bool skipVectorNormalization);
+
+typedef double(__fastcall* SQUAREDMAGNITUDE)(float* vec);
+extern SQUAREDMAGNITUDE p_squaredMagnitude;
+extern SQUAREDMAGNITUDE p_original_squaredMagnitude;
+double __fastcall detoured_squaredMagnitude(float* vec);
 
 typedef int(__fastcall* LUA_SQRT)(void*);
 extern LUA_SQRT p_lua_sqrt;
