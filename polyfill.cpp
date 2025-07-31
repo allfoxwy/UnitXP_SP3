@@ -73,15 +73,14 @@ OPERATOR_MULTIPLY_4 p_operator_multiply_4 = reinterpret_cast<OPERATOR_MULTIPLY_4
 OPERATOR_MULTIPLY_4 p_original_operator_multiply_4 = NULL;
 float* __fastcall detoured_operator_multiply_4(float* matAsrc, float* matBsrc, float* matCsrc)
 {
-    double matA[16];
     double matB[16];
     double matC[16];
     for (int i = 0; i < 16; ++i) {
-        matA[i] = matAsrc[i];
         matB[i] = matBsrc[i];
         matC[i] = matCsrc[i];
     }
 
+    double matA[16];
     matA[0] = matC[12] * matB[3] + matC[8] * matB[2] + matB[1] * matC[4] + matB[0] * matC[0];
     matA[1] = matB[3] * matC[13] + matB[2] * matC[9] + matC[5] * matB[1] + matC[1] * matB[0];
     matA[2] = matB[3] * matC[14] + matB[2] * matC[10] + matC[6] * matB[1] + matC[2] * matB[0];
@@ -178,11 +177,6 @@ FUNTYPE_0x7be490 p_fun_0x7be490 = reinterpret_cast<FUNTYPE_0x7be490>(0x7be490);
 FUNTYPE_0x7be490 p_original_fun_0x7be490 = NULL;
 float* __fastcall detoured_fun_0x7be490(float* matAsrc, float* vecBsrc, float angle, bool skipVectorNormalization)
 {
-    double matA[9];
-    for (int i = 0; i < 9; ++i) {
-        matA[i] = matAsrc[i];
-    }
-
     double vecB[3];
     vecB[0] = vecBsrc[0];
     vecB[1] = vecBsrc[1];
@@ -200,6 +194,8 @@ float* __fastcall detoured_fun_0x7be490(float* matAsrc, float* vecBsrc, float an
     double rVecXY = rcosResult * vecB[1] * vecB[0];
     double rVecXZ = rcosResult * vecB[2] * vecB[0];
     double rVecYZ = rcosResult * vecB[2] * vecB[1];
+
+    double matA[9];
     matA[0] = std::pow(vecB[0], 2.0) * rcosResult + cosResult;
     matA[1] = rVecXY + vecB[2] * sinResult;
     matA[2] = rVecXZ - vecB[1] * sinResult;
@@ -252,11 +248,6 @@ MATRIX_ROTATE_1 p_matrix_rotate_1 = reinterpret_cast<MATRIX_ROTATE_1>(0x7bdb00);
 MATRIX_ROTATE_1 p_original_matrix_rotate_1 = NULL;
 float* __fastcall detoured_matrix_rotate_1(float* matAsrc, float* vecBsrc, float angle, bool skipVectorNormalization)
 {
-    double matA[16];
-    for (int i = 0; i < 16; ++i) {
-        matA[i] = matAsrc[i];
-    }
-
     double vecB[3];
     vecB[0] = vecBsrc[0];
     vecB[1] = vecBsrc[1];
@@ -273,6 +264,7 @@ float* __fastcall detoured_matrix_rotate_1(float* matAsrc, float* vecBsrc, float
     double sinResult = std::sin(static_cast<double>(angle));
     double rcosResult = 1.0 - cosResult;
 
+    double matA[16];
     matA[0] = std::pow(vecB[0], 2.0) * rcosResult + cosResult;
     matA[1] = rcosResult * vecB[1] * vecB[0] + vecB[2] * sinResult;
     matA[2] = rcosResult * vecB[2] * vecB[0] - vecB[1] * sinResult;
