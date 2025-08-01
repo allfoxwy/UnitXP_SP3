@@ -25,6 +25,8 @@ bool cameraPinHeight = false;
 static const float keepDistanceFromWall = 0.2f;
 static C3Vector cameraOriginalPosition = {};
 static C3Vector cameraTranslatedPosition = {};
+static C3Vector cameraOriginalForwardVector = {};
+static C3Vector cameraRotatedForwardVector = {};
 
 C3Vector editCamera_originalPosition() {
     if (cameraOriginalPosition.x == 0.0f && cameraOriginalPosition.y == 0.0f && cameraOriginalPosition.z == 0.0f) {
@@ -33,11 +35,25 @@ C3Vector editCamera_originalPosition() {
     return cameraOriginalPosition;
 }
 
+C3Vector editCamera_originalForword() {
+    if (cameraOriginalForwardVector.x == 0.0f && cameraOriginalForwardVector.y == 0.0f && cameraOriginalForwardVector.z == 0.0f) {
+        return vanilla1121_getCameraForwardVector(vanilla1121_getCamera());
+    }
+    return cameraOriginalForwardVector;
+}
+
 C3Vector editCamera_translatedPosition() {
     if (cameraTranslatedPosition.x == 0.0f && cameraTranslatedPosition.y == 0.0f && cameraTranslatedPosition.z == 0.0f) {
         return vanilla1121_getCameraPosition(vanilla1121_getCamera());
     }
     return cameraTranslatedPosition;
+}
+
+C3Vector editCamera_rotatedForword() {
+    if (cameraRotatedForwardVector.x == 0.0f && cameraRotatedForwardVector.y == 0.0f && cameraRotatedForwardVector.z == 0.0f) {
+        return vanilla1121_getCameraForwardVector(vanilla1121_getCamera());
+    }
+    return cameraRotatedForwardVector;
 }
 
 double __fastcall detoured_OrganicSmooth(float start, float end, float step) {
@@ -350,11 +366,8 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
     int result = p_original_CGCamera_updateCallback_0x511bc0(unknown1, camera);
 
     if (camera > 0 && (camera & 1) == 0) {
-        float* editPtr = reinterpret_cast<float*>(camera + 0x8);
-
-        cameraOriginalPosition.x = editPtr[0];
-        cameraOriginalPosition.y = editPtr[1];
-        cameraOriginalPosition.z = editPtr[2];
+        cameraOriginalPosition = vanilla1121_getCameraPosition(camera);
+        cameraOriginalForwardVector = vanilla1121_getCameraForwardVector(camera);
 
         uint32_t u = vanilla1121_getVisiableObject(vanilla1121_getCameraLookingAtGUID(camera));
         if (u > 0 &&
@@ -406,6 +419,7 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
                 }
             }
 
+            float* editPtr = reinterpret_cast<float*>(camera + 0x8);
             editPtr[0] = cameraTranslatedPosition.x;
             editPtr[1] = cameraTranslatedPosition.y;
             editPtr[2] = cameraTranslatedPosition.z;
@@ -425,6 +439,8 @@ int __fastcall detoured_CGCamera_updateCallback_0x511bc0(void* unknown1, uint32_
                     }
                 }
             }
+
+            cameraRotatedForwardVector = vanilla1121_getCameraForwardVector(camera);
         }
     }
     return result;

@@ -23,5 +23,7 @@ extern bool cameraPinHeight;
 
 // Get camera position after editing.
 C3Vector editCamera_translatedPosition();
+C3Vector editCamera_rotatedForword();
 // Get camera position before editing.
 C3Vector editCamera_originalPosition();
+C3Vector editCamera_originalForword();

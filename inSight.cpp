@@ -109,49 +109,20 @@ static void unitCacheHousekeeping() {
 // This implementation is not perfectly fit the actual viewing frustum, as it does not take clip or aspect ratio into consideration.
 // However it's simple. I think it would be better not to fix things which are not broken.
 bool inViewingFrustum(const C3Vector& posObject, float checkCone) {
-    uint64_t playerGUID = UnitGUID("player");
-    if (playerGUID == 0) {
-        return false;
-    }
-
-    uint32_t player = vanilla1121_getVisiableObject(playerGUID);
-    if (player == 0) {
-        return false;
-    }
-
-    if (vanilla1121_objectType(player) != OBJECT_TYPE_Player && vanilla1121_objectType(player) != OBJECT_TYPE_Unit) {
-        return false;
-    }
-
-    // Player position is taking height into consideration, because if we zoom in player, it would eventually point at head, not feet
-    C3Vector posPlayer = vanilla1121_unitPosition(player);
-    posPlayer.z += vanilla1121_unitCollisionBoxHeight(player);
-
     C3Vector posCamera = editCamera_translatedPosition();
-
-    // As we might edit camera position, so we need to edit viewing frustum either.
-    // We move player position by the same vector so that the viewing frstum would be moved.
-    C3Vector posOriginal = editCamera_originalPosition();
-    posPlayer.x += posCamera.x - posOriginal.x;
-    posPlayer.y += posCamera.y - posOriginal.y;
-    posPlayer.z += posCamera.z - posOriginal.z;
+    C3Vector vecCameraForward = editCamera_rotatedForword();
 
     C3Vector vecObject = {};
     vecObject.x = posObject.x - posCamera.x;
     vecObject.y = posObject.y - posCamera.y;
     vecObject.z = posObject.z - posCamera.z;
 
-    C3Vector vecPlayer = {};
-    vecPlayer.x = posPlayer.x - posCamera.x;
-    vecPlayer.y = posPlayer.y - posCamera.y;
-    vecPlayer.z = posPlayer.z - posCamera.z;
-
     // I tested in game and find out that even Vanilla Tweaks change this value, the screen border of objects still follow original FoV somehow
     // I suspect game has additional transformation before Direct X FoV
     //float fov = vanilla1121_getCameraFoV();
     const float fov = 1.5708f;
 
-    float angle = angleBetweenVectors(vecObject, vecPlayer);
+    float angle = angleBetweenVectors(vecObject, vecCameraForward);
 
     if (angle > fov / checkCone) {
         return false;
