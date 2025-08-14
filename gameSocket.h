@@ -17,3 +17,4 @@ int WSAAPI detoured_connect(SOCKET s, const struct sockaddr FAR* addr, int len);
 
 bool gameSocket_isQuickACK();
 bool gameSocket_hasSmallerMTU();
+bool gameSocket_hasBiggerWindow();

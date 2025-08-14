@@ -388,7 +388,7 @@ uint64_t polyfill_debugCounter = 0;
 std::string getPolyfillDebug() {
     std::stringstream ss{};
     ss << "Enhanced REP MOVSB: " << ERMS << std::endl;
-    ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
+    // ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
     ss << "Unimplemented Blit history: " << std::endl;
     for (auto& i : blitCounters) {
         ss << "blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;

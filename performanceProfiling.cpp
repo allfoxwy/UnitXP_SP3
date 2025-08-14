@@ -7,6 +7,8 @@
 
 #include "performanceProfiling.h"
 #include "coffTimeDateStamp.h"
+#include "gameSocket.h"
+#include "polyfill.h"
 
 static const int perfSlotsTotal = 16;
 
@@ -109,6 +111,10 @@ static std::string timeString(const LARGE_INTEGER& t) {
 std::string perfSummary() {
     std::stringstream ss;
     ss << "UnitXP_SP3 built at " << static_cast<uint32_t>(coffTimeDateStamp()) << std::endl;
+    ss << "TCP quick ACK: " << gameSocket_isQuickACK() << std::endl;
+    ss << "TCP fixed receiving window: " << gameSocket_hasBiggerWindow() << std::endl;
+    ss << "IP smaller MTU: " << gameSocket_hasSmallerMTU() << std::endl;
+    ss << getPolyfillDebug() << std::endl;
     for (int i = 0; i < perfSlotsTotal; ++i) {
         if (perfSampleCount[i].QuadPart == 0) {
             continue;

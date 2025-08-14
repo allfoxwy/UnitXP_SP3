@@ -13,6 +13,24 @@ CONNECT p_original_connect = NULL;
 
 static bool quickACK_failed = false;
 static bool smallerMTU_failed = false;
+static bool biggerWindow_failed = false;
+
+static void setFixedReceivingWindow(SOCKET s) {
+    // The reason behind this function is that Windows TCP auto-tuning determines TCP window size by application retrieve rate. (and BDP)
+    // I have a suspection of the game's data retrieving pattern is not well fit into Windows auto-tuning,
+    // because @pepopo report he witness exceptional good FPS on a local server.
+    
+    // According to https://learn.microsoft.com/en-us/windows/win32/winsock/sio-set-compatibility-mode
+    // If an application sets a valid receive window size with the SO_RCVBUF socket option,
+    // the stack will use the size specified and window receive auto-tuning will disabled.
+    
+    // And it seems later version of the game is also tuning it manually.
+
+    DWORD window = 256 * 1024;
+    if (0 != setsockopt(s, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<char*>(&window), sizeof window)) {
+        biggerWindow_failed = true;
+    }
+}
 
 static void enableQuickACK(SOCKET s) {
     // From https://cygwin.com/git/?p=newlib-cygwin.git;a=commitdiff;h=ee2292413792f0360d357bc200c5e947eae516e6
@@ -49,6 +67,7 @@ int WSAAPI detoured_connect(SOCKET s, const struct sockaddr FAR* addr, int len) 
             sInfo.iProtocol == IPPROTO_TCP) {
 
             setSmallerMTU(s);
+            setFixedReceivingWindow(s);
             enableQuickACK(s);
         }
     }
@@ -62,4 +81,8 @@ bool gameSocket_isQuickACK() {
 
 bool gameSocket_hasSmallerMTU() {
     return smallerMTU_failed == false;
+}
+
+bool gameSocket_hasBiggerWindow() {
+    return biggerWindow_failed == false;
 }

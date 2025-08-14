@@ -126,8 +126,8 @@ static void refreshMarkStatus() {
 
 int __fastcall detoured_renderWorld(void* self, void* ignored) {
     if (self && modernNameplateDistance) {
-        perfSetSlotName(1, "remove nameplate");
-        perfMarkStart(1);
+        // perfSetSlotName(1, "remove nameplate");
+        // perfMarkStart(1);
 
         if (prioritizeMarkedNameplate) {
             refreshMarkStatus();
@@ -162,7 +162,7 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
             nameplate_item = next_item;
         }
 
-        perfMarkEnd(1);
+        // perfMarkEnd(1);
     }
 
     if (self) {
@@ -172,10 +172,10 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
         perfMarkEnd(4);
     }
 
-    perfSetSlotName(3, "original RenderWorld");
-    perfMarkStart(3);
+    // perfSetSlotName(3, "original RenderWorld");
+    // perfMarkStart(3);
     int result = p_original_renderWorld(self);
-    perfMarkEnd(3);
+    // perfMarkEnd(3);
 
     return result;
 }
@@ -183,12 +183,12 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
 
 void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1, void* unknown2) {
     if (self && modernNameplateDistance) {
-        perfSetSlotName(2, "add nameplate");
-        perfMarkStart(2);
+        // perfSetSlotName(2, "add nameplate");
+        // perfMarkStart(2);
 
         uint32_t unit = reinterpret_cast<uint32_t>(self);
         if (unit == 0 || (unit & 1) != 0) {
-            perfMarkEnd(2);
+            //perfMarkEnd(2);
             return;
         }
 
@@ -196,11 +196,11 @@ void __fastcall detoured_addNameplate(void* self, void* ignored, void* unknown1,
         int type = vanilla1121_objectType(unit);
         if (type == OBJECT_TYPE_Unit || type == OBJECT_TYPE_Player) {
             if (shouldHaveNameplate(self) == 0) {
-                perfMarkEnd(2);
+                //perfMarkEnd(2);
                 return;
             }
         }
-        perfMarkEnd(2);
+        // perfMarkEnd(2);
     }
     return p_original_addNameplate(self, unknown1, unknown2);
 }

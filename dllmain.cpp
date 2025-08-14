@@ -98,21 +98,7 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-        else if (cmd == "behindThreshold") {
-            string subcmd{ lua_tostring(L,2) };
-            if (subcmd == "set" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
-                double n = lua_tonumber(L, 3);
-                if (n < 0) {
-                    n = 0;
-                }
-                if (n > M_PI) {
-                    n = M_PI;
-                }
-                behind_threshold = static_cast<float>(n);
-            }
-            lua_pushnumber(L, behind_threshold);
-            return 1;
-        }
+
         else if (cmd == "target") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "nearestEnemy") {
@@ -266,6 +252,52 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushnil(L);
             return 1;
         }
+        else if (cmd == "notify") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "taskbarIcon") {
+                flashTaskbarIcon();
+                lua_pushboolean(L, true);
+                return 1;
+            }
+
+            if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
+                string soundName{ lua_tostring(L, 3) };
+                lua_pushboolean(L, playSystemSound(soundName));
+                return 1;
+            }
+
+            lua_pushnil(L);
+            return 1;
+        }
+        else if (cmd == "FPScap") {
+            if (lua_isnumber(L, 2)) {
+                double v = lua_tonumber(L, 2);
+                if (v < 1) {
+                    targetFrameInterval.QuadPart = 0;
+                }
+                else if (v > 500) {
+                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / 500;
+                }
+                else {
+                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / static_cast<LONGLONG>(v);
+                }
+            }
+            if (targetFrameInterval.QuadPart > 0) {
+                lua_pushnumber(L, static_cast<double>(getPerformanceCounterFrequency().QuadPart / targetFrameInterval.QuadPart));
+            }
+            else {
+                lua_pushnumber(L, 0);
+            }
+            return 1;
+        }
+        else if (cmd == "debug") {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "breakpoint") {
+                int result = LuaDebug_breakpoint();
+                lua_pushnumber(L, result);
+                return 1;
+            }
+        }
         else if (cmd == "cameraHeight") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "set" && lua_isnumber(L, 3)) {
@@ -359,23 +391,6 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, cameraPinHeight);
             return 1;
         }
-        else if (cmd == "notify") {
-            string subcmd{ lua_tostring(L, 2) };
-            if (subcmd == "taskbarIcon") {
-                flashTaskbarIcon();
-                lua_pushboolean(L, true);
-                return 1;
-            }
-
-            if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
-                string soundName{ lua_tostring(L, 3) };
-                lua_pushboolean(L, playSystemSound(soundName));
-                return 1;
-            }
-
-            lua_pushnil(L);
-            return 1;
-        }
         else if (cmd == "nop") {
             lua_pushboolean(L, true);
             return 1;
@@ -391,53 +406,6 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-        else if (cmd == "TCP_quickACK") {
-            lua_pushboolean(L, gameSocket_isQuickACK());
-            return 1;
-        }
-        else if (cmd == "IP_smallerMTU") {
-            lua_pushboolean(L, gameSocket_hasSmallerMTU());
-            return 1;
-        }
-        else if (cmd == "performanceProfile") {
-            lua_pushstring(L, perfSummary().data());
-
-            string subcmd{ lua_tostring(L,2) };
-            if (subcmd == "reset") {
-                perfReset();
-            }
-
-            return 1;
-        }
-        else if (cmd == "debug") {
-            string subcmd{ lua_tostring(L,2) };
-            if (subcmd == "breakpoint") {
-                int result = LuaDebug_breakpoint();
-                lua_pushnumber(L, result);
-                return 1;
-            }
-        }
-        else if (cmd == "FPScap") {
-            if (lua_isnumber(L, 2)) {
-                double v = lua_tonumber(L, 2);
-                if (v < 1) {
-                    targetFrameInterval.QuadPart = 0;
-                }
-                else if (v > 500) {
-                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / 500;
-                }
-                else {
-                    targetFrameInterval.QuadPart = getPerformanceCounterFrequency().QuadPart / static_cast<LONGLONG>(v);
-                }
-            }
-            if (targetFrameInterval.QuadPart > 0) {
-                lua_pushnumber(L, static_cast<double>(getPerformanceCounterFrequency().QuadPart / targetFrameInterval.QuadPart));
-            }
-            else {
-                lua_pushnumber(L, 0);
-            }
-            return 1;
-        }
         else if (cmd == "weatherAlwaysClear") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "enable") {
@@ -449,17 +417,29 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, weather_alwaysClear);
             return 1;
         }
-        else if (cmd == "polyfill") {
-            string subcmd{ lua_tostring(L, 2) };
-            if (subcmd == "write") {
-                std::fstream f;
-                f.open("polyfill_xp3.txt", std::ios::out);
-                if (f.is_open()) {
-                    f << getPolyfillDebug();
-                    f.close();
+        else if (cmd == "behindThreshold") {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "set" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                double n = lua_tonumber(L, 3);
+                if (n < 0) {
+                    n = 0;
                 }
+                if (n > M_PI) {
+                    n = M_PI;
+                }
+                behind_threshold = static_cast<float>(n);
             }
-            lua_pushstring(L, getPolyfillDebug());
+            lua_pushnumber(L, behind_threshold);
+            return 1;
+        }
+        else if (cmd == "performanceProfile") {
+            lua_pushstring(L, perfSummary().data());
+
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "reset") {
+                perfReset();
+            }
+
             return 1;
         }
     }
