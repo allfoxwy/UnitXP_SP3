@@ -140,6 +140,10 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
     uint32_t unitMe = reinterpret_cast<uint32_t>(mevoid);
     uint32_t unitMob = reinterpret_cast<uint32_t>(mobvoid);
 
+    if (unitMe == unitMob) {
+        return -1;
+    }
+
     if ((unitMe & 1) != 0 || (unitMob & 1) != 0) {
         return -1;
     }
@@ -206,6 +210,9 @@ int UnitXP_behind(const void* mevoid, const void* mobvoid) {
 
 int UnitXP_behind(const uint64_t guidMe, const uint64_t guidMob) {
     if (guidMe == 0 || guidMob == 0) {
+        return -1;
+    }
+    if (guidMe == guidMob) {
         return -1;
     }
     return UnitXP_behind(
@@ -393,6 +400,9 @@ int UnitXP_inSight(const void* unit0void, const void* unit1void) {
 int UnitXP_inSight(const uint64_t guid0, const uint64_t guid1) {
     if (guid0 == 0 || guid1 == 0) {
         return -1;
+    }
+    if (guid0 == guid1) {
+        return true;
     }
     return UnitXP_inSight(
         reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),

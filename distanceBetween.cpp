@@ -31,6 +31,10 @@ float UnitXP_distanceBetween(const void* unit0void, const void* unit1void, dista
         return -1;
     }
 
+    if (unit0 == unit1) {
+        return 0.0f;
+    }
+
     if (vanilla1121_objectType(unit0) != OBJECT_TYPE_Unit &&
         vanilla1121_objectType(unit0) != OBJECT_TYPE_Player) {
         return -1;
@@ -102,6 +106,11 @@ float UnitXP_distanceBetween(const uint64_t guid0, const uint64_t guid1, distanc
     if (guid0 == 0 || guid1 == 0) {
         return -1.0f;
     }
+
+    if (guid0 == guid1) {
+        return 0.0f;
+    }
+
     return UnitXP_distanceBetween(
         reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid0)),
         reinterpret_cast<void*>(vanilla1121_getVisiableObject(guid1)),

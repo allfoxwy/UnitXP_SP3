@@ -173,12 +173,16 @@ bool CWorld_Intersect(const C3Vector* p1, const C3Vector* p2, C3Vector* intersec
 
     // I witnessed 1 crash without distance guard.
     const float distanceGuard = 150.0f;
-    if (UnitXP_distanceBetween(*p1, *p2) > distanceGuard) {
+    float checkDistance = UnitXP_distanceBetween(*p1, *p2);
+    if (checkDistance > distanceGuard) {
         *distance = 0.5f;
         intersectPoint->x = (p2->x + p1->x) / 2;
         intersectPoint->y = (p2->y + p1->y) / 2;
         intersectPoint->z = (p2->z + p1->z) / 2;
         return true;
+    }
+    if (checkDistance <= std::numeric_limits<float>::epsilon()) {
+        return false;
     }
 
     std::string perfName = "CWorld_Intersect";
@@ -385,6 +389,10 @@ float vanilla1121_unitScaleX(uint32_t unit) {
 }
 
 bool vanilla1121_unitInLineOfSight(uint32_t unit0, uint32_t unit1) {
+    if (unit0 == unit1) {
+        return true;
+    }
+
     if (vanilla1121_unitCollisionBoxHeight(unit0) > vanilla1121_unitCollisionBoxHeight(unit1)) {
         // We keep unit 1 is taller
         uint32_t temp = unit0;
