@@ -43,6 +43,15 @@ extern OPERATOR_MULTIPLY_4 p_operator_multiply_4;
 extern OPERATOR_MULTIPLY_4 p_original_operator_multiply_4;
 float* __fastcall detoured_operator_multiply_4(float* matA, float* matB, float* matC);
 
+typedef float* (__fastcall* OPERATOR_MULTIPLY_6)(float*, float*, float);
+extern OPERATOR_MULTIPLY_6 p_operator_multiply_6;
+extern OPERATOR_MULTIPLY_6 p_original_operator_multiply_6;
+float* __fastcall detoured_operator_multiply_6(float* result, float* vecA, float factor);
+
+typedef float* (__thiscall* OPERATOR_MULTIPLY_ASSIGN_1)(float*, float);
+extern OPERATOR_MULTIPLY_ASSIGN_1 p_operator_multiply_assign_1;
+extern OPERATOR_MULTIPLY_ASSIGN_1 p_original_operator_multiply_assign_1;
+float* __fastcall detoured_operator_multiply_assign_1(float* self, void* ignored, float factor);
 
 // The technique of hooking __thiscall function is from: https://tresp4sser.wordpress.com/2012/10/06/how-to-hook-thiscall-functions/
 // -- Pointer is __thiscall with 1st param being THIS
@@ -67,6 +76,11 @@ extern FUNTYPE_0x7be490 p_fun_0x7be490;
 extern FUNTYPE_0x7be490 p_original_fun_0x7be490;
 float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, bool skipVectorNormalization);
 
+typedef float* (__fastcall* FUNTYPE_0x7bdfc0)(float*, float*, float*);
+extern FUNTYPE_0x7bdfc0 p_fun_0x7bdfc0;
+extern FUNTYPE_0x7bdfc0 p_original_fun_0x7bdfc0;
+float* __fastcall detoured_fun_0x7bdfc0(float* matSelf, float* matA, float* matB);
+
 typedef float* (__fastcall* MATRIX_ROTATE_1)(float*, float*, float, bool);
 extern MATRIX_ROTATE_1 p_matrix_rotate_1;
 extern MATRIX_ROTATE_1 p_original_matrix_rotate_1;
@@ -81,6 +95,11 @@ typedef void(__thiscall* CALPLANENORMAL)(float*, float*, float*, float*);
 extern CALPLANENORMAL p_calculatePlaneNormal;
 extern CALPLANENORMAL p_original_calculatePlaneNormal;
 void __fastcall detoured_calculatePlaneNormal(float* self, void* ignored, float* p1, float* p2, float* p3);
+
+typedef void(__fastcall* TRANSFORMAABOX)(float*, float*, float*, float*, float*);
+extern TRANSFORMAABOX p_transformAABox;
+extern TRANSFORMAABOX p_original_transformAABox;
+void __fastcall detoured_transformAABox(float* C33Mat, float* C3Vec_A, float* C3Vec_B, float* CAAbox_A, float* CAAbox_B);
 
 typedef int(__fastcall* LUA_SQRT)(void*);
 extern LUA_SQRT p_lua_sqrt;

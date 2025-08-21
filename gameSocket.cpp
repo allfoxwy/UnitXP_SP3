@@ -26,7 +26,7 @@ static void setFixedReceivingWindow(SOCKET s) {
     // If an application sets a valid receive window size with the SO_RCVBUF socket option,
     // the stack will use the size specified and window receive auto-tuning will disabled.
     
-    DWORD window = 512 * 1024;
+    DWORD window = 1024 * 1024;
     if (0 != setsockopt(s, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<char*>(&window), sizeof window)) {
         biggerWindow_failed = true;
     }

@@ -98,7 +98,6 @@ int __fastcall detoured_UnitXP(void* L) {
                 return 1;
             }
         }
-
         else if (cmd == "target") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "nearestEnemy") {
@@ -180,6 +179,40 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushnil(L);
             return 1;
         }
+        else if (cmd == "timer") {
+            string subcmd{ lua_tostring(L,2) };
+            if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {
+                lua_pushnumber(L, gTimer.add(static_cast<uint64_t>(lua_tonumber(L, 3)), lua_tostring(L, 5), static_cast<uint64_t>(lua_tonumber(L, 4))));
+                return 1;
+            }
+            if (subcmd == "disarm" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
+                lua_pushboolean(L, gTimer.remove(static_cast<CppTime::timer_id>(lua_tonumber(L, 3))));
+                return 1;
+            }
+            if (subcmd == "size") {
+                lua_pushnumber(L, gTimer.size());
+                return 1;
+            }
+            lua_pushnil(L);
+            return 1;
+        }
+        else if (cmd == "notify") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "taskbarIcon") {
+                flashTaskbarIcon();
+                lua_pushboolean(L, true);
+                return 1;
+            }
+
+            if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
+                string soundName{ lua_tostring(L, 3) };
+                lua_pushboolean(L, playSystemSound(soundName));
+                return 1;
+            }
+
+            lua_pushnil(L);
+            return 1;
+        }
         else if (cmd == "modernNameplateDistance") {
             string subcmd{ lua_tostring(L, 2) };
             if (subcmd == "enable") {
@@ -189,6 +222,17 @@ int __fastcall detoured_UnitXP(void* L) {
                 modernNameplateDistance = false;
             }
             lua_pushboolean(L, modernNameplateDistance);
+            return 1;
+        }
+        else if (cmd == "hideCritterNameplate") {
+            string subcmd{ lua_tostring(L, 2) };
+            if (subcmd == "enable") {
+                hideCritterNameplate = true;
+            }
+            else if (subcmd == "disable") {
+                hideCritterNameplate = false;
+            }
+            lua_pushboolean(L, hideCritterNameplate);
             return 1;
         }
         else if (cmd == "prioritizeTargetNameplate") {
@@ -235,40 +279,7 @@ int __fastcall detoured_UnitXP(void* L) {
             lua_pushboolean(L, showInCombatNameplatesNearPlayer);
             return 1;
         }
-        else if (cmd == "timer") {
-            string subcmd{ lua_tostring(L,2) };
-            if (subcmd == "arm" && lua_gettop(L) >= 5 && lua_isnumber(L, 3) && lua_isnumber(L, 4) && lua_isstring(L, 5)) {
-                lua_pushnumber(L, gTimer.add(static_cast<uint64_t>(lua_tonumber(L, 3)), lua_tostring(L, 5), static_cast<uint64_t>(lua_tonumber(L, 4))));
-                return 1;
-            }
-            if (subcmd == "disarm" && lua_gettop(L) >= 3 && lua_isnumber(L, 3)) {
-                lua_pushboolean(L, gTimer.remove(static_cast<CppTime::timer_id>(lua_tonumber(L, 3))));
-                return 1;
-            }
-            if (subcmd == "size") {
-                lua_pushnumber(L, gTimer.size());
-                return 1;
-            }
-            lua_pushnil(L);
-            return 1;
-        }
-        else if (cmd == "notify") {
-            string subcmd{ lua_tostring(L, 2) };
-            if (subcmd == "taskbarIcon") {
-                flashTaskbarIcon();
-                lua_pushboolean(L, true);
-                return 1;
-            }
 
-            if (subcmd == "systemSound" && lua_gettop(L) >= 3) {
-                string soundName{ lua_tostring(L, 3) };
-                lua_pushboolean(L, playSystemSound(soundName));
-                return 1;
-            }
-
-            lua_pushnil(L);
-            return 1;
-        }
         else if (cmd == "FPScap") {
             if (lua_isnumber(L, 2)) {
                 double v = lua_tonumber(L, 2);
@@ -543,6 +554,14 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for operator_multiply_4 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_operator_multiply_6, &detoured_operator_multiply_6, reinterpret_cast<LPVOID*>(&p_original_operator_multiply_6)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for operator_multiply_6 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+        if (MH_CreateHook(p_operator_multiply_assign_1, &detoured_operator_multiply_assign_1, reinterpret_cast<LPVOID*>(&p_original_operator_multiply_assign_1)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for operator_multiply_assign_1 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_CreateHook(p_matrix_translate_1, &detoured_matrix_translate_1, reinterpret_cast<LPVOID*>(&p_original_matrix_translate_1)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for matrix_translate_1 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -559,8 +578,16 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for fun_0x7be490 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_fun_0x7bdfc0, &detoured_fun_0x7bdfc0, reinterpret_cast<LPVOID*>(&p_original_fun_0x7bdfc0)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for fun_0x7bdfc0 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_CreateHook(p_matrix_rotate_1, &detoured_matrix_rotate_1, reinterpret_cast<LPVOID*>(&p_original_matrix_rotate_1)) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for matrix_rotate_1 function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+        if (MH_CreateHook(p_transformAABox, &detoured_transformAABox, reinterpret_cast<LPVOID*>(&p_original_transformAABox)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for transformAABox function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
         if (MH_CreateHook(p_lua_sqrt, &detoured_lua_sqrt, reinterpret_cast<LPVOID*>(&p_original_lua_sqrt)) != MH_OK) {
@@ -615,8 +642,16 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for lua_sqrt function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
+            if (MH_RemoveHook(p_transformAABox) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for transformAABox function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
             if (MH_RemoveHook(p_matrix_rotate_1) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for matrix_rotate_1 function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_fun_0x7bdfc0) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for fun_0x7bdfc0 function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_fun_0x7be490) != MH_OK) {
@@ -633,6 +668,14 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             }
             if (MH_RemoveHook(p_matrix_translate_1) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for matrix_translate_1 function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_operator_multiply_assign_1) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for operator_multiply_assign_1 function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_operator_multiply_6) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for operator_multiply_6 function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_operator_multiply_4) != MH_OK) {

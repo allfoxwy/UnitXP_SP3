@@ -120,6 +120,24 @@ float* __fastcall detoured_operator_multiply_5(float* matA, float* matB, float* 
 }
 */
 
+OPERATOR_MULTIPLY_6 p_operator_multiply_6 = reinterpret_cast<OPERATOR_MULTIPLY_6>(0x5f8cf0);
+OPERATOR_MULTIPLY_6 p_original_operator_multiply_6 = NULL;
+float* __fastcall detoured_operator_multiply_6(float* result, float* vecA, float factor) {
+    result[0] = static_cast<float>(static_cast<double>(vecA[0]) * static_cast<double>(factor));
+    result[1] = static_cast<float>(static_cast<double>(vecA[1]) * static_cast<double>(factor));
+    result[2] = static_cast<float>(static_cast<double>(vecA[2]) * static_cast<double>(factor));
+
+    return result;
+}
+
+OPERATOR_MULTIPLY_ASSIGN_1 p_operator_multiply_assign_1 = reinterpret_cast<OPERATOR_MULTIPLY_ASSIGN_1>(0x5132f0);
+OPERATOR_MULTIPLY_ASSIGN_1 p_original_operator_multiply_assign_1 = NULL;
+float* __fastcall detoured_operator_multiply_assign_1(float* self, void* ignored, float factor) {
+    self[0] = static_cast<float>(static_cast<double>(self[0]) * static_cast<double>(factor));
+    self[1] = static_cast<float>(static_cast<double>(self[1]) * static_cast<double>(factor));
+    self[2] = static_cast<float>(static_cast<double>(self[2]) * static_cast<double>(factor));
+    return self;
+}
 
 MATRIX_TRANSLATE_1 p_matrix_translate_1 = reinterpret_cast<MATRIX_TRANSLATE_1>(0x7bdc40);
 MATRIX_TRANSLATE_1 p_original_matrix_translate_1 = NULL;
@@ -190,6 +208,21 @@ float* __fastcall detoured_fun_0x7be490(float* matA, float* vecB, float angle, b
     matA[8] = static_cast<float>(std::pow(static_cast<double>(vecB[2]), 2.0) * rcosResult + cosResult);
 
     return matA;
+}
+
+FUNTYPE_0x7bdfc0 p_fun_0x7bdfc0 = reinterpret_cast<FUNTYPE_0x7bdfc0>(0x7bdfc0);
+FUNTYPE_0x7bdfc0 p_original_fun_0x7bdfc0 = NULL;
+float* __fastcall detoured_fun_0x7bdfc0(float* matSelf, float* matA, float* matB) {
+    matSelf[0] = static_cast<float>(static_cast<double>(matA[0]) * static_cast<double>(matB[0]) + static_cast<double>(matB[3]) * static_cast<double>(matA[1]) + static_cast<double>(matB[6]) * static_cast<double>(matA[2]));
+    matSelf[1] = static_cast<float>(static_cast<double>(matA[1]) * static_cast<double>(matB[4]) + static_cast<double>(matB[7]) * static_cast<double>(matA[2]) + static_cast<double>(matB[1]) * static_cast<double>(matA[0]));
+    matSelf[2] = static_cast<float>(static_cast<double>(matA[1]) * static_cast<double>(matB[5]) + static_cast<double>(matA[0]) * static_cast<double>(matB[2]) + static_cast<double>(matB[8]) * static_cast<double>(matA[2]));
+    matSelf[3] = static_cast<float>(static_cast<double>(matB[3]) * static_cast<double>(matA[4]) + static_cast<double>(matB[6]) * static_cast<double>(matA[5]) + static_cast<double>(matA[3]) * static_cast<double>(matB[0]));
+    matSelf[4] = static_cast<float>(static_cast<double>(matA[3]) * static_cast<double>(matB[1]) + static_cast<double>(matA[4]) * static_cast<double>(matB[4]) + static_cast<double>(matA[5]) * static_cast<double>(matB[7]));
+    matSelf[5] = static_cast<float>(static_cast<double>(matA[4]) * static_cast<double>(matB[5]) + static_cast<double>(matA[3]) * static_cast<double>(matB[2]) + static_cast<double>(matA[5]) * static_cast<double>(matB[8]));
+    matSelf[6] = static_cast<float>(static_cast<double>(matA[6]) * static_cast<double>(matB[0]) + static_cast<double>(matA[7]) * static_cast<double>(matB[3]) + static_cast<double>(matB[6]) * static_cast<double>(matA[8]));
+    matSelf[7] = static_cast<float>(static_cast<double>(matA[8]) * static_cast<double>(matB[7]) + static_cast<double>(matA[6]) * static_cast<double>(matB[1]) + static_cast<double>(matA[7]) * static_cast<double>(matB[4]));
+    matSelf[8] = static_cast<float>(static_cast<double>(matB[8]) * static_cast<double>(matA[8]) + static_cast<double>(matA[6]) * static_cast<double>(matB[2]) + static_cast<double>(matA[7]) * static_cast<double>(matB[5]));
+    return matSelf;
 }
 
 /* Seems not used
@@ -282,6 +315,31 @@ void __fastcall detoured_calculatePlaneNormal(float* self, void* ignored, float*
     self[3] = static_cast<float>(-(selfHD[0] * static_cast<double>(p1[0]) + selfHD[1] * static_cast<double>(p1[1]) + selfHD[2] * static_cast<double>(p1[2])) / sqrtResult);
 }
 
+TRANSFORMAABOX p_transformAABox = reinterpret_cast<TRANSFORMAABOX>(0x6dc470);
+TRANSFORMAABOX p_original_transformAABox = NULL;
+void __fastcall detoured_transformAABox(float* C33Mat, float* C3Vec_A, float* C3Vec_B, float* CAAbox_A, float* CAAbox_B) {
+    float* ptr[3];
+    ptr[0] = C33Mat;
+    ptr[1] = C3Vec_A;
+    ptr[2] = C3Vec_B;
+    
+    for (uint32_t outer_i = 0; outer_i < 3; outer_i++, CAAbox_B++) {
+        for (uint32_t inner_i = 0; inner_i < 3; inner_i++) {
+            double test1 = static_cast<double>(ptr[inner_i][outer_i]) * static_cast<double>(CAAbox_A[inner_i]);
+            double test2 = static_cast<double>(CAAbox_A[inner_i + 3]) * static_cast<double>(ptr[inner_i][outer_i]);
+            if (test2 <= test1) {
+                CAAbox_B[0] = static_cast<float>(test2 + static_cast<double>(CAAbox_B[0]));
+            }
+            else {
+                CAAbox_B[0] = static_cast<float>(test1 + static_cast<double>(CAAbox_B[0]));
+                test1 = test2;
+            }
+            CAAbox_B[3] = static_cast<float>(test1 + static_cast<double>(CAAbox_B[3]));
+        }
+    }
+
+    return;
+}
 
 LUA_SQRT p_lua_sqrt = reinterpret_cast<LUA_SQRT>(0x7fb020);
 LUA_SQRT p_original_lua_sqrt = NULL;
@@ -388,7 +446,7 @@ uint64_t polyfill_debugCounter = 0;
 std::string getPolyfillDebug() {
     std::stringstream ss{};
     ss << "Enhanced REP MOVSB: " << ERMS << std::endl;
-    // ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
+    //ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
     ss << "Unimplemented Blit history: " << std::endl;
     for (auto& i : blitCounters) {
         ss << "blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;

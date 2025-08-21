@@ -25,6 +25,7 @@ bool prioritizeTargetNameplate = false;
 bool prioritizeMarkedNameplate = false;
 bool nameplateCombatFilter = false;
 bool showInCombatNameplatesNearPlayer = false;
+bool hideCritterNameplate = true;
 
 static bool nameplatesHasMarkOnThem = false;
 
@@ -67,6 +68,17 @@ static int shouldHaveNameplate(void* voidUnit) {
                         return 0;
                     }
                 }
+            }
+        }
+    }
+
+    if (hideCritterNameplate) {
+        bool typeCheck = (vanilla1121_objectType(reinterpret_cast<uint32_t>(voidUnit)) == OBJECT_TYPE_Unit || vanilla1121_objectType(reinterpret_cast<uint32_t>(voidUnit)) == OBJECT_TYPE_Player)
+            && vanilla1121_unitCreatureType(reinterpret_cast<uint32_t>(voidUnit)) == 8;
+        if (typeCheck) {
+            bool inCombat = vanilla1121_unitInCombat(reinterpret_cast<uint32_t>(voidUnit));
+            if (inCombat == false) {
+                return 0;
             }
         }
     }
