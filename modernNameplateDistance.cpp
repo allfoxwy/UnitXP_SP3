@@ -184,10 +184,10 @@ int __fastcall detoured_renderWorld(void* self, void* ignored) {
         perfMarkEnd(4);
     }
 
-    // perfSetSlotName(3, "original RenderWorld");
-    // perfMarkStart(3);
+    perfSetSlotName(3, "original RenderWorld");
+    perfMarkStart(3);
     int result = p_original_renderWorld(self);
-    // perfMarkEnd(3);
+    perfMarkEnd(3);
 
     return result;
 }
