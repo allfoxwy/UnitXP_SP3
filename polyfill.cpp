@@ -474,7 +474,7 @@ EVALUATEPOLYNOMIAL p_original_evaluatePolynomial = NULL;
 double __fastcall detoured_evaluatePolynomial(uint32_t count, float* coefficients, float factor) {
     double result = static_cast<double>(coefficients[0]);
     for (uint32_t i = 1; i <= count; ++i) {
-        result = result * static_cast<double>(factor) + static_cast<double>(coefficients[i - 1]);
+        result = result * static_cast<double>(factor) + static_cast<double>(coefficients[i]);
     }
     return result;
 }
