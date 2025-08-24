@@ -610,6 +610,18 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for calculatePlaneNormal function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
         }
+        if (MH_CreateHook(p_crossProduct, &detoured_crossProduct, reinterpret_cast<LPVOID*>(&p_original_crossProduct)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for crossProduct function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+        if (MH_CreateHook(p_dotProduct, &detoured_dotProduct, reinterpret_cast<LPVOID*>(&p_original_dotProduct)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for dotProduct function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
+        if (MH_CreateHook(p_evaluatePolynomial, &detoured_evaluatePolynomial, reinterpret_cast<LPVOID*>(&p_original_evaluatePolynomial)) != MH_OK) {
+            MessageBoxW(NULL, utf8_to_utf16(u8"Failed to create hook for evaluatePolynomial function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+            return FALSE;
+        }
         if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed when enabling hooks.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
@@ -624,6 +636,18 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         if (lpReserved == NULL) {
             if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
                 MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to disable hooks. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_evaluatePolynomial) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for dotProduct function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_dotProduct) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for dotProduct function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
+                return FALSE;
+            }
+            if (MH_RemoveHook(p_crossProduct) != MH_OK) {
+                MessageBoxW(NULL, utf8_to_utf16(u8"Failed when to remove hook for crossProduct function. Game might crash later.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
                 return FALSE;
             }
             if (MH_RemoveHook(p_calculatePlaneNormal) != MH_OK) {

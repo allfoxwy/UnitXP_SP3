@@ -446,10 +446,35 @@ uint64_t polyfill_debugCounter = 0;
 std::string getPolyfillDebug() {
     std::stringstream ss{};
     ss << "Enhanced REP MOVSB: " << ERMS << std::endl;
-    //ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
+    ss << "Polyfill debug counter: " << polyfill_debugCounter << std::endl;
     ss << "Unimplemented Blit history: " << std::endl;
     for (auto& i : blitCounters) {
         ss << "blit" << std::get<0>(i.first) << "(" << std::get<1>(i.first) << ", " << std::get<2>(i.first) << ") = " << i.second << std::endl;
     }
     return ss.str();
+}
+
+CROSSPRODUCT p_crossProduct = reinterpret_cast<CROSSPRODUCT>(0x672130);
+CROSSPRODUCT p_original_crossProduct = NULL;
+float* __fastcall detoured_crossProduct(float* result, float* vecA, float* vecB) {
+    result[0] = static_cast<float>(static_cast<double>(vecA[1]) * static_cast<double>(vecB[2]) - static_cast<double>(vecA[2]) * static_cast<double>(vecB[1]));
+    result[1] = static_cast<float>(static_cast<double>(vecA[2]) * static_cast<double>(vecB[0]) - static_cast<double>(vecB[2]) * static_cast<double>(vecA[0]));
+    result[2] = static_cast<float>(static_cast<double>(vecA[0]) * static_cast<double>(vecB[1]) - static_cast<double>(vecA[1]) * static_cast<double>(vecB[0]));
+    return result;
+}
+
+DOTPRODUCT p_dotProduct = reinterpret_cast<DOTPRODUCT>(0x602630);
+DOTPRODUCT p_original_dotProduct = NULL;
+double __fastcall detoured_dotProduct(float* vecA, float* vecB) {
+    return static_cast<double>(vecA[0]) * static_cast<double>(vecB[0]) + static_cast<double>(vecA[1]) * static_cast<double>(vecB[1]) + static_cast<double>(vecA[2]) * static_cast<double>(vecB[2]);
+}
+
+extern EVALUATEPOLYNOMIAL p_evaluatePolynomial = reinterpret_cast<EVALUATEPOLYNOMIAL>(0x453620);
+extern EVALUATEPOLYNOMIAL p_original_evaluatePolynomial = NULL;
+double __fastcall detoured_evaluatePolynomial(uint32_t count, float* coefficients, float factor) {
+    double result = static_cast<double>(coefficients[0]);
+    for (uint32_t i = 1; i <= count; ++i) {
+        result = result * static_cast<double>(factor) + static_cast<double>(coefficients[i - 1]);
+    }
+    return result;
 }

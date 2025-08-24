@@ -110,3 +110,18 @@ typedef void(__fastcall* BLIT_HUB)(int*, int, uint32_t, uint32_t, int, uint32_t,
 extern BLIT_HUB p_blit_hub;
 extern BLIT_HUB p_original_blit_hub;
 void __fastcall detoured_blit_hub(int* vec2size, int unknownFuncIndex, uint32_t srcAddr, uint32_t srcStep, int srcFormat, uint32_t dstAddr, uint32_t dstStep, int dstFormat);
+
+typedef float* (__fastcall* CROSSPRODUCT)(float*, float*, float*);
+extern CROSSPRODUCT p_crossProduct;
+extern CROSSPRODUCT p_original_crossProduct;
+float* __fastcall detoured_crossProduct(float* result, float* vecA, float* vecB);
+
+typedef double(__fastcall* DOTPRODUCT)(float*, float*);
+extern DOTPRODUCT p_dotProduct;
+extern DOTPRODUCT p_original_dotProduct;
+double __fastcall detoured_dotProduct(float* vecA, float* vecB);
+
+typedef double(__fastcall* EVALUATEPOLYNOMIAL)(uint32_t, float*, float);
+extern EVALUATEPOLYNOMIAL p_evaluatePolynomial;
+extern EVALUATEPOLYNOMIAL p_original_evaluatePolynomial;
+double __fastcall detoured_evaluatePolynomial(uint32_t count, float* coefficients, float factor);
