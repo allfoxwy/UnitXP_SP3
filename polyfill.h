@@ -14,6 +14,8 @@
 * However in 2013, Intel deployed Enhanced REP MOVSB. Now REP MOVSB is faster, and it now requires a fixed heating up
 * when it starts. So the original design is flipped. Replace them with std::memcpy and compile the mod with a modern compiler
 * should fix it.
+* 
+* Some address are from libSiliconPatch. I tried to reach its author but received no reply.
 */
 
 extern uint64_t polyfill_debugCounter;
