@@ -469,8 +469,8 @@ double __fastcall detoured_dotProduct(float* vecA, float* vecB) {
     return static_cast<double>(vecA[0]) * static_cast<double>(vecB[0]) + static_cast<double>(vecA[1]) * static_cast<double>(vecB[1]) + static_cast<double>(vecA[2]) * static_cast<double>(vecB[2]);
 }
 
-extern EVALUATEPOLYNOMIAL p_evaluatePolynomial = reinterpret_cast<EVALUATEPOLYNOMIAL>(0x453620);
-extern EVALUATEPOLYNOMIAL p_original_evaluatePolynomial = NULL;
+EVALUATEPOLYNOMIAL p_evaluatePolynomial = reinterpret_cast<EVALUATEPOLYNOMIAL>(0x453620);
+EVALUATEPOLYNOMIAL p_original_evaluatePolynomial = NULL;
 double __fastcall detoured_evaluatePolynomial(uint32_t count, float* coefficients, float factor) {
     double result = static_cast<double>(coefficients[0]);
     for (uint32_t i = 1; i <= count; ++i) {
