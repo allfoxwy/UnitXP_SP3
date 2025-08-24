@@ -241,3 +241,5 @@ float vectorDotProduct(const C3Vector& a, const C3Vector& b);
 void vectorNormalize(C3Vector& vec);
 // Return 4 * M_PI for error
 float angleBetweenVectors(C3Vector& a, C3Vector& b);
+bool vectorsAreNear(C3Vector& a, C3Vector& b);
+bool vectorAlmostZero(C3Vector& vec);

@@ -841,3 +841,20 @@ uint32_t vanilla1121_unitMountDisplayID(uint32_t unit) {
 bool vanilla1121_unitIsMounted(uint32_t unit) {
     return vanilla1121_unitMountDisplayID(unit) != 0;
 }
+
+bool vectorsAreNear(C3Vector& a, C3Vector& b) {
+    if (UnitXP_distanceBetween(a, b) <= std::numeric_limits<float>::epsilon()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+bool vectorAlmostZero(C3Vector& vec) {
+    if (vectorLength(vec) <= std::numeric_limits<float>::epsilon()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

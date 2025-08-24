@@ -27,3 +27,6 @@ C3Vector editCamera_rotatedForword();
 // Get camera position before editing.
 C3Vector editCamera_originalPosition();
 C3Vector editCamera_originalForword();
+
+void editCamera_init();
+

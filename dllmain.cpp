@@ -485,6 +485,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
         polyfill_checkCPU();
 
+        editCamera_init();
+
         if (initFPScap() != 1) {
             MessageBoxW(NULL, utf8_to_utf16(u8"Failed to load NtDelayExecution function.").data(), utf8_to_utf16(u8"UnitXP Service Pack 3").data(), MB_OK | MB_ICONINFORMATION | MB_SYSTEMMODAL);
             return FALSE;
